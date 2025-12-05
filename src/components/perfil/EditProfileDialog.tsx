@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -35,23 +35,12 @@ interface Props {
 export default function EditProfileDialog({ open, onOpenChange, profile, onSaved }: Props) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    bio: "",
-    location: "",
-    phone: "",
-    whatsapp: "",
+    name: profile.name || "",
+    bio: profile.bio || "",
+    location: profile.location || "",
+    phone: profile.phone || "",
+    whatsapp: profile.whatsapp || "",
   });
-
-  useEffect(() => {
-    if (!open || !profile) return;
-    setFormData({
-      name: profile.name || "",
-      bio: profile.bio || "",
-      location: profile.location || "",
-      phone: profile.phone || "",
-      whatsapp: profile.whatsapp || "",
-    });
-  }, [profile, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

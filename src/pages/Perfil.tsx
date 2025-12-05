@@ -350,6 +350,7 @@ export default function Perfil() {
       {/* Dialogs */}
       {isSubperfilDialogOpen && (
         <SubperfilDialog
+          key={editingSubperfil?.id || "new"}
           open={isSubperfilDialogOpen}
           onOpenChange={setIsSubperfilDialogOpen}
           agentType={profile.agent_type}
@@ -361,6 +362,7 @@ export default function Perfil() {
 
       {isEditProfileOpen && (
         <EditProfileDialog
+          key={profile.id}
           open={isEditProfileOpen}
           onOpenChange={setIsEditProfileOpen}
           profile={profile}

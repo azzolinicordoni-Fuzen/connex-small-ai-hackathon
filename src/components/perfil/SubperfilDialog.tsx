@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,17 +27,7 @@ interface Props {
 
 export default function SubperfilDialog({ open, onOpenChange, agentType, profileId, editData, onSaved }: Props) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<any>({});
-
-  useEffect(() => {
-    if (!open) return;
-    if (editData) {
-      setFormData(editData);
-    } else {
-      setFormData(getInitialData());
-    }
-  }, [editData, agentType, open]);
-
+  
   const getInitialData = () => {
     switch (agentType) {
       case "proprietario":
@@ -54,6 +44,8 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         return {};
     }
   };
+
+  const [formData, setFormData] = useState<any>(editData || getInitialData());
 
   const handleArrayToggle = (field: string, value: string) => {
     const current = formData[field] || [];
