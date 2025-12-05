@@ -20,10 +20,15 @@ import EditProfileDialog from "@/components/perfil/EditProfileDialog";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string }> = {
   proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald", subperfilLabel: "Áreas" },
+  desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan", subperfilLabel: "Projetos" },
   certificadora: { icon: Award, label: "Certificadora", color: "amber", subperfilLabel: "Serviços" },
+  auditor: { icon: Award, label: "Auditor / VVB", color: "orange", subperfilLabel: "Serviços" },
   investidor: { icon: Landmark, label: "Fundo / Banco", color: "blue", subperfilLabel: "Requisições" },
+  financeira: { icon: Landmark, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos" },
+  advogado: { icon: Users, label: "Advogado / Jurídico", color: "slate", subperfilLabel: "Serviços" },
   comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "red", subperfilLabel: "Demandas ESG" },
   projeto: { icon: FolderOpen, label: "Projeto", color: "purple", subperfilLabel: "Projetos" },
+  engenheiro: { icon: Building2, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços" },
   outro: { icon: Users, label: "Outro Agente", color: "gray", subperfilLabel: "Subperfis" },
 };
 
@@ -88,8 +93,12 @@ export default function Perfil() {
   const fetchSubperfis = async (profileId: string, agentType: string) => {
     const tableMap: Record<string, string> = {
       proprietario: "proprietario_subperfis",
+      desenvolvedor: "desenvolvedor_subperfis",
       certificadora: "certificadora_subperfis",
+      auditor: "auditor_subperfis",
       investidor: "investidor_subperfis",
+      financeira: "financeira_subperfis",
+      advogado: "advogado_subperfis",
       comprador: "comprador_subperfis",
       projeto: "projeto_subperfis",
     };
@@ -119,8 +128,12 @@ export default function Perfil() {
 
     const tableMap: Record<string, string> = {
       proprietario: "proprietario_subperfis",
+      desenvolvedor: "desenvolvedor_subperfis",
       certificadora: "certificadora_subperfis",
+      auditor: "auditor_subperfis",
       investidor: "investidor_subperfis",
+      financeira: "financeira_subperfis",
+      advogado: "advogado_subperfis",
       comprador: "comprador_subperfis",
       projeto: "projeto_subperfis",
     };
@@ -271,15 +284,13 @@ export default function Perfil() {
                   Gerencie seus {config.subperfilLabel.toLowerCase()} cadastrados
                 </p>
               </div>
-              {["proprietario", "certificadora", "investidor", "comprador", "projeto"].includes(profile.agent_type) && (
-                <Button onClick={() => {
-                  setEditingSubperfil(null);
-                  setIsSubperfilDialogOpen(true);
-                }}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar {config.subperfilLabel.slice(0, -1)}
-                </Button>
-              )}
+              <Button onClick={() => {
+                setEditingSubperfil(null);
+                setIsSubperfilDialogOpen(true);
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Projeto
+              </Button>
             </div>
 
             {subperfis.length === 0 ? (
@@ -289,18 +300,16 @@ export default function Perfil() {
                   <p className="text-muted-foreground text-center mb-4">
                     Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
                   </p>
-                  {["proprietario", "certificadora", "investidor", "comprador", "projeto"].includes(profile.agent_type) && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        setEditingSubperfil(null);
-                        setIsSubperfilDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Criar primeiro {config.subperfilLabel.slice(0, -1).toLowerCase()}
-                    </Button>
-                  )}
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setEditingSubperfil(null);
+                      setIsSubperfilDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar primeiro projeto
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
