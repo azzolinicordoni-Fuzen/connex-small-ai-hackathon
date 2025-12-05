@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
 
 const agentTypes = [
   { id: "proprietario", icon: TreePine, label: "Proprietário de Terra", description: "Possuo áreas rurais" },
@@ -35,6 +37,16 @@ const agentTypes = [
   { id: "projeto", icon: FolderOpen, label: "Projeto Pronto", description: "Tenho projeto para apresentar" },
   { id: "outro", icon: Users, label: "Outro Agente", description: "Outro tipo de atuação" },
 ];
+
+const signUpSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(100),
+  email: z.string().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
 
 export default function Cadastro() {
   const [step, setStep] = useState(1);
@@ -47,9 +59,20 @@ export default function Cadastro() {
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  const { signUp, user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     
     if (step === 1) {
       if (!selectedType) {
@@ -60,19 +83,48 @@ export default function Cadastro() {
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("As senhas não coincidem");
+    // Validate form data
+    const result = signUpSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast.error(Object.values(fieldErrors)[0]);
       return;
     }
 
     setIsLoading(true);
     
-    // Simulate registration - will be replaced with Supabase auth
-    setTimeout(() => {
-      toast.success("Conta criada com sucesso! Verifique seu e-mail.");
+    const { error } = await signUp(formData.email, formData.password, {
+      name: formData.name,
+      agent_type: selectedType,
+    });
+    
+    if (error) {
+      if (error.message.includes("already registered")) {
+        toast.error("Este e-mail já está cadastrado");
+      } else {
+        toast.error(error.message);
+      }
       setIsLoading(false);
-    }, 1500);
+      return;
+    }
+    
+    toast.success("Conta criada com sucesso!");
+    navigate("/dashboard");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--gradient-hero)" }}>
@@ -220,12 +272,13 @@ export default function Cadastro() {
                           id="name"
                           type="text"
                           placeholder="Seu nome"
-                          className="pl-10"
+                          className={cn("pl-10", errors.name && "border-destructive")}
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
                         />
                       </div>
+                      {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -236,12 +289,13 @@ export default function Cadastro() {
                           id="email"
                           type="email"
                           placeholder="seu@email.com"
-                          className="pl-10"
+                          className={cn("pl-10", errors.email && "border-destructive")}
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           required
                         />
                       </div>
+                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -252,7 +306,7 @@ export default function Cadastro() {
                           id="password"
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
-                          className="pl-10 pr-10"
+                          className={cn("pl-10 pr-10", errors.password && "border-destructive")}
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                           required
@@ -265,6 +319,7 @@ export default function Cadastro() {
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -275,12 +330,13 @@ export default function Cadastro() {
                           id="confirmPassword"
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
-                          className="pl-10"
+                          className={cn("pl-10", errors.confirmPassword && "border-destructive")}
                           value={formData.confirmPassword}
                           onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                           required
                         />
                       </div>
+                      {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                     </div>
                   </div>
                 )}

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,8 @@ import {
   X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
@@ -35,31 +37,10 @@ const navItems = [
 ];
 
 const stats = [
-  { label: "Visualizações do Perfil", value: "1,234", change: "+12%", icon: Eye },
-  { label: "Conexões", value: "156", change: "+8%", icon: Users },
-  { label: "Solicitações Pendentes", value: "23", change: "+5", icon: UserPlus },
-  { label: "Projetos Ativos", value: "4", change: "0", icon: FolderOpen },
-];
-
-const recentConnections = [
-  {
-    name: "João Silva",
-    role: "Proprietário",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-    time: "Há 2 horas",
-  },
-  {
-    name: "Maria Santos",
-    role: "Engenheira",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-    time: "Há 5 horas",
-  },
-  {
-    name: "Carlos Oliveira",
-    role: "Desenvolvedor",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-    time: "Há 1 dia",
-  },
+  { label: "Visualizações do Perfil", value: "0", change: "+0%", icon: Eye },
+  { label: "Conexões", value: "0", change: "+0%", icon: Users },
+  { label: "Solicitações Pendentes", value: "0", change: "+0", icon: UserPlus },
+  { label: "Projetos Ativos", value: "0", change: "0", icon: FolderOpen },
 ];
 
 const upcomingEvents = [
@@ -80,8 +61,86 @@ const upcomingEvents = [
   },
 ];
 
+interface Profile {
+  id: string;
+  name: string;
+  agent_type: string;
+  bio: string | null;
+  location: string | null;
+  avatar_url: string | null;
+}
+
+const agentTypeLabels: Record<string, string> = {
+  proprietario: "Proprietário",
+  engenheiro: "Engenheiro",
+  desenvolvedor: "Desenvolvedor",
+  certificadora: "Certificadora",
+  investidor: "Investidor",
+  projeto: "Projeto",
+  outro: "Outro",
+};
+
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  const { user, signOut, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (data) {
+        setProfile(data as Profile);
+      }
+      setLoading(false);
+    }
+    
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const profileCompletion = [
+    { label: "Adicionar foto de capa", done: !!profile?.avatar_url },
+    { label: "Verificar e-mail", done: true },
+    { label: "Adicionar certificações", done: false },
+    { label: "Completar bio", done: !!profile?.bio },
+    { label: "Adicionar localização", done: !!profile?.location },
+    { label: "Conectar WhatsApp", done: false },
+  ];
+  
+  const completedItems = profileCompletion.filter(item => item.done).length;
+  const completionPercent = Math.round((completedItems / profileCompletion.length) * 100);
 
   return (
     <div className="min-h-screen bg-secondary/30 flex">
@@ -129,15 +188,17 @@ export default function Dashboard() {
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3 mb-4">
               <Avatar>
-                <AvatarImage src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop" />
-                <AvatarFallback>RL</AvatarFallback>
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback>{profile?.name?.charAt(0) || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">Ricardo Lima</p>
-                <p className="text-xs text-muted-foreground truncate">Investidor</p>
+                <p className="font-medium text-sm truncate">{profile?.name || user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {profile?.agent_type ? agentTypeLabels[profile.agent_type] : "Usuário"}
+                </p>
               </div>
             </div>
-            <Button variant="outline" className="w-full" size="sm">
+            <Button variant="outline" className="w-full" size="sm" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
               Sair
             </Button>
@@ -182,6 +243,14 @@ export default function Dashboard() {
 
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6">
+          {/* Welcome Message */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-display font-bold">
+              Bem-vindo, {profile?.name?.split(" ")[0] || "Usuário"}!
+            </h2>
+            <p className="text-muted-foreground">Aqui está um resumo da sua atividade</p>
+          </div>
+
           {/* Stats Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {stats.map((stat) => (
@@ -219,20 +288,15 @@ export default function Dashboard() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">75% completo</span>
-                    <span className="text-sm text-muted-foreground">Faltam 3 itens</span>
+                    <span className="text-sm font-medium">{completionPercent}% completo</span>
+                    <span className="text-sm text-muted-foreground">
+                      Faltam {profileCompletion.length - completedItems} itens
+                    </span>
                   </div>
-                  <Progress value={75} className="h-2" />
+                  <Progress value={completionPercent} className="h-2" />
                   
                   <div className="grid sm:grid-cols-3 gap-3 pt-4">
-                    {[
-                      { label: "Adicionar foto de capa", done: false },
-                      { label: "Verificar e-mail", done: true },
-                      { label: "Adicionar certificações", done: false },
-                      { label: "Completar bio", done: true },
-                      { label: "Adicionar localização", done: true },
-                      { label: "Conectar WhatsApp", done: false },
-                    ].map((item) => (
+                    {profileCompletion.map((item) => (
                       <div 
                         key={item.label}
                         className={cn(
@@ -286,65 +350,43 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Recent Connections */}
+            {/* Quick Actions */}
             <Card className="lg:col-span-2">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Conexões Recentes</CardTitle>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/conexoes">
-                      Ver todas
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </Button>
-                </div>
+                <CardTitle className="text-base">Comece Agora</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="space-y-3">
-                  {recentConnections.map((connection) => (
-                    <div 
-                      key={connection.name}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors"
-                    >
-                      <Avatar>
-                        <AvatarImage src={connection.avatar} />
-                        <AvatarFallback>{connection.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{connection.name}</p>
-                        <p className="text-xs text-muted-foreground">{connection.role}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">{connection.time}</p>
-                        <Button variant="outline" size="sm" className="mt-1">
-                          Mensagem
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                    <Link to="/conexoes">
+                      <Users className="w-6 h-6" />
+                      <span>Buscar Conexões</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                    <Link to="/feed">
+                      <MessageSquare className="w-6 h-6" />
+                      <span>Ver Feed</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <FolderOpen className="w-6 h-6" />
+                    <span>Criar Projeto</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* Tips */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Ações Rápidas</CardTitle>
+                <CardTitle className="text-base">Dicas</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FolderOpen className="w-4 h-4" />
-                    Criar novo projeto
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Users className="w-4 h-4" />
-                    Buscar conexões
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageSquare className="w-4 h-4" />
-                    Iniciar conversa
-                  </Button>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>💡 Complete seu perfil para aumentar sua visibilidade</p>
+                  <p>🤝 Conecte-se com agentes do seu interesse</p>
+                  <p>📝 Publique atualizações no feed para engajar</p>
                 </div>
               </CardContent>
             </Card>

@@ -1,28 +1,61 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Leaf, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { signIn, user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Preencha todos os campos");
+      return;
+    }
+
     setIsLoading(true);
     
-    // Simulate login - will be replaced with Supabase auth
-    setTimeout(() => {
-      toast.success("Login realizado com sucesso!");
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("E-mail ou senha incorretos");
+      } else {
+        toast.error(error.message);
+      }
       setIsLoading(false);
-    }, 1500);
+      return;
+    }
+    
+    toast.success("Login realizado com sucesso!");
+    navigate("/dashboard");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--gradient-hero)" }}>
