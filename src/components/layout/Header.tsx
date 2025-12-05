@@ -10,7 +10,6 @@ const navItems = [
   { label: "Início", href: "/" },
   { label: "Conexões", href: "/conexoes" },
   { label: "Feed", href: "/feed" },
-  { label: "Perfil", href: "/perfil" },
 ];
 
 export function Header() {

@@ -21,7 +21,8 @@ import {
   Plus,
   LogOut,
   Menu,
-  X
+  X,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
+  { icon: User, label: "Meu Perfil", href: "/perfil" },
   { icon: Users, label: "Conexões", href: "/conexoes" },
   { icon: FolderOpen, label: "Meus Projetos", href: "/projetos" },
   { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
