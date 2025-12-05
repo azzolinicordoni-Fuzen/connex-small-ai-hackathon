@@ -43,15 +43,14 @@ export default function EditProfileDialog({ open, onOpenChange, profile, onSaved
   });
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        name: profile.name || "",
-        bio: profile.bio || "",
-        location: profile.location || "",
-        phone: profile.phone || "",
-        whatsapp: profile.whatsapp || "",
-      });
-    }
+    if (!open || !profile) return;
+    setFormData({
+      name: profile.name || "",
+      bio: profile.bio || "",
+      location: profile.location || "",
+      phone: profile.phone || "",
+      whatsapp: profile.whatsapp || "",
+    });
   }, [profile, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {

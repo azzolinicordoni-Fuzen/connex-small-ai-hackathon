@@ -30,6 +30,7 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
   const [formData, setFormData] = useState<any>({});
 
   useEffect(() => {
+    if (!open) return;
     if (editData) {
       setFormData(editData);
     } else {
