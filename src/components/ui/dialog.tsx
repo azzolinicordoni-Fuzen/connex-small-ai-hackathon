@@ -27,12 +27,17 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+interface DialogContentProps
+  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+  forceMount?: true;
+}
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
+  DialogContentProps
+>(({ className, children, forceMount, ...props }, ref) => (
+  <DialogPortal forceMount={forceMount}>
+    <DialogOverlay forceMount={forceMount} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
