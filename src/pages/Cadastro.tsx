@@ -9,45 +9,46 @@ import {
   Leaf, 
   Mail, 
   Lock, 
-  User, 
   Eye, 
   EyeOff, 
   ArrowRight, 
   ArrowLeft,
   TreePine,
-  HardHat,
   Briefcase,
   Award,
   Landmark,
   FolderOpen,
   Users,
   Check,
-  ShoppingCart
+  Scale,
+  Building2,
+  Heart,
+  Cpu,
+  ClipboardCheck,
+  HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
-import ProprietarioForm from "@/components/cadastro/ProprietarioForm";
-import CertificadoraForm from "@/components/cadastro/CertificadoraForm";
-import InvestidorForm from "@/components/cadastro/InvestidorForm";
-import CompradorForm from "@/components/cadastro/CompradorForm";
-import ProjetoForm from "@/components/cadastro/ProjetoForm";
+import CadastroForm, { CadastroFormData } from "@/components/cadastro/CadastroForm";
 
 const agentTypes = [
   { id: "proprietario", icon: TreePine, label: "Proprietário Rural", description: "Possuo áreas rurais com potencial" },
-  { id: "certificadora", icon: Award, label: "Certificadora", description: "Ofereço serviços de auditoria" },
-  { id: "investidor", icon: Landmark, label: "Fundo ou Banco", description: "Invisto em projetos de carbono" },
-  { id: "comprador", icon: ShoppingCart, label: "Empresa Compradora", description: "Compro créditos de carbono" },
-  { id: "projeto", icon: FolderOpen, label: "Projeto", description: "Tenho projeto para apresentar" },
-  { id: "engenheiro", icon: HardHat, label: "Engenheiro", description: "Atuo em projetos técnicos" },
-  { id: "desenvolvedor", icon: Briefcase, label: "Desenvolvedor", description: "Desenvolvo projetos sustentáveis" },
-  { id: "outro", icon: Users, label: "Outro Agente", description: "Outro tipo de atuação" },
+  { id: "desenvolvedor", icon: Briefcase, label: "Desenvolvedor de Projetos", description: "Desenvolvo projetos de carbono" },
+  { id: "certificadora", icon: Award, label: "Certificadora / Padrão", description: "Certifico padrões de qualidade" },
+  { id: "auditor", icon: ClipboardCheck, label: "Auditor / Verificador", description: "Realizo auditorias e verificações" },
+  { id: "investidor", icon: Landmark, label: "Investidor / Comprador", description: "Invisto ou compro créditos de carbono" },
+  { id: "instituicao_financeira", icon: Building2, label: "Instituição Financeira", description: "Banco ou fundo de investimento" },
+  { id: "advogado", icon: Scale, label: "Advogado / Escritório Jurídico", description: "Ofereço serviços jurídicos" },
+  { id: "plataforma_mrv", icon: Cpu, label: "Plataforma de Tecnologia / MRV", description: "Soluções de MRV e tecnologia" },
+  { id: "ong", icon: Heart, label: "ONG / Entidade", description: "Organização sem fins lucrativos" },
+  { id: "projeto", icon: FolderOpen, label: "Projeto Existente", description: "Tenho projeto já estruturado" },
+  { id: "outro", icon: HelpCircle, label: "Outro", description: "Outro tipo de atuação" },
 ];
 
 const signUpSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(100),
   email: z.string().email("E-mail inválido").max(255),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
   confirmPassword: z.string(),
@@ -61,7 +62,6 @@ export default function Cadastro() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedType, setSelectedType] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -106,11 +106,12 @@ export default function Cadastro() {
 
     setIsLoading(true);
 
-    // Map comprador to outro for database (since comprador might not be in enum yet)
-    const dbAgentType = selectedType === "comprador" ? "outro" : selectedType;
+    // Map types that might not be in the database enum
+    const enumTypes = ["proprietario", "engenheiro", "desenvolvedor", "certificadora", "investidor", "projeto", "outro"];
+    const dbAgentType = enumTypes.includes(selectedType) ? selectedType : "outro";
 
     const { error, data } = await signUp(formData.email, formData.password, {
-      name: formData.name,
+      name: formData.email.split("@")[0], // Temporary name, will be updated in step 3
       agent_type: dbAgentType,
     });
 
@@ -137,18 +138,11 @@ export default function Cadastro() {
       }
     }
 
-    // Check if this type has a specific form
-    const typesWithForms = ["proprietario", "certificadora", "investidor", "comprador", "projeto"];
-    if (typesWithForms.includes(selectedType)) {
-      setStep(3);
-      setIsLoading(false);
-    } else {
-      toast.success("Conta criada com sucesso!");
-      navigate("/dashboard");
-    }
+    setStep(3);
+    setIsLoading(false);
   };
 
-  const handleSpecificFormSubmit = async (data: unknown) => {
+  const handleCadastroFormSubmit = async (cadastroData: CadastroFormData) => {
     if (!profileId) {
       toast.error("Erro ao salvar dados. Tente novamente.");
       return;
@@ -157,30 +151,19 @@ export default function Cadastro() {
     setIsLoading(true);
 
     try {
-      const tableMap: Record<string, string> = {
-        proprietario: "proprietario_details",
-        certificadora: "certificadora_details",
-        investidor: "investidor_details",
-        comprador: "comprador_details",
-        projeto: "projeto_details",
-      };
+      // Update profile with the cadastro form data
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          name: cadastroData.nomeCompleto,
+          bio: cadastroData.descricaoCurta,
+          location: `${cadastroData.cidade}, ${cadastroData.estado}, ${cadastroData.pais}`,
+          phone: cadastroData.telefone,
+          whatsapp: cadastroData.whatsapp,
+        })
+        .eq("id", profileId);
 
-      const tableName = tableMap[selectedType];
-      if (!tableName) {
-        throw new Error("Tipo de agente inválido");
-      }
-
-      // Insert data into the specific table
-      const insertData = {
-        profile_id: profileId,
-        ...(data as Record<string, unknown>),
-      };
-
-      const { error } = await supabase
-        .from(tableName as "proprietario_details" | "certificadora_details" | "investidor_details" | "comprador_details" | "projeto_details")
-        .insert(insertData as never);
-
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       toast.success("Cadastro finalizado com sucesso!");
       navigate("/dashboard");
@@ -201,38 +184,16 @@ export default function Cadastro() {
     );
   }
 
-  const renderSpecificForm = () => {
-    const commonProps = {
-      onBack: () => setStep(2),
-      isLoading,
-    };
-
-    switch (selectedType) {
-      case "proprietario":
-        return <ProprietarioForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
-      case "certificadora":
-        return <CertificadoraForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
-      case "investidor":
-        return <InvestidorForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
-      case "comprador":
-        return <CompradorForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
-      case "projeto":
-        return <ProjetoForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
-      default:
-        return null;
-    }
-  };
-
   const getStepTitle = () => {
     if (step === 1) return "Qual é o seu perfil?";
     if (step === 2) return "Crie sua conta";
-    return `Complete seu cadastro`;
+    return "Complete seu cadastro";
   };
 
   const getStepDescription = () => {
     if (step === 1) return "Selecione o tipo de agente que melhor descreve você";
-    if (step === 2) return "Preencha seus dados para criar sua conta";
-    return `Informações específicas para ${agentTypes.find(t => t.id === selectedType)?.label}`;
+    if (step === 2) return "Preencha seus dados de acesso";
+    return `Informações do seu perfil como ${agentTypes.find(t => t.id === selectedType)?.label}`;
   };
 
   return (
@@ -251,7 +212,7 @@ export default function Cadastro() {
             Junte-se à maior rede de agronegócio sustentável do Brasil
           </h1>
           <p className="text-primary-foreground/70 text-lg mb-8">
-            Conecte-se com proprietários, engenheiros, investidores e desenvolvedores 
+            Conecte-se com proprietários, desenvolvedores, investidores e certificadoras 
             para fazer seus projetos acontecerem.
           </p>
           
@@ -308,20 +269,16 @@ export default function Cadastro() {
               )}>
                 2
               </div>
-              {["proprietario", "certificadora", "investidor", "comprador", "projeto"].includes(selectedType) && (
-                <>
-                  <div className={cn(
-                    "w-16 h-1 rounded-full transition-colors",
-                    step >= 3 ? "bg-primary" : "bg-muted"
-                  )} />
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-                    step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  )}>
-                    3
-                  </div>
-                </>
-              )}
+              <div className={cn(
+                "w-16 h-1 rounded-full transition-colors",
+                step >= 3 ? "bg-primary" : "bg-muted"
+              )} />
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}>
+                3
+              </div>
             </div>
           )}
 
@@ -336,7 +293,7 @@ export default function Cadastro() {
             </CardHeader>
             <CardContent>
               {step === 1 && (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                   {agentTypes.map((type) => (
                     <button
                       key={type.id}
@@ -350,7 +307,7 @@ export default function Cadastro() {
                       )}
                     >
                       <div className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-colors shrink-0",
                         selectedType === type.id ? "bg-primary/10" : "bg-secondary"
                       )}>
                         <type.icon className={cn(
@@ -358,12 +315,12 @@ export default function Cadastro() {
                           selectedType === type.id ? "text-primary" : "text-muted-foreground"
                         )} />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="font-semibold text-foreground">{type.label}</div>
-                        <div className="text-sm text-muted-foreground">{type.description}</div>
+                        <div className="text-sm text-muted-foreground truncate">{type.description}</div>
                       </div>
                       {selectedType === type.id && (
-                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
                           <Check className="w-4 h-4 text-primary-foreground" />
                         </div>
                       )}
@@ -397,24 +354,7 @@ export default function Cadastro() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="name">Nome completo</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          type="text"
-                          placeholder="Seu nome"
-                          className={cn("pl-10", errors.name && "border-destructive")}
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                        />
-                      </div>
-                      {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">E-mail</Label>
+                      <Label htmlFor="email">E-mail *</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
@@ -431,7 +371,7 @@ export default function Cadastro() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Senha</Label>
+                      <Label htmlFor="password">Senha *</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
@@ -455,7 +395,7 @@ export default function Cadastro() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                      <Label htmlFor="confirmPassword">Confirmar senha *</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
@@ -489,14 +429,21 @@ export default function Cadastro() {
                       disabled={isLoading}
                       className="flex-1"
                     >
-                      {isLoading ? "Criando..." : "Criar Conta"}
+                      {isLoading ? "Criando..." : "Continuar"}
                       {!isLoading && <ArrowRight className="w-4 h-4" />}
                     </Button>
                   </div>
                 </form>
               )}
 
-              {step === 3 && renderSpecificForm()}
+              {step === 3 && (
+                <CadastroForm
+                  agentType={selectedType}
+                  onSubmit={handleCadastroFormSubmit}
+                  onBack={() => setStep(2)}
+                  isLoading={isLoading}
+                />
+              )}
 
               <p className="text-center text-sm text-muted-foreground mt-6">
                 Já tem uma conta?{" "}
