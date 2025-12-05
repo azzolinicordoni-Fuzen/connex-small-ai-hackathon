@@ -21,20 +21,28 @@ import {
   Landmark,
   FolderOpen,
   Users,
-  Check
+  Check,
+  ShoppingCart
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import ProprietarioForm from "@/components/cadastro/ProprietarioForm";
+import CertificadoraForm from "@/components/cadastro/CertificadoraForm";
+import InvestidorForm from "@/components/cadastro/InvestidorForm";
+import CompradorForm from "@/components/cadastro/CompradorForm";
+import ProjetoForm from "@/components/cadastro/ProjetoForm";
 
 const agentTypes = [
-  { id: "proprietario", icon: TreePine, label: "Proprietário de Terra", description: "Possuo áreas rurais" },
+  { id: "proprietario", icon: TreePine, label: "Proprietário Rural", description: "Possuo áreas rurais com potencial" },
+  { id: "certificadora", icon: Award, label: "Certificadora", description: "Ofereço serviços de auditoria" },
+  { id: "investidor", icon: Landmark, label: "Fundo ou Banco", description: "Invisto em projetos de carbono" },
+  { id: "comprador", icon: ShoppingCart, label: "Empresa Compradora", description: "Compro créditos de carbono" },
+  { id: "projeto", icon: FolderOpen, label: "Projeto", description: "Tenho projeto para apresentar" },
   { id: "engenheiro", icon: HardHat, label: "Engenheiro", description: "Atuo em projetos técnicos" },
   { id: "desenvolvedor", icon: Briefcase, label: "Desenvolvedor", description: "Desenvolvo projetos sustentáveis" },
-  { id: "certificadora", icon: Award, label: "Certificadora", description: "Ofereço serviços de certificação" },
-  { id: "investidor", icon: Landmark, label: "Banco ou Fundo", description: "Invisto em projetos" },
-  { id: "projeto", icon: FolderOpen, label: "Projeto Pronto", description: "Tenho projeto para apresentar" },
   { id: "outro", icon: Users, label: "Outro Agente", description: "Outro tipo de atuação" },
 ];
 
@@ -60,6 +68,7 @@ export default function Cadastro() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [profileId, setProfileId] = useState<string | null>(null);
   
   const { signUp, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -70,20 +79,18 @@ export default function Cadastro() {
     }
   }, [user, loading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    
-    if (step === 1) {
-      if (!selectedType) {
-        toast.error("Selecione um tipo de agente");
-        return;
-      }
-      setStep(2);
+  const handleTypeSelect = () => {
+    if (!selectedType) {
+      toast.error("Selecione um tipo de agente");
       return;
     }
+    setStep(2);
+  };
 
-    // Validate form data
+  const handleAccountSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
     const result = signUpSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -98,12 +105,15 @@ export default function Cadastro() {
     }
 
     setIsLoading(true);
-    
-    const { error } = await signUp(formData.email, formData.password, {
+
+    // Map comprador to outro for database (since comprador might not be in enum yet)
+    const dbAgentType = selectedType === "comprador" ? "outro" : selectedType;
+
+    const { error, data } = await signUp(formData.email, formData.password, {
       name: formData.name,
-      agent_type: selectedType,
+      agent_type: dbAgentType,
     });
-    
+
     if (error) {
       if (error.message.includes("already registered")) {
         toast.error("Este e-mail já está cadastrado");
@@ -113,9 +123,74 @@ export default function Cadastro() {
       setIsLoading(false);
       return;
     }
-    
-    toast.success("Conta criada com sucesso!");
-    navigate("/dashboard");
+
+    // Get profile ID for the specific form
+    if (data?.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      
+      if (profile) {
+        setProfileId(profile.id);
+      }
+    }
+
+    // Check if this type has a specific form
+    const typesWithForms = ["proprietario", "certificadora", "investidor", "comprador", "projeto"];
+    if (typesWithForms.includes(selectedType)) {
+      setStep(3);
+      setIsLoading(false);
+    } else {
+      toast.success("Conta criada com sucesso!");
+      navigate("/dashboard");
+    }
+  };
+
+  const handleSpecificFormSubmit = async (data: unknown) => {
+    if (!profileId) {
+      toast.error("Erro ao salvar dados. Tente novamente.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const tableMap: Record<string, string> = {
+        proprietario: "proprietario_details",
+        certificadora: "certificadora_details",
+        investidor: "investidor_details",
+        comprador: "comprador_details",
+        projeto: "projeto_details",
+      };
+
+      const tableName = tableMap[selectedType];
+      if (!tableName) {
+        throw new Error("Tipo de agente inválido");
+      }
+
+      // Insert data into the specific table
+      const insertData = {
+        profile_id: profileId,
+        ...(data as Record<string, unknown>),
+      };
+
+      const { error } = await supabase
+        .from(tableName as "proprietario_details" | "certificadora_details" | "investidor_details" | "comprador_details" | "projeto_details")
+        .insert(insertData as never);
+
+      if (error) throw error;
+
+      toast.success("Cadastro finalizado com sucesso!");
+      navigate("/dashboard");
+    } catch (error: unknown) {
+      console.error("Error saving details:", error);
+      toast.error("Erro ao salvar dados. Você pode completar depois no seu perfil.");
+      navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (loading) {
@@ -125,6 +200,40 @@ export default function Cadastro() {
       </div>
     );
   }
+
+  const renderSpecificForm = () => {
+    const commonProps = {
+      onBack: () => setStep(2),
+      isLoading,
+    };
+
+    switch (selectedType) {
+      case "proprietario":
+        return <ProprietarioForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
+      case "certificadora":
+        return <CertificadoraForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
+      case "investidor":
+        return <InvestidorForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
+      case "comprador":
+        return <CompradorForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
+      case "projeto":
+        return <ProjetoForm {...commonProps} onSubmit={handleSpecificFormSubmit} />;
+      default:
+        return null;
+    }
+  };
+
+  const getStepTitle = () => {
+    if (step === 1) return "Qual é o seu perfil?";
+    if (step === 2) return "Crie sua conta";
+    return `Complete seu cadastro`;
+  };
+
+  const getStepDescription = () => {
+    if (step === 1) return "Selecione o tipo de agente que melhor descreve você";
+    if (step === 2) return "Preencha seus dados para criar sua conta";
+    return `Informações específicas para ${agentTypes.find(t => t.id === selectedType)?.label}`;
+  };
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--gradient-hero)" }}>
@@ -180,76 +289,99 @@ export default function Cadastro() {
             <span className="font-display font-bold text-xl">AgroConnect</span>
           </Link>
 
-          {/* Progress */}
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <div className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-              step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            )}>
-              1
+          {/* Progress - Only show for first 2 steps */}
+          {step <= 2 && (
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}>
+                1
+              </div>
+              <div className={cn(
+                "w-16 h-1 rounded-full transition-colors",
+                step >= 2 ? "bg-primary" : "bg-muted"
+              )} />
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}>
+                2
+              </div>
+              {["proprietario", "certificadora", "investidor", "comprador", "projeto"].includes(selectedType) && (
+                <>
+                  <div className={cn(
+                    "w-16 h-1 rounded-full transition-colors",
+                    step >= 3 ? "bg-primary" : "bg-muted"
+                  )} />
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                    step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}>
+                    3
+                  </div>
+                </>
+              )}
             </div>
-            <div className={cn(
-              "w-16 h-1 rounded-full transition-colors",
-              step >= 2 ? "bg-primary" : "bg-muted"
-            )} />
-            <div className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-              step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            )}>
-              2
-            </div>
-          </div>
+          )}
 
           <Card className="border-0 shadow-none bg-transparent">
             <CardHeader className="text-center space-y-2 pb-6">
               <CardTitle className="font-display text-3xl">
-                {step === 1 ? "Qual é o seu perfil?" : "Crie sua conta"}
+                {getStepTitle()}
               </CardTitle>
               <CardDescription className="text-base">
-                {step === 1 
-                  ? "Selecione o tipo de agente que melhor descreve você"
-                  : "Preencha seus dados para criar sua conta"
-                }
+                {getStepDescription()}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit}>
-                {step === 1 ? (
-                  <div className="space-y-3">
-                    {agentTypes.map((type) => (
-                      <button
-                        key={type.id}
-                        type="button"
-                        onClick={() => setSelectedType(type.id)}
-                        className={cn(
-                          "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left",
-                          selectedType === type.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50 hover:bg-secondary/50"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
-                          selectedType === type.id ? "bg-primary/10" : "bg-secondary"
-                        )}>
-                          <type.icon className={cn(
-                            "w-6 h-6",
-                            selectedType === type.id ? "text-primary" : "text-muted-foreground"
-                          )} />
+              {step === 1 && (
+                <div className="space-y-3">
+                  {agentTypes.map((type) => (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => setSelectedType(type.id)}
+                      className={cn(
+                        "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left",
+                        selectedType === type.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50 hover:bg-secondary/50"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
+                        selectedType === type.id ? "bg-primary/10" : "bg-secondary"
+                      )}>
+                        <type.icon className={cn(
+                          "w-6 h-6",
+                          selectedType === type.id ? "text-primary" : "text-muted-foreground"
+                        )} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-foreground">{type.label}</div>
+                        <div className="text-sm text-muted-foreground">{type.description}</div>
+                      </div>
+                      {selectedType === type.id && (
+                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-4 h-4 text-primary-foreground" />
                         </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-foreground">{type.label}</div>
-                          <div className="text-sm text-muted-foreground">{type.description}</div>
-                        </div>
-                        {selectedType === type.id && (
-                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-4 h-4 text-primary-foreground" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
+                      )}
+                    </button>
+                  ))}
+                  <Button 
+                    onClick={handleTypeSelect}
+                    size="lg" 
+                    className="w-full mt-6"
+                  >
+                    Continuar
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {step === 2 && (
+                <form onSubmit={handleAccountSubmit}>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-6">
                       <Badge variant="emerald">
@@ -339,10 +471,8 @@ export default function Cadastro() {
                       {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                     </div>
                   </div>
-                )}
 
-                <div className="flex gap-3 mt-8">
-                  {step === 2 && (
+                  <div className="flex gap-3 mt-8">
                     <Button 
                       type="button" 
                       variant="outline" 
@@ -353,25 +483,27 @@ export default function Cadastro() {
                       <ArrowLeft className="w-4 h-4" />
                       Voltar
                     </Button>
-                  )}
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    {isLoading ? "Criando..." : step === 1 ? "Continuar" : "Criar Conta"}
-                    {!isLoading && <ArrowRight className="w-4 h-4" />}
-                  </Button>
-                </div>
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      {isLoading ? "Criando..." : "Criar Conta"}
+                      {!isLoading && <ArrowRight className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </form>
+              )}
 
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  Já tem uma conta?{" "}
-                  <Link to="/login" className="text-primary font-medium hover:underline">
-                    Fazer login
-                  </Link>
-                </p>
-              </form>
+              {step === 3 && renderSpecificForm()}
+
+              <p className="text-center text-sm text-muted-foreground mt-6">
+                Já tem uma conta?{" "}
+                <Link to="/login" className="text-primary font-medium hover:underline">
+                  Fazer login
+                </Link>
+              </p>
             </CardContent>
           </Card>
         </div>
