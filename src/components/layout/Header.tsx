@@ -1,8 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, X, Leaf } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Início", href: "/" },
@@ -16,6 +18,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const isLanding = location.pathname === "/";
+  const { user, loading } = useAuth();
 
   return (
     <header className={cn(
@@ -57,12 +60,27 @@ export function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant={isLanding ? "glass" : "ghost"} asChild>
-              <Link to="/login">Entrar</Link>
-            </Button>
-            <Button variant={isLanding ? "hero" : "default"} asChild>
-              <Link to="/cadastro">Começar Grátis</Link>
-            </Button>
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            ) : user ? (
+              <Link to="/dashboard" className="flex items-center gap-2">
+                <Avatar size="sm">
+                  <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Button variant={isLanding ? "glass" : "outline"} size="sm">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Button variant={isLanding ? "glass" : "ghost"} asChild>
+                  <Link to="/login">Entrar</Link>
+                </Button>
+                <Button variant={isLanding ? "hero" : "default"} asChild>
+                  <Link to="/cadastro">Começar Grátis</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -97,12 +115,20 @@ export function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border/20 mt-2">
-                <Button variant="outline" asChild className="w-full">
-                  <Link to="/login">Entrar</Link>
-                </Button>
-                <Button variant="default" asChild className="w-full">
-                  <Link to="/cadastro">Começar Grátis</Link>
-                </Button>
+                {user ? (
+                  <Button variant="default" asChild className="w-full">
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" asChild className="w-full">
+                      <Link to="/login" onClick={() => setIsOpen(false)}>Entrar</Link>
+                    </Button>
+                    <Button variant="default" asChild className="w-full">
+                      <Link to="/cadastro" onClick={() => setIsOpen(false)}>Começar Grátis</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
