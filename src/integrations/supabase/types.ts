@@ -14,6 +14,130 @@ export type Database = {
   }
   public: {
     Tables: {
+      advogado_subperfis: {
+        Row: {
+          areas_atuacao: string[] | null
+          busca_plataforma: string[] | null
+          clientes_atendidos: string[] | null
+          contato_preferido: string | null
+          created_at: string
+          descricao: string | null
+          experiencia_carbono: boolean | null
+          id: string
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
+          nome_servico: string
+          permitir_mensagens: boolean | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          areas_atuacao?: string[] | null
+          busca_plataforma?: string[] | null
+          clientes_atendidos?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          experiencia_carbono?: boolean | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_servico: string
+          permitir_mensagens?: boolean | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          areas_atuacao?: string[] | null
+          busca_plataforma?: string[] | null
+          clientes_atendidos?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          experiencia_carbono?: boolean | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_servico?: string
+          permitir_mensagens?: boolean | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advogado_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auditor_subperfis: {
+        Row: {
+          busca_plataforma: string[] | null
+          contato_preferido: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
+          nome_servico: string
+          padroes_acreditados: string[] | null
+          permitir_mensagens: boolean | null
+          profile_id: string
+          tempo_medio_verificacao: string | null
+          tipos_projeto_aceitos: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_servico: string
+          padroes_acreditados?: string[] | null
+          permitir_mensagens?: boolean | null
+          profile_id: string
+          tempo_medio_verificacao?: string | null
+          tipos_projeto_aceitos?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_servico?: string
+          padroes_acreditados?: string[] | null
+          permitir_mensagens?: boolean | null
+          profile_id?: string
+          tempo_medio_verificacao?: string | null
+          tipos_projeto_aceitos?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditor_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificadora_details: {
         Row: {
           areas_atuacao: string[] | null
@@ -90,38 +214,68 @@ export type Database = {
       }
       certificadora_subperfis: {
         Row: {
+          busca_plataforma: string[] | null
+          contato_preferido: string | null
           created_at: string
           descricao: string | null
           escopo: string | null
           id: string
           metodologia: string | null
+          metodologias_suportadas: string[] | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
           nome_servico: string
+          padroes_oferecidos: string[] | null
+          paises_atuacao: string[] | null
+          permitir_mensagens: boolean | null
           portfolio_url: string | null
           profile_id: string
+          requisitos_especificos: string | null
           tipo_auditoria: string | null
           updated_at: string
         }
         Insert: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           escopo?: string | null
           id?: string
           metodologia?: string | null
+          metodologias_suportadas?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_servico: string
+          padroes_oferecidos?: string[] | null
+          paises_atuacao?: string[] | null
+          permitir_mensagens?: boolean | null
           portfolio_url?: string | null
           profile_id: string
+          requisitos_especificos?: string | null
           tipo_auditoria?: string | null
           updated_at?: string
         }
         Update: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           escopo?: string | null
           id?: string
           metodologia?: string | null
+          metodologias_suportadas?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_servico?: string
+          padroes_oferecidos?: string[] | null
+          paises_atuacao?: string[] | null
+          permitir_mensagens?: boolean | null
           portfolio_url?: string | null
           profile_id?: string
+          requisitos_especificos?: string | null
           tipo_auditoria?: string | null
           updated_at?: string
         }
@@ -203,11 +357,17 @@ export type Database = {
       comprador_subperfis: {
         Row: {
           ano_alvo: number | null
+          busca_plataforma: string[] | null
           certificacao_exigida: string | null
+          contato_preferido: string | null
           created_at: string
           descricao: string | null
           id: string
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
           nome_demanda: string
+          permitir_mensagens: boolean | null
           profile_id: string
           setor_projeto: string | null
           tipos_preferidos: string[] | null
@@ -216,11 +376,17 @@ export type Database = {
         }
         Insert: {
           ano_alvo?: number | null
+          busca_plataforma?: string[] | null
           certificacao_exigida?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_demanda: string
+          permitir_mensagens?: boolean | null
           profile_id: string
           setor_projeto?: string | null
           tipos_preferidos?: string[] | null
@@ -229,11 +395,17 @@ export type Database = {
         }
         Update: {
           ano_alvo?: number | null
+          busca_plataforma?: string[] | null
           certificacao_exigida?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_demanda?: string
+          permitir_mensagens?: boolean | null
           profile_id?: string
           setor_projeto?: string | null
           tipos_preferidos?: string[] | null
@@ -286,6 +458,139 @@ export type Database = {
           {
             foreignKeyName: "connections_requester_id_fkey"
             columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      desenvolvedor_subperfis: {
+        Row: {
+          anos_experiencia: number | null
+          busca_plataforma: string[] | null
+          certificadoras_parceiras: string[] | null
+          contato_preferido: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
+          nome_projeto: string
+          numero_projetos: number | null
+          permitir_mensagens: boolean | null
+          profile_id: string
+          tamanho_area_ideal: string | null
+          tipos_projeto: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          anos_experiencia?: number | null
+          busca_plataforma?: string[] | null
+          certificadoras_parceiras?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_projeto: string
+          numero_projetos?: number | null
+          permitir_mensagens?: boolean | null
+          profile_id: string
+          tamanho_area_ideal?: string | null
+          tipos_projeto?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          anos_experiencia?: number | null
+          busca_plataforma?: string[] | null
+          certificadoras_parceiras?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_projeto?: string
+          numero_projetos?: number | null
+          permitir_mensagens?: boolean | null
+          profile_id?: string
+          tamanho_area_ideal?: string | null
+          tipos_projeto?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "desenvolvedor_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financeira_subperfis: {
+        Row: {
+          busca_plataforma: string[] | null
+          contato_preferido: string | null
+          created_at: string
+          descricao: string | null
+          exigencias_garantia: string | null
+          id: string
+          modalidades: string[] | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
+          nome_produto: string
+          permitir_mensagens: boolean | null
+          profile_id: string
+          ticket_medio: number | null
+          tipos_financiamento: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          exigencias_garantia?: string | null
+          id?: string
+          modalidades?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_produto: string
+          permitir_mensagens?: boolean | null
+          profile_id: string
+          ticket_medio?: number | null
+          tipos_financiamento?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          busca_plataforma?: string[] | null
+          contato_preferido?: string | null
+          created_at?: string
+          descricao?: string | null
+          exigencias_garantia?: string | null
+          id?: string
+          modalidades?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
+          nome_produto?: string
+          permitir_mensagens?: boolean | null
+          profile_id?: string
+          ticket_medio?: number | null
+          tipos_financiamento?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeira_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -359,40 +664,67 @@ export type Database = {
       }
       investidor_subperfis: {
         Row: {
+          busca_plataforma: string[] | null
           certificacao_exigida: string | null
+          contato_preferido: string | null
           created_at: string
           descricao: string | null
           id: string
+          interesse_principal: string[] | null
           localizacao_preferencial: string[] | null
           modalidade: string[] | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
           nome_requisicao: string
+          perfil_investidor: string | null
+          permitir_mensagens: boolean | null
           profile_id: string
+          tipo_credito_desejado: string[] | null
           tipo_projeto: string | null
           updated_at: string
           volume_desejado: number | null
         }
         Insert: {
+          busca_plataforma?: string[] | null
           certificacao_exigida?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
+          interesse_principal?: string[] | null
           localizacao_preferencial?: string[] | null
           modalidade?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_requisicao: string
+          perfil_investidor?: string | null
+          permitir_mensagens?: boolean | null
           profile_id: string
+          tipo_credito_desejado?: string[] | null
           tipo_projeto?: string | null
           updated_at?: string
           volume_desejado?: number | null
         }
         Update: {
+          busca_plataforma?: string[] | null
           certificacao_exigida?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
+          interesse_principal?: string[] | null
           localizacao_preferencial?: string[] | null
           modalidade?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_requisicao?: string
+          perfil_investidor?: string | null
+          permitir_mensagens?: boolean | null
           profile_id?: string
+          tipo_credito_desejado?: string[] | null
           tipo_projeto?: string | null
           updated_at?: string
           volume_desejado?: number | null
@@ -608,17 +940,27 @@ export type Database = {
       }
       projeto_subperfis: {
         Row: {
+          ano_inicio: number | null
+          busca_plataforma: string[] | null
           car_url: string | null
+          co_beneficios: string[] | null
+          contato_preferido: string | null
           created_at: string
+          creditos_disponiveis: number | null
           descricao: string | null
           emissoes_evitadas_ano: number | null
           estado: string | null
           geometria_url: string | null
           id: string
           investimento_total: number | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
           municipio: string | null
           nome_projeto: string
+          padrao_certificacao: string | null
           pdd_url: string | null
+          permitir_mensagens: boolean | null
           prazo_projeto: string | null
           profile_id: string
           status: string | null
@@ -626,17 +968,27 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ano_inicio?: number | null
+          busca_plataforma?: string[] | null
           car_url?: string | null
+          co_beneficios?: string[] | null
+          contato_preferido?: string | null
           created_at?: string
+          creditos_disponiveis?: number | null
           descricao?: string | null
           emissoes_evitadas_ano?: number | null
           estado?: string | null
           geometria_url?: string | null
           id?: string
           investimento_total?: number | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           municipio?: string | null
           nome_projeto: string
+          padrao_certificacao?: string | null
           pdd_url?: string | null
+          permitir_mensagens?: boolean | null
           prazo_projeto?: string | null
           profile_id: string
           status?: string | null
@@ -644,17 +996,27 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ano_inicio?: number | null
+          busca_plataforma?: string[] | null
           car_url?: string | null
+          co_beneficios?: string[] | null
+          contato_preferido?: string | null
           created_at?: string
+          creditos_disponiveis?: number | null
           descricao?: string | null
           emissoes_evitadas_ano?: number | null
           estado?: string | null
           geometria_url?: string | null
           id?: string
           investimento_total?: number | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           municipio?: string | null
           nome_projeto?: string
+          padrao_certificacao?: string | null
           pdd_url?: string | null
+          permitir_mensagens?: boolean | null
           prazo_projeto?: string | null
           profile_id?: string
           status?: string | null
@@ -762,42 +1124,69 @@ export type Database = {
       }
       proprietario_subperfis: {
         Row: {
+          bioma: string | null
+          busca_plataforma: string[] | null
           car_documento_url: string | null
           car_numero: string | null
+          contato_preferido: string | null
           created_at: string
           descricao: string | null
+          documentacao_fundiaria: boolean | null
           documento_fundiario_url: string | null
           hectares: number | null
           id: string
+          interesse_projeto: string[] | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
           nome_area: string
+          permitir_mensagens: boolean | null
           profile_id: string
           tipo_projeto_desejado: string[] | null
           tipo_uso: string | null
           updated_at: string
         }
         Insert: {
+          bioma?: string | null
+          busca_plataforma?: string[] | null
           car_documento_url?: string | null
           car_numero?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
+          documentacao_fundiaria?: boolean | null
           documento_fundiario_url?: string | null
           hectares?: number | null
           id?: string
+          interesse_projeto?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_area: string
+          permitir_mensagens?: boolean | null
           profile_id: string
           tipo_projeto_desejado?: string[] | null
           tipo_uso?: string | null
           updated_at?: string
         }
         Update: {
+          bioma?: string | null
+          busca_plataforma?: string[] | null
           car_documento_url?: string | null
           car_numero?: string | null
+          contato_preferido?: string | null
           created_at?: string
           descricao?: string | null
+          documentacao_fundiaria?: boolean | null
           documento_fundiario_url?: string | null
           hectares?: number | null
           id?: string
+          interesse_projeto?: string[] | null
+          mostrar_localizacao_precisa?: boolean | null
+          mostrar_nome_publico?: boolean | null
+          mostrar_telefone?: boolean | null
           nome_area?: string
+          permitir_mensagens?: boolean | null
           profile_id?: string
           tipo_projeto_desejado?: string[] | null
           tipo_uso?: string | null
@@ -830,6 +1219,9 @@ export type Database = {
         | "projeto"
         | "outro"
         | "comprador"
+        | "auditor"
+        | "financeira"
+        | "advogado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -966,6 +1358,9 @@ export const Constants = {
         "projeto",
         "outro",
         "comprador",
+        "auditor",
+        "financeira",
+        "advogado",
       ],
     },
   },
