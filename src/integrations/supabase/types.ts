@@ -88,6 +88,53 @@ export type Database = {
           },
         ]
       }
+      certificadora_subperfis: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          escopo: string | null
+          id: string
+          metodologia: string | null
+          nome_servico: string
+          portfolio_url: string | null
+          profile_id: string
+          tipo_auditoria: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          escopo?: string | null
+          id?: string
+          metodologia?: string | null
+          nome_servico: string
+          portfolio_url?: string | null
+          profile_id: string
+          tipo_auditoria?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          escopo?: string | null
+          id?: string
+          metodologia?: string | null
+          nome_servico?: string
+          portfolio_url?: string | null
+          profile_id?: string
+          tipo_auditoria?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificadora_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comprador_details: {
         Row: {
           ano_net_zero: number | null
@@ -148,6 +195,56 @@ export type Database = {
             foreignKeyName: "comprador_details_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comprador_subperfis: {
+        Row: {
+          ano_alvo: number | null
+          certificacao_exigida: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome_demanda: string
+          profile_id: string
+          setor_projeto: string | null
+          tipos_preferidos: string[] | null
+          updated_at: string
+          volume_creditos: number | null
+        }
+        Insert: {
+          ano_alvo?: number | null
+          certificacao_exigida?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome_demanda: string
+          profile_id: string
+          setor_projeto?: string | null
+          tipos_preferidos?: string[] | null
+          updated_at?: string
+          volume_creditos?: number | null
+        }
+        Update: {
+          ano_alvo?: number | null
+          certificacao_exigida?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome_demanda?: string
+          profile_id?: string
+          setor_projeto?: string | null
+          tipos_preferidos?: string[] | null
+          updated_at?: string
+          volume_creditos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comprador_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -255,6 +352,56 @@ export type Database = {
             foreignKeyName: "investidor_details_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investidor_subperfis: {
+        Row: {
+          certificacao_exigida: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          localizacao_preferencial: string[] | null
+          modalidade: string[] | null
+          nome_requisicao: string
+          profile_id: string
+          tipo_projeto: string | null
+          updated_at: string
+          volume_desejado: number | null
+        }
+        Insert: {
+          certificacao_exigida?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          localizacao_preferencial?: string[] | null
+          modalidade?: string[] | null
+          nome_requisicao: string
+          profile_id: string
+          tipo_projeto?: string | null
+          updated_at?: string
+          volume_desejado?: number | null
+        }
+        Update: {
+          certificacao_exigida?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          localizacao_preferencial?: string[] | null
+          modalidade?: string[] | null
+          nome_requisicao?: string
+          profile_id?: string
+          tipo_projeto?: string | null
+          updated_at?: string
+          volume_desejado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investidor_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -459,6 +606,71 @@ export type Database = {
           },
         ]
       }
+      projeto_subperfis: {
+        Row: {
+          car_url: string | null
+          created_at: string
+          descricao: string | null
+          emissoes_evitadas_ano: number | null
+          estado: string | null
+          geometria_url: string | null
+          id: string
+          investimento_total: number | null
+          municipio: string | null
+          nome_projeto: string
+          pdd_url: string | null
+          prazo_projeto: string | null
+          profile_id: string
+          status: string | null
+          tipo_projeto: string | null
+          updated_at: string
+        }
+        Insert: {
+          car_url?: string | null
+          created_at?: string
+          descricao?: string | null
+          emissoes_evitadas_ano?: number | null
+          estado?: string | null
+          geometria_url?: string | null
+          id?: string
+          investimento_total?: number | null
+          municipio?: string | null
+          nome_projeto: string
+          pdd_url?: string | null
+          prazo_projeto?: string | null
+          profile_id: string
+          status?: string | null
+          tipo_projeto?: string | null
+          updated_at?: string
+        }
+        Update: {
+          car_url?: string | null
+          created_at?: string
+          descricao?: string | null
+          emissoes_evitadas_ano?: number | null
+          estado?: string | null
+          geometria_url?: string | null
+          id?: string
+          investimento_total?: number | null
+          municipio?: string | null
+          nome_projeto?: string
+          pdd_url?: string | null
+          prazo_projeto?: string | null
+          profile_id?: string
+          status?: string | null
+          tipo_projeto?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projeto_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proprietario_details: {
         Row: {
           app_descricao: string | null
@@ -543,6 +755,59 @@ export type Database = {
             foreignKeyName: "proprietario_details_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proprietario_subperfis: {
+        Row: {
+          car_documento_url: string | null
+          car_numero: string | null
+          created_at: string
+          descricao: string | null
+          documento_fundiario_url: string | null
+          hectares: number | null
+          id: string
+          nome_area: string
+          profile_id: string
+          tipo_projeto_desejado: string[] | null
+          tipo_uso: string | null
+          updated_at: string
+        }
+        Insert: {
+          car_documento_url?: string | null
+          car_numero?: string | null
+          created_at?: string
+          descricao?: string | null
+          documento_fundiario_url?: string | null
+          hectares?: number | null
+          id?: string
+          nome_area: string
+          profile_id: string
+          tipo_projeto_desejado?: string[] | null
+          tipo_uso?: string | null
+          updated_at?: string
+        }
+        Update: {
+          car_documento_url?: string | null
+          car_numero?: string | null
+          created_at?: string
+          descricao?: string | null
+          documento_fundiario_url?: string | null
+          hectares?: number | null
+          id?: string
+          nome_area?: string
+          profile_id?: string
+          tipo_projeto_desejado?: string[] | null
+          tipo_uso?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proprietario_subperfis_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

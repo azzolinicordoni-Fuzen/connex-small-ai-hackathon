@@ -10,6 +10,7 @@ import Cadastro from "./pages/Cadastro";
 import Conexoes from "./pages/Conexoes";
 import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
+import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/conexoes" element={<Conexoes />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/perfil" element={<Perfil />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
