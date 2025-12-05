@@ -66,7 +66,6 @@ const signUpSchema = z.object({
 
 export default function Cadastro() {
   const [step, setStep] = useState(1);
-  const [formStep, setFormStep] = useState(1); // Sub-step within step 2
   const [showPassword, setShowPassword] = useState(false);
   const [selectedType, setSelectedType] = useState("");
   const [formData, setFormData] = useState({
@@ -131,23 +130,8 @@ export default function Cadastro() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFormStepNext = () => {
-    if (formStep < 4) {
-      setFormStep(formStep + 1);
-    } else {
-      handleFinalSubmit();
-    }
-  };
-
-  const handleFormStepBack = () => {
-    if (formStep > 1) {
-      setFormStep(formStep - 1);
-    } else {
-      setStep(1);
-    }
-  };
-
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setErrors({});
 
     const result = signUpSchema.safeParse(formData);
@@ -218,414 +202,6 @@ export default function Cadastro() {
     );
   }
 
-  const getStepTitle = () => {
-    if (step === 1) return "Qual é o seu perfil?";
-    return "Crie sua conta";
-  };
-
-  const getStepDescription = () => {
-    if (step === 1) return "Selecione o tipo de agente que melhor descreve você";
-    if (formStep === 1) return "Dados básicos e de acesso";
-    if (formStep === 2) return "Localização e área de atuação";
-    if (formStep === 3) return "Contato principal";
-    return "Redes sociais e contato comercial";
-  };
-
-  const renderFormStep1 = () => (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Badge variant="emerald">
-          {agentTypes.find(t => t.id === selectedType)?.label}
-        </Badge>
-        <button type="button" onClick={() => setStep(1)} className="text-sm text-primary hover:underline">
-          Alterar
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2 col-span-2">
-          <Label htmlFor="nomeCompleto">Nome Completo / Razão Social *</Label>
-          <Input
-            id="nomeCompleto"
-            value={formData.nomeCompleto}
-            onChange={(e) => handleChange("nomeCompleto", e.target.value)}
-            placeholder="Digite o nome completo ou razão social"
-            required
-          />
-        </div>
-
-        <div className="space-y-2 col-span-2 sm:col-span-1">
-          <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-          <Input
-            id="nomeFantasia"
-            value={formData.nomeFantasia}
-            onChange={(e) => handleChange("nomeFantasia", e.target.value)}
-            placeholder="Nome fantasia (opcional)"
-          />
-        </div>
-
-        <div className="space-y-2 col-span-2 sm:col-span-1">
-          <Label htmlFor="cpfCnpj">CPF / CNPJ *</Label>
-          <Input
-            id="cpfCnpj"
-            value={formData.cpfCnpj}
-            onChange={(e) => handleChange("cpfCnpj", e.target.value)}
-            placeholder="000.000.000-00"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Foto / Logo</Label>
-        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer">
-          <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
-          <p className="text-xs text-muted-foreground">Clique para upload</p>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="descricaoCurta">
-          Descrição Curta * <span className="text-muted-foreground text-xs">(até 300 caracteres)</span>
-        </Label>
-        <Textarea
-          id="descricaoCurta"
-          value={formData.descricaoCurta}
-          onChange={(e) => handleChange("descricaoCurta", e.target.value.slice(0, 300))}
-          placeholder="Breve descrição para listas e cards"
-          rows={2}
-          maxLength={300}
-        />
-        <p className="text-xs text-muted-foreground text-right">{formData.descricaoCurta.length}/300</p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="descricaoCompleta">Descrição Completa</Label>
-        <Textarea
-          id="descricaoCompleta"
-          value={formData.descricaoCompleta}
-          onChange={(e) => handleChange("descricaoCompleta", e.target.value)}
-          placeholder="Quem é, o que faz, foco de atuação, diferenciais..."
-          rows={3}
-        />
-      </div>
-
-      {showOutroField && (
-        <div className="space-y-2">
-          <Label htmlFor="outroTipoEspecificar">Especifique seu tipo de atuação *</Label>
-          <Input
-            id="outroTipoEspecificar"
-            value={formData.outroTipoEspecificar}
-            onChange={(e) => handleChange("outroTipoEspecificar", e.target.value)}
-            placeholder="Descreva seu tipo de atuação"
-          />
-        </div>
-      )}
-
-      <div className="border-t pt-4 mt-4">
-        <h4 className="font-medium text-sm mb-3">Dados de Acesso</h4>
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail *</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                className={cn("pl-9", errors.email && "border-destructive")}
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha *</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••"
-                  className={cn("pl-9 pr-9", errors.password && "border-destructive")}
-                  value={formData.password}
-                  onChange={(e) => handleChange("password", e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar *</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••"
-                  className={cn("pl-9", errors.confirmPassword && "border-destructive")}
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderFormStep2 = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2 col-span-2 sm:col-span-1">
-          <Label htmlFor="pais">País *</Label>
-          <Select value={formData.pais} onValueChange={(value) => handleChange("pais", value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              {PAISES.map((pais) => (
-                <SelectItem key={pais} value={pais}>{pais}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2 col-span-2 sm:col-span-1">
-          <Label htmlFor="estado">Estado *</Label>
-          {formData.pais === "Brasil" ? (
-            <Select value={formData.estado} onValueChange={(value) => handleChange("estado", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="UF" />
-              </SelectTrigger>
-              <SelectContent>
-                {ESTADOS_BRASIL.map((uf) => (
-                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <Input
-              value={formData.estado}
-              onChange={(e) => handleChange("estado", e.target.value)}
-              placeholder="Estado ou província"
-            />
-          )}
-        </div>
-
-        <div className="space-y-2 col-span-2">
-          <Label htmlFor="cidade">Cidade *</Label>
-          <Input
-            value={formData.cidade}
-            onChange={(e) => handleChange("cidade", e.target.value)}
-            placeholder="Nome da cidade"
-          />
-        </div>
-
-        <div className="space-y-2 col-span-2">
-          <Label htmlFor="enderecoCompleto">Endereço Completo</Label>
-          <Input
-            value={formData.enderecoCompleto}
-            onChange={(e) => handleChange("enderecoCompleto", e.target.value)}
-            placeholder="Rua, número, bairro, CEP (opcional)"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <Label>Área de Atuação</Label>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="atuacaoNacional"
-              checked={formData.atuacaoNacional}
-              onCheckedChange={(checked) => handleChange("atuacaoNacional", !!checked)}
-            />
-            <Label htmlFor="atuacaoNacional" className="font-normal cursor-pointer text-sm">
-              Atuação Nacional
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="atuacaoInternacional"
-              checked={formData.atuacaoInternacional}
-              onCheckedChange={(checked) => handleChange("atuacaoInternacional", !!checked)}
-            />
-            <Label htmlFor="atuacaoInternacional" className="font-normal cursor-pointer text-sm">
-              Atuação Internacional
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      {showLandOwnerFields && (
-        <div className="border-t pt-4 mt-4">
-          <h4 className="font-medium text-sm mb-3">Informações da Propriedade / Projeto</h4>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="areaTotal">Área Total (ha)</Label>
-              <Input
-                type="number"
-                value={formData.areaTotal}
-                onChange={(e) => handleChange("areaTotal", e.target.value)}
-                placeholder="Hectares"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tipoBioma">Tipo de Bioma</Label>
-              <Select value={formData.tipoBioma} onValueChange={(value) => handleChange("tipoBioma", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BIOMAS.map((bioma) => (
-                    <SelectItem key={bioma} value={bioma}>{bioma}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="linkMapa">Link Mapa / KML / GeoJSON</Label>
-              <Input
-                type="url"
-                value={formData.linkMapa}
-                onChange={(e) => handleChange("linkMapa", e.target.value)}
-                placeholder="https://... (opcional)"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderFormStep3 = () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="emailPrincipal">E-mail Principal *</Label>
-        <Input
-          type="email"
-          value={formData.emailPrincipal || formData.email}
-          onChange={(e) => handleChange("emailPrincipal", e.target.value)}
-          placeholder="email@exemplo.com"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="telefone">Telefone</Label>
-          <Input
-            type="tel"
-            value={formData.telefone}
-            onChange={(e) => handleChange("telefone", e.target.value)}
-            placeholder="(00) 0000-0000"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
-          <Input
-            type="tel"
-            value={formData.whatsapp}
-            onChange={(e) => handleChange("whatsapp", e.target.value)}
-            placeholder="(00) 00000-0000"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="site">Site</Label>
-        <Input
-          type="url"
-          value={formData.site}
-          onChange={(e) => handleChange("site", e.target.value)}
-          placeholder="https://www.seusite.com.br"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="linkedin">LinkedIn</Label>
-        <Input
-          type="url"
-          value={formData.linkedin}
-          onChange={(e) => handleChange("linkedin", e.target.value)}
-          placeholder="https://linkedin.com/in/seu-perfil"
-        />
-      </div>
-    </div>
-  );
-
-  const renderFormStep4 = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="instagram">Instagram</Label>
-          <Input
-            value={formData.instagram}
-            onChange={(e) => handleChange("instagram", e.target.value)}
-            placeholder="@seu_instagram"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="youtube">YouTube</Label>
-          <Input
-            type="url"
-            value={formData.youtube}
-            onChange={(e) => handleChange("youtube", e.target.value)}
-            placeholder="https://youtube.com/@canal"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="outrosCanais">Outros Canais</Label>
-        <Input
-          value={formData.outrosCanais}
-          onChange={(e) => handleChange("outrosCanais", e.target.value)}
-          placeholder="Twitter, TikTok, etc."
-        />
-      </div>
-
-      <div className="border-t pt-4 mt-4">
-        <h4 className="font-medium text-sm mb-3">Contato Comercial (opcional)</h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="contatoComercialNome">Nome</Label>
-            <Input
-              value={formData.contatoComercialNome}
-              onChange={(e) => handleChange("contatoComercialNome", e.target.value)}
-              placeholder="Nome do contato"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="contatoComercialFuncao">Função</Label>
-            <Input
-              value={formData.contatoComercialFuncao}
-              onChange={(e) => handleChange("contatoComercialFuncao", e.target.value)}
-              placeholder="Cargo ou função"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex" style={{ background: "var(--gradient-hero)" }}>
       {/* Left Side - Branding */}
@@ -669,7 +245,7 @@ export default function Cadastro() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-background rounded-l-3xl lg:rounded-l-[3rem] overflow-y-auto">
+      <div className="flex-1 flex items-start justify-center p-6 bg-background rounded-l-3xl lg:rounded-l-[3rem] overflow-y-auto">
         <div className="w-full max-w-lg py-8">
           {/* Mobile Logo */}
           <Link to="/" className="flex lg:hidden items-center gap-2 mb-8 justify-center">
@@ -679,39 +255,20 @@ export default function Cadastro() {
             <span className="font-display font-bold text-xl">AgroConnect</span>
           </Link>
 
-          {/* Progress */}
-          {step === 2 && (
-            <div className="flex items-center justify-center gap-1 mb-6">
-              {[1, 2, 3, 4].map((s) => (
-                <div key={s} className="flex items-center">
-                  <div
-                    className={cn(
-                      "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
-                      formStep >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {s}
-                  </div>
-                  {s < 4 && (
-                    <div className={cn("w-6 h-1 rounded-full transition-colors mx-0.5", formStep > s ? "bg-primary" : "bg-muted")} />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
           <Card className="border-0 shadow-none bg-transparent">
             <CardHeader className="text-center space-y-2 pb-4">
               <CardTitle className="font-display text-2xl">
-                {getStepTitle()}
+                {step === 1 ? "Qual é o seu perfil?" : "Crie sua conta"}
               </CardTitle>
               <CardDescription className="text-sm">
-                {getStepDescription()}
+                {step === 1 
+                  ? "Selecione o tipo de agente que melhor descreve você" 
+                  : "Preencha todos os dados para criar seu perfil completo"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {step === 1 && (
-                <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
                   {agentTypes.map((type) => (
                     <button
                       key={type.id}
@@ -751,22 +308,441 @@ export default function Cadastro() {
               )}
 
               {step === 2 && (
-                <div className="max-h-[55vh] overflow-y-auto pr-2">
-                  {formStep === 1 && renderFormStep1()}
-                  {formStep === 2 && renderFormStep2()}
-                  {formStep === 3 && renderFormStep3()}
-                  {formStep === 4 && renderFormStep4()}
+                <form onSubmit={handleFinalSubmit} className="space-y-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="emerald">
+                      {agentTypes.find(t => t.id === selectedType)?.label}
+                    </Badge>
+                    <button type="button" onClick={() => setStep(1)} className="text-sm text-primary hover:underline">
+                      Alterar
+                    </button>
+                  </div>
 
-                  <div className="flex gap-3 mt-6 sticky bottom-0 bg-background pt-2">
-                    <Button type="button" variant="outline" size="lg" onClick={handleFormStepBack} className="flex-1">
+                  {/* Dados Básicos */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Dados Básicos
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="nomeCompleto">Nome Completo / Razão Social *</Label>
+                      <Input
+                        id="nomeCompleto"
+                        value={formData.nomeCompleto}
+                        onChange={(e) => handleChange("nomeCompleto", e.target.value)}
+                        placeholder="Digite o nome completo ou razão social"
+                        className={errors.nomeCompleto ? "border-destructive" : ""}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                        <Input
+                          id="nomeFantasia"
+                          value={formData.nomeFantasia}
+                          onChange={(e) => handleChange("nomeFantasia", e.target.value)}
+                          placeholder="Opcional"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="cpfCnpj">CPF / CNPJ *</Label>
+                        <Input
+                          id="cpfCnpj"
+                          value={formData.cpfCnpj}
+                          onChange={(e) => handleChange("cpfCnpj", e.target.value)}
+                          placeholder="000.000.000-00"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Foto / Logo</Label>
+                      <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                        <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                        <p className="text-xs text-muted-foreground">Clique para upload (opcional)</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="descricaoCurta">
+                        Descrição Curta <span className="text-muted-foreground text-xs">(até 300 caracteres - para listas e cards)</span>
+                      </Label>
+                      <Textarea
+                        id="descricaoCurta"
+                        value={formData.descricaoCurta}
+                        onChange={(e) => handleChange("descricaoCurta", e.target.value.slice(0, 300))}
+                        placeholder="Breve descrição sobre você ou sua empresa"
+                        rows={2}
+                        maxLength={300}
+                      />
+                      <p className="text-xs text-muted-foreground text-right">{formData.descricaoCurta.length}/300</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="descricaoCompleta">Descrição Completa</Label>
+                      <Textarea
+                        id="descricaoCompleta"
+                        value={formData.descricaoCompleta}
+                        onChange={(e) => handleChange("descricaoCompleta", e.target.value)}
+                        placeholder="Quem é, o que faz, foco de atuação, diferenciais..."
+                        rows={3}
+                      />
+                    </div>
+
+                    {showOutroField && (
+                      <div className="space-y-2">
+                        <Label htmlFor="outroTipoEspecificar">Especifique seu tipo de atuação *</Label>
+                        <Input
+                          id="outroTipoEspecificar"
+                          value={formData.outroTipoEspecificar}
+                          onChange={(e) => handleChange("outroTipoEspecificar", e.target.value)}
+                          placeholder="Descreva seu tipo de atuação"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Localização */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Localização
+                    </h3>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="pais">País *</Label>
+                        <Select value={formData.pais} onValueChange={(value) => handleChange("pais", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="País" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PAISES.map((pais) => (
+                              <SelectItem key={pais} value={pais}>{pais}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="estado">Estado *</Label>
+                        {formData.pais === "Brasil" ? (
+                          <Select value={formData.estado} onValueChange={(value) => handleChange("estado", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="UF" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ESTADOS_BRASIL.map((uf) => (
+                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            value={formData.estado}
+                            onChange={(e) => handleChange("estado", e.target.value)}
+                            placeholder="Estado"
+                          />
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="cidade">Cidade *</Label>
+                        <Input
+                          value={formData.cidade}
+                          onChange={(e) => handleChange("cidade", e.target.value)}
+                          placeholder="Cidade"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="enderecoCompleto">Endereço Completo</Label>
+                      <Input
+                        value={formData.enderecoCompleto}
+                        onChange={(e) => handleChange("enderecoCompleto", e.target.value)}
+                        placeholder="Rua, número, bairro, CEP (opcional)"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Área de Atuação</Label>
+                      <div className="flex flex-wrap gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="atuacaoNacional"
+                            checked={formData.atuacaoNacional}
+                            onCheckedChange={(checked) => handleChange("atuacaoNacional", !!checked)}
+                          />
+                          <Label htmlFor="atuacaoNacional" className="font-normal cursor-pointer text-sm">
+                            Atuação Nacional
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="atuacaoInternacional"
+                            checked={formData.atuacaoInternacional}
+                            onCheckedChange={(checked) => handleChange("atuacaoInternacional", !!checked)}
+                          />
+                          <Label htmlFor="atuacaoInternacional" className="font-normal cursor-pointer text-sm">
+                            Atuação Internacional
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Campos para Proprietários e Projetos */}
+                  {showLandOwnerFields && (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                        Informações da Propriedade / Projeto
+                      </h3>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="areaTotal">Área Total (ha)</Label>
+                          <Input
+                            type="number"
+                            value={formData.areaTotal}
+                            onChange={(e) => handleChange("areaTotal", e.target.value)}
+                            placeholder="Hectares"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="tipoBioma">Tipo de Bioma</Label>
+                          <Select value={formData.tipoBioma} onValueChange={(value) => handleChange("tipoBioma", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BIOMAS.map((bioma) => (
+                                <SelectItem key={bioma} value={bioma}>{bioma}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="linkMapa">Link Mapa / KML / GeoJSON</Label>
+                        <Input
+                          type="url"
+                          value={formData.linkMapa}
+                          onChange={(e) => handleChange("linkMapa", e.target.value)}
+                          placeholder="https://... (opcional)"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contato */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Contato
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="emailPrincipal">E-mail Principal *</Label>
+                      <Input
+                        type="email"
+                        value={formData.emailPrincipal || formData.email}
+                        onChange={(e) => handleChange("emailPrincipal", e.target.value)}
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="telefone">Telefone</Label>
+                        <Input
+                          type="tel"
+                          value={formData.telefone}
+                          onChange={(e) => handleChange("telefone", e.target.value)}
+                          placeholder="(00) 0000-0000"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp">WhatsApp</Label>
+                        <Input
+                          type="tel"
+                          value={formData.whatsapp}
+                          onChange={(e) => handleChange("whatsapp", e.target.value)}
+                          placeholder="(00) 00000-0000"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="site">Site</Label>
+                        <Input
+                          type="url"
+                          value={formData.site}
+                          onChange={(e) => handleChange("site", e.target.value)}
+                          placeholder="https://www.seusite.com"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedin">LinkedIn</Label>
+                        <Input
+                          type="url"
+                          value={formData.linkedin}
+                          onChange={(e) => handleChange("linkedin", e.target.value)}
+                          placeholder="linkedin.com/in/perfil"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Redes Sociais */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Outros Canais
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="instagram">Instagram</Label>
+                        <Input
+                          value={formData.instagram}
+                          onChange={(e) => handleChange("instagram", e.target.value)}
+                          placeholder="@seu_instagram"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="youtube">YouTube</Label>
+                        <Input
+                          type="url"
+                          value={formData.youtube}
+                          onChange={(e) => handleChange("youtube", e.target.value)}
+                          placeholder="youtube.com/@canal"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="outrosCanais">Outros Canais</Label>
+                      <Input
+                        value={formData.outrosCanais}
+                        onChange={(e) => handleChange("outrosCanais", e.target.value)}
+                        placeholder="Twitter, TikTok, etc."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Contato Comercial */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Contato Comercial (opcional)
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="contatoComercialNome">Nome</Label>
+                        <Input
+                          value={formData.contatoComercialNome}
+                          onChange={(e) => handleChange("contatoComercialNome", e.target.value)}
+                          placeholder="Nome do contato"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contatoComercialFuncao">Função</Label>
+                        <Input
+                          value={formData.contatoComercialFuncao}
+                          onChange={(e) => handleChange("contatoComercialFuncao", e.target.value)}
+                          placeholder="Cargo ou função"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dados de Acesso */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide border-b pb-2">
+                      Dados de Acesso
+                    </h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="email">E-mail de Login *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="seu@email.com"
+                          className={cn("pl-9", errors.email && "border-destructive")}
+                          value={formData.email}
+                          onChange={(e) => handleChange("email", e.target.value)}
+                          required
+                        />
+                      </div>
+                      {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Senha *</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className={cn("pl-9 pr-9", errors.password && "border-destructive")}
+                            value={formData.password}
+                            onChange={(e) => handleChange("password", e.target.value)}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="confirmPassword"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className={cn("pl-9", errors.confirmPassword && "border-destructive")}
+                            value={formData.confirmPassword}
+                            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                            required
+                          />
+                        </div>
+                        {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)} className="flex-1">
                       <ArrowLeft className="w-4 h-4" /> Voltar
                     </Button>
-                    <Button type="button" size="lg" disabled={isLoading} onClick={handleFormStepNext} className="flex-1">
-                      {isLoading ? "Salvando..." : formStep < 4 ? "Continuar" : "Finalizar"}
+                    <Button type="submit" size="lg" disabled={isLoading} className="flex-1">
+                      {isLoading ? "Criando conta..." : "Criar Conta"}
                       {!isLoading && <ArrowRight className="w-4 h-4" />}
                     </Button>
                   </div>
-                </div>
+                </form>
               )}
 
               <p className="text-center text-sm text-muted-foreground mt-4">
