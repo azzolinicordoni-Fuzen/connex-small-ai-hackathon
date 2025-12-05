@@ -14,6 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      certificadora_details: {
+        Row: {
+          areas_atuacao: string[] | null
+          certificados_url: string[] | null
+          cnpj: string | null
+          created_at: string
+          id: string
+          metodologias_certificadas: string[] | null
+          numero_auditores: number | null
+          portfolio_url: string | null
+          profile_id: string
+          projetos_auditados_agricultura: number | null
+          projetos_auditados_energia: number | null
+          projetos_auditados_florestal: number | null
+          projetos_auditados_outros: number | null
+          selos_credenciamento: string[] | null
+          servico_auditoria_inicial: boolean | null
+          servico_auditoria_monitoramento: boolean | null
+          servico_revisao_inventario: boolean | null
+          servico_verificacao_baseline: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          areas_atuacao?: string[] | null
+          certificados_url?: string[] | null
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          metodologias_certificadas?: string[] | null
+          numero_auditores?: number | null
+          portfolio_url?: string | null
+          profile_id: string
+          projetos_auditados_agricultura?: number | null
+          projetos_auditados_energia?: number | null
+          projetos_auditados_florestal?: number | null
+          projetos_auditados_outros?: number | null
+          selos_credenciamento?: string[] | null
+          servico_auditoria_inicial?: boolean | null
+          servico_auditoria_monitoramento?: boolean | null
+          servico_revisao_inventario?: boolean | null
+          servico_verificacao_baseline?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          areas_atuacao?: string[] | null
+          certificados_url?: string[] | null
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          metodologias_certificadas?: string[] | null
+          numero_auditores?: number | null
+          portfolio_url?: string | null
+          profile_id?: string
+          projetos_auditados_agricultura?: number | null
+          projetos_auditados_energia?: number | null
+          projetos_auditados_florestal?: number | null
+          projetos_auditados_outros?: number | null
+          selos_credenciamento?: string[] | null
+          servico_auditoria_inicial?: boolean | null
+          servico_auditoria_monitoramento?: boolean | null
+          servico_revisao_inventario?: boolean | null
+          servico_verificacao_baseline?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificadora_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comprador_details: {
+        Row: {
+          ano_net_zero: number | null
+          cnpj: string | null
+          compromissos_publicos: string | null
+          created_at: string
+          criterios_sociais: string | null
+          exigencia_certificacao: string | null
+          id: string
+          numero_funcionarios: number | null
+          preferencia_energia: boolean | null
+          preferencia_florestal: boolean | null
+          preferencia_metano: boolean | null
+          preferencia_solo: boolean | null
+          profile_id: string
+          setor: string | null
+          updated_at: string
+          volume_anual_creditos: number | null
+        }
+        Insert: {
+          ano_net_zero?: number | null
+          cnpj?: string | null
+          compromissos_publicos?: string | null
+          created_at?: string
+          criterios_sociais?: string | null
+          exigencia_certificacao?: string | null
+          id?: string
+          numero_funcionarios?: number | null
+          preferencia_energia?: boolean | null
+          preferencia_florestal?: boolean | null
+          preferencia_metano?: boolean | null
+          preferencia_solo?: boolean | null
+          profile_id: string
+          setor?: string | null
+          updated_at?: string
+          volume_anual_creditos?: number | null
+        }
+        Update: {
+          ano_net_zero?: number | null
+          cnpj?: string | null
+          compromissos_publicos?: string | null
+          created_at?: string
+          criterios_sociais?: string | null
+          exigencia_certificacao?: string | null
+          id?: string
+          numero_funcionarios?: number | null
+          preferencia_energia?: boolean | null
+          preferencia_florestal?: boolean | null
+          preferencia_metano?: boolean | null
+          preferencia_solo?: boolean | null
+          profile_id?: string
+          setor?: string | null
+          updated_at?: string
+          volume_anual_creditos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comprador_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       connections: {
         Row: {
           addressee_id: string
@@ -51,6 +190,71 @@ export type Database = {
             foreignKeyName: "connections_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investidor_details: {
+        Row: {
+          busca_agricultura_regenerativa: boolean | null
+          busca_biodiversidade: boolean | null
+          busca_energia_renovavel: boolean | null
+          busca_floresta_nativa: boolean | null
+          cnpj: string | null
+          created_at: string
+          exigencia_certificadora: string | null
+          id: string
+          interesse_financeiro: string[] | null
+          localizacao_preferencial: string[] | null
+          profile_id: string
+          ticket_maximo: number | null
+          ticket_minimo: number | null
+          tipo_investidor: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          busca_agricultura_regenerativa?: boolean | null
+          busca_biodiversidade?: boolean | null
+          busca_energia_renovavel?: boolean | null
+          busca_floresta_nativa?: boolean | null
+          cnpj?: string | null
+          created_at?: string
+          exigencia_certificadora?: string | null
+          id?: string
+          interesse_financeiro?: string[] | null
+          localizacao_preferencial?: string[] | null
+          profile_id: string
+          ticket_maximo?: number | null
+          ticket_minimo?: number | null
+          tipo_investidor?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          busca_agricultura_regenerativa?: boolean | null
+          busca_biodiversidade?: boolean | null
+          busca_energia_renovavel?: boolean | null
+          busca_floresta_nativa?: boolean | null
+          cnpj?: string | null
+          created_at?: string
+          exigencia_certificadora?: string | null
+          id?: string
+          interesse_financeiro?: string[] | null
+          localizacao_preferencial?: string[] | null
+          profile_id?: string
+          ticket_maximo?: number | null
+          ticket_minimo?: number | null
+          tipo_investidor?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investidor_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -187,6 +391,163 @@ export type Database = {
         }
         Relationships: []
       }
+      projeto_details: {
+        Row: {
+          car_url: string | null
+          cnpj: string | null
+          created_at: string
+          emissoes_evitadas_ano: number | null
+          estado: string | null
+          geometria_url: string | null
+          id: string
+          investimento_total: number | null
+          municipio: string | null
+          nome_projeto: string | null
+          pdd_url: string | null
+          prazo_projeto: string | null
+          profile_id: string
+          responsavel: string | null
+          status: string | null
+          tipo_projeto: string | null
+          updated_at: string
+        }
+        Insert: {
+          car_url?: string | null
+          cnpj?: string | null
+          created_at?: string
+          emissoes_evitadas_ano?: number | null
+          estado?: string | null
+          geometria_url?: string | null
+          id?: string
+          investimento_total?: number | null
+          municipio?: string | null
+          nome_projeto?: string | null
+          pdd_url?: string | null
+          prazo_projeto?: string | null
+          profile_id: string
+          responsavel?: string | null
+          status?: string | null
+          tipo_projeto?: string | null
+          updated_at?: string
+        }
+        Update: {
+          car_url?: string | null
+          cnpj?: string | null
+          created_at?: string
+          emissoes_evitadas_ano?: number | null
+          estado?: string | null
+          geometria_url?: string | null
+          id?: string
+          investimento_total?: number | null
+          municipio?: string | null
+          nome_projeto?: string | null
+          pdd_url?: string | null
+          prazo_projeto?: string | null
+          profile_id?: string
+          responsavel?: string | null
+          status?: string | null
+          tipo_projeto?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projeto_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proprietario_details: {
+        Row: {
+          app_descricao: string | null
+          area_disponivel_ha: number | null
+          area_total_ha: number | null
+          areas_degradadas_percentual: number | null
+          car_documento_url: string | null
+          car_numero: string | null
+          cpf_cnpj: string | null
+          created_at: string
+          documento_fundiario_url: string | null
+          estado: string | null
+          id: string
+          interesses_atrair: string[] | null
+          municipio: string | null
+          nome_fazenda: string | null
+          phone: string | null
+          possui_app: boolean | null
+          possui_projeto_carbono: boolean | null
+          possui_reserva_legal: boolean | null
+          profile_id: string
+          reserva_legal_descricao: string | null
+          tipo_uso_atual: string | null
+          tipos_projeto_desejado: string[] | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          app_descricao?: string | null
+          area_disponivel_ha?: number | null
+          area_total_ha?: number | null
+          areas_degradadas_percentual?: number | null
+          car_documento_url?: string | null
+          car_numero?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          documento_fundiario_url?: string | null
+          estado?: string | null
+          id?: string
+          interesses_atrair?: string[] | null
+          municipio?: string | null
+          nome_fazenda?: string | null
+          phone?: string | null
+          possui_app?: boolean | null
+          possui_projeto_carbono?: boolean | null
+          possui_reserva_legal?: boolean | null
+          profile_id: string
+          reserva_legal_descricao?: string | null
+          tipo_uso_atual?: string | null
+          tipos_projeto_desejado?: string[] | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          app_descricao?: string | null
+          area_disponivel_ha?: number | null
+          area_total_ha?: number | null
+          areas_degradadas_percentual?: number | null
+          car_documento_url?: string | null
+          car_numero?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          documento_fundiario_url?: string | null
+          estado?: string | null
+          id?: string
+          interesses_atrair?: string[] | null
+          municipio?: string | null
+          nome_fazenda?: string | null
+          phone?: string | null
+          possui_app?: boolean | null
+          possui_projeto_carbono?: boolean | null
+          possui_reserva_legal?: boolean | null
+          profile_id?: string
+          reserva_legal_descricao?: string | null
+          tipo_uso_atual?: string | null
+          tipos_projeto_desejado?: string[] | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proprietario_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -203,6 +564,7 @@ export type Database = {
         | "investidor"
         | "projeto"
         | "outro"
+        | "comprador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -338,6 +700,7 @@ export const Constants = {
         "investidor",
         "projeto",
         "outro",
+        "comprador",
       ],
     },
   },
