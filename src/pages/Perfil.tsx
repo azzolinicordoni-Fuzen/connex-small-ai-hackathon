@@ -348,27 +348,26 @@ export default function Perfil() {
       </main>
 
       {/* Dialogs */}
-      {isSubperfilDialogOpen && (
-        <SubperfilDialog
-          key={editingSubperfil?.id || "new"}
-          open={isSubperfilDialogOpen}
-          onOpenChange={setIsSubperfilDialogOpen}
-          agentType={profile.agent_type}
-          profileId={profile.id}
-          editData={editingSubperfil}
-          onSaved={handleSubperfilSaved}
-        />
-      )}
+      <SubperfilDialog
+        key={editingSubperfil?.id || "new-subperfil"}
+        open={isSubperfilDialogOpen}
+        onOpenChange={(open) => {
+          setIsSubperfilDialogOpen(open);
+          if (!open) setEditingSubperfil(null);
+        }}
+        agentType={profile.agent_type}
+        profileId={profile.id}
+        editData={editingSubperfil}
+        onSaved={handleSubperfilSaved}
+      />
 
-      {isEditProfileOpen && (
-        <EditProfileDialog
-          key={profile.id}
-          open={isEditProfileOpen}
-          onOpenChange={setIsEditProfileOpen}
-          profile={profile}
-          onSaved={handleProfileUpdated}
-        />
-      )}
+      <EditProfileDialog
+        key={`edit-${profile.id}`}
+        open={isEditProfileOpen}
+        onOpenChange={setIsEditProfileOpen}
+        profile={profile}
+        onSaved={handleProfileUpdated}
+      />
     </div>
   );
 }
