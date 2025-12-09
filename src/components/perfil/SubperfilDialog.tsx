@@ -112,13 +112,18 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
     }
   };
 
-  const [formData, setFormData] = useState<any>(editData || getInitialData());
+  const [formData, setFormData] = useState<any>(() => editData || getInitialData());
 
   useEffect(() => {
     if (open) {
-      setFormData(editData || getInitialData());
+      if (editData) {
+        setFormData(editData);
+      } else {
+        setFormData(getInitialData());
+      }
     }
-  }, [open, editData, agentType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleArrayToggle = (field: string, value: string) => {
     const current = formData[field] || [];
