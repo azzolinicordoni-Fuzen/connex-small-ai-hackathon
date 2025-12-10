@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { 
   Leaf, 
   Home, 
@@ -13,12 +11,6 @@ import {
   MessageSquare, 
   Settings, 
   Bell,
-  TrendingUp,
-  Eye,
-  UserPlus,
-  Calendar,
-  ChevronRight,
-  Plus,
   LogOut,
   Menu,
   X,
@@ -32,31 +24,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useMessages } from "@/hooks/useMessages";
-
-const stats = [
-  { label: "Visualizações do Perfil", value: "0", change: "+0%", icon: Eye },
-  { label: "Conexões", value: "0", change: "+0%", icon: Users },
-  { label: "Solicitações Pendentes", value: "0", change: "+0", icon: UserPlus },
-  { label: "Projetos Ativos", value: "0", change: "0", icon: FolderOpen },
-];
-
-const upcomingEvents = [
-  {
-    title: "Webinar: Mercado de Carbono 2024",
-    date: "15 Jan",
-    time: "14:00",
-  },
-  {
-    title: "Reunião com Investidores",
-    date: "18 Jan",
-    time: "10:00",
-  },
-  {
-    title: "Visita técnica - Fazenda Verde",
-    date: "22 Jan",
-    time: "08:00",
-  },
-];
+import { useConnections } from "@/hooks/useConnections";
+import { useProjects } from "@/hooks/useProjects";
+import { usePosts } from "@/hooks/usePosts";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { DashboardProjects } from "@/components/dashboard/DashboardProjects";
+import { DashboardConnections } from "@/components/dashboard/DashboardConnections";
+import { DashboardActivity } from "@/components/dashboard/DashboardActivity";
+import { DashboardProfile } from "@/components/dashboard/DashboardProfile";
+import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
+import { toast } from "sonner";
 
 interface Profile {
   id: string;
@@ -65,6 +42,9 @@ interface Profile {
   bio: string | null;
   location: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
+  phone: string | null;
+  whatsapp: string | null;
 }
 
 const agentTypeLabels: Record<string, string> = {
@@ -74,6 +54,10 @@ const agentTypeLabels: Record<string, string> = {
   certificadora: "Certificadora",
   investidor: "Investidor",
   projeto: "Projeto",
+  comprador: "Comprador",
+  auditor: "Auditor",
+  financeira: "Financeira",
+  advogado: "Advogado",
   outro: "Outro",
 };
 
@@ -81,10 +65,15 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [projectsWithStages, setProjectsWithStages] = useState<any[]>([]);
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState(0);
   
   const { user, signOut, loading: authLoading } = useAuth();
   const { unreadCount } = useNotifications();
   const { totalUnreadCount: messagesUnreadCount } = useMessages();
+  const { connections, loading: connectionsLoading, acceptConnection, rejectConnection } = useConnections(profile?.id || '');
+  const { projects, loading: projectsLoading } = useProjects(profile?.id || '');
+  const { posts, loading: postsLoading } = usePosts();
   const navigate = useNavigate();
 
   const navItems = [
@@ -92,7 +81,7 @@ export default function Dashboard() {
     { icon: User, label: "Meu Perfil", href: "/perfil" },
     { icon: Newspaper, label: "Feed", href: "/feed" },
     { icon: Globe, label: "Rede de Contatos", href: "/conexoes" },
-    { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
+    { icon: Users, label: "Minhas Conexões", href: "/minhas-conexoes" },
     { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
     { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: messagesUnreadCount || undefined },
     { icon: Bell, label: "Notificações", href: "/notificacoes", badge: unreadCount || undefined },
@@ -126,9 +115,58 @@ export default function Dashboard() {
     }
   }, [user]);
 
+  // Fetch projects with stages when profile is loaded
+  useEffect(() => {
+    async function fetchProjectsWithStages() {
+      if (!profile?.id) return;
+
+      const { data: projectsData, error } = await supabase
+        .from("carbon_projects")
+        .select(`
+          *,
+          stages:project_stages(*)
+        `)
+        .eq("profile_id", profile.id)
+        .order("created_at", { ascending: false });
+
+      if (projectsData) {
+        setProjectsWithStages(projectsData);
+        
+        // Calculate upcoming deadlines
+        let deadlineCount = 0;
+        const today = new Date();
+        const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        projectsData.forEach((project: any) => {
+          project.stages?.forEach((stage: any) => {
+            if (stage.deadline && stage.status !== 'concluida') {
+              const deadline = new Date(stage.deadline);
+              if (deadline >= today && deadline <= weekFromNow) {
+                deadlineCount++;
+              }
+            }
+          });
+        });
+        setUpcomingDeadlines(deadlineCount);
+      }
+    }
+
+    fetchProjectsWithStages();
+  }, [profile?.id]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleAcceptConnection = async (connectionId: string) => {
+    await acceptConnection(connectionId);
+    toast.success("Conexão aceita!");
+  };
+
+  const handleRejectConnection = async (connectionId: string) => {
+    await rejectConnection(connectionId);
+    toast.success("Solicitação rejeitada");
   };
 
   if (authLoading || loading) {
@@ -141,17 +179,28 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  const profileCompletion = [
-    { label: "Adicionar foto de capa", done: !!profile?.avatar_url },
-    { label: "Verificar e-mail", done: true },
-    { label: "Adicionar certificações", done: false },
-    { label: "Completar bio", done: !!profile?.bio },
-    { label: "Adicionar localização", done: !!profile?.location },
-    { label: "Conectar WhatsApp", done: false },
-  ];
-  
-  const completedItems = profileCompletion.filter(item => item.done).length;
-  const completionPercent = Math.round((completedItems / profileCompletion.length) * 100);
+  // Calculate stats from real data
+  const activeConnections = connections.filter(c => c.status === 'accepted').length;
+  const pendingConnections = connections.filter(c => c.status === 'pending' && !c.isRequester).length;
+  const activeProjects = projectsWithStages.length;
+
+  // Transform connections for the component
+  const transformedConnections = connections.map(conn => ({
+    id: conn.id,
+    status: conn.status,
+    profile: conn.profile,
+    isRequester: conn.isRequester
+  }));
+
+  // Transform posts for the component
+  const transformedPosts = posts.map(post => ({
+    id: post.id,
+    content: post.content,
+    created_at: post.created_at,
+    likes_count: post.likes_count,
+    comments_count: post.comments_count,
+    author: post.author
+  }));
 
   return (
     <div className="min-h-screen bg-secondary/30 flex">
@@ -172,7 +221,7 @@ export default function Dashboard() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -241,165 +290,62 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="hidden sm:flex">
-              <Plus className="w-4 h-4" />
-              Novo Projeto
-            </Button>
             <NotificationDropdown />
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6">
+        <main className="flex-1 p-4 lg:p-6 space-y-6">
           {/* Welcome Message */}
-          <div className="mb-6">
+          <div>
             <h2 className="text-2xl font-display font-bold">
               Bem-vindo, {profile?.name?.split(" ")[0] || "Usuário"}!
             </h2>
-            <p className="text-muted-foreground">Aqui está um resumo da sua atividade</p>
+            <p className="text-muted-foreground">
+              Aqui está o resumo das suas atividades e o que precisa da sua atenção
+            </p>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {stats.map((stat) => (
-              <Card key={stat.label}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                      <p className="text-2xl font-bold">{stat.value}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <stat.icon className="w-5 h-5 text-primary" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="w-3 h-3 text-emerald-light" />
-                    <span className="text-xs text-emerald-light font-medium">{stat.change}</span>
-                    <span className="text-xs text-muted-foreground">vs. último mês</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {/* Stats - Resumo Rápido */}
+          <DashboardStats
+            profileViews={0}
+            activeConnections={activeConnections}
+            pendingConnections={pendingConnections}
+            activeProjects={activeProjects}
+            unreadNotifications={unreadCount}
+            unreadMessages={messagesUnreadCount}
+            upcomingDeadlines={upcomingDeadlines}
+          />
 
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Profile Completion */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Complete seu Perfil</CardTitle>
-                <CardDescription>
-                  Perfis completos recebem 3x mais visualizações
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{completionPercent}% completo</span>
-                    <span className="text-sm text-muted-foreground">
-                      Faltam {profileCompletion.length - completedItems} itens
-                    </span>
-                  </div>
-                  <Progress value={completionPercent} className="h-2" />
-                  
-                  <div className="grid sm:grid-cols-3 gap-3 pt-4">
-                    {profileCompletion.map((item) => (
-                      <div 
-                        key={item.label}
-                        className={cn(
-                          "flex items-center gap-2 p-3 rounded-lg text-sm",
-                          item.done ? "bg-primary/5 text-primary" : "bg-secondary text-muted-foreground"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-5 h-5 rounded-full flex items-center justify-center text-xs",
-                          item.done ? "bg-primary text-primary-foreground" : "bg-muted"
-                        )}>
-                          {item.done ? "✓" : ""}
-                        </div>
-                        <span className="truncate">{item.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Left Column - Projects */}
+            <div className="lg:col-span-2 space-y-6">
+              <DashboardProjects 
+                projects={projectsWithStages} 
+                loading={loading} 
+              />
+              
+              <DashboardActivity 
+                posts={transformedPosts} 
+                loading={postsLoading} 
+              />
+            </div>
 
-            {/* Upcoming Events */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Próximos Eventos</CardTitle>
-                  <Button variant="ghost" size="sm">
-                    Ver todos
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  {upcomingEvents.map((event) => (
-                    <div 
-                      key={event.title}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50"
-                    >
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-                        <Calendar className="w-4 h-4 text-primary mb-0.5" />
-                        <span className="text-[10px] font-medium text-primary">{event.date}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{event.title}</p>
-                        <p className="text-xs text-muted-foreground">{event.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="lg:col-span-2">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Comece Agora</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid sm:grid-cols-3 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                    <Link to="/conexoes">
-                      <Users className="w-6 h-6" />
-                      <span>Buscar Conexões</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                    <Link to="/feed">
-                      <MessageSquare className="w-6 h-6" />
-                      <span>Ver Feed</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                    <Link to="/meus-projetos">
-                      <FolderOpen className="w-6 h-6" />
-                      <span>Criar Projeto</span>
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Tips */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Dicas</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3 text-sm text-muted-foreground">
-                  <p>💡 Complete seu perfil para aumentar sua visibilidade</p>
-                  <p>🤝 Conecte-se com agentes do seu interesse</p>
-                  <p>📝 Publique atualizações no feed para engajar</p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Right Column - Profile, Connections, Actions */}
+            <div className="space-y-6">
+              <DashboardProfile profile={profile} />
+              
+              <DashboardConnections 
+                connections={transformedConnections}
+                pendingCount={pendingConnections}
+                loading={connectionsLoading}
+                onAccept={handleAcceptConnection}
+                onReject={handleRejectConnection}
+              />
+              
+              <DashboardQuickActions agentType={profile?.agent_type || 'outro'} />
+            </div>
           </div>
         </main>
       </div>
