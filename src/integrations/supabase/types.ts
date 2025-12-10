@@ -1443,6 +1443,7 @@ export type Database = {
       is_project_member: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       is_user_premium: { Args: never; Returns: boolean }
+      user_owns_profile: { Args: { p_profile_id: string }; Returns: boolean }
     }
     Enums: {
       agent_type:
