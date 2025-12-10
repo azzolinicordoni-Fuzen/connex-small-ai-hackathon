@@ -307,6 +307,141 @@ export function useProjectMessages(projectId: string | undefined) {
   return { messages, loading, sendMessage, refetch: fetchMessages };
 }
 
+// Hook for stage-specific comments (separate from project chat)
+export function useStageComments(stageId: string | undefined, projectId: string | undefined) {
+  const [comments, setComments] = useState<ProjectMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchComments = useCallback(async () => {
+    if (!stageId || !projectId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('project_messages')
+        .select(`
+          *,
+          sender:profiles!project_messages_sender_id_fkey(id, name, avatar_url, agent_type)
+        `)
+        .eq('project_id', projectId)
+        .eq('stage_id', stageId)
+        .eq('is_stage_comment', true)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setComments(data || []);
+    } catch (error: any) {
+      console.error('Error fetching stage comments:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [stageId, projectId]);
+
+  useEffect(() => {
+    fetchComments();
+
+    // Subscribe to realtime updates for this stage's comments
+    if (stageId && projectId) {
+      const channel = supabase
+        .channel(`stage-comments-${stageId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'project_messages',
+            filter: `stage_id=eq.${stageId}`,
+          },
+          () => {
+            fetchComments();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [stageId, projectId, fetchComments]);
+
+  const addComment = async (senderId: string, content: string) => {
+    if (!stageId || !projectId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('project_messages')
+        .insert({
+          project_id: projectId,
+          sender_id: senderId,
+          content,
+          stage_id: stageId,
+          is_stage_comment: true,
+        });
+
+      if (error) throw error;
+      toast.success('Comentário adicionado!');
+    } catch (error: any) {
+      console.error('Error adding comment:', error);
+      toast.error('Erro ao adicionar comentário');
+    }
+  };
+
+  return { comments, loading, addComment, refetch: fetchComments };
+}
+
+// Hook for fetching all stage members for a project (for timeline display)
+export function useProjectAllStageMembers(projectId: string | undefined) {
+  const [membersByStage, setMembersByStage] = useState<Record<string, ProjectStageMember[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  const fetchAllMembers = useCallback(async () => {
+    if (!projectId) return;
+    
+    try {
+      const { data: stages, error: stagesError } = await supabase
+        .from('project_stages')
+        .select('id')
+        .eq('project_id', projectId);
+
+      if (stagesError) throw stagesError;
+
+      const stageIds = stages?.map(s => s.id) || [];
+      
+      if (stageIds.length === 0) {
+        setMembersByStage({});
+        return;
+      }
+
+      const { data: members, error: membersError } = await supabase
+        .from('project_stage_members')
+        .select(`
+          *,
+          profile:profiles!project_stage_members_member_profile_id_fkey(id, name, avatar_url, agent_type)
+        `)
+        .in('stage_id', stageIds);
+
+      if (membersError) throw membersError;
+
+      const grouped: Record<string, ProjectStageMember[]> = {};
+      (members || []).forEach(member => {
+        if (!grouped[member.stage_id]) grouped[member.stage_id] = [];
+        grouped[member.stage_id].push(member);
+      });
+      
+      setMembersByStage(grouped);
+    } catch (error: any) {
+      console.error('Error fetching all stage members:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchAllMembers();
+  }, [fetchAllMembers]);
+
+  return { membersByStage, loading, refetch: fetchAllMembers };
+}
+
 // Hook for fetching online projects (for Conexoes page)
 export function useOnlineProjects() {
   const [projects, setProjects] = useState<(CarbonProject & { owner: { id: string; name: string; avatar_url: string | null; agent_type: string } })[]>([]);

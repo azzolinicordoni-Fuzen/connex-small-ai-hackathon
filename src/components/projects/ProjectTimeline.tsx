@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,12 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   FileText, Search, Hammer, Award, ClipboardCheck, DollarSign,
-  Calendar, Users, ChevronRight, Plus
+  Calendar, ChevronRight, User
 } from 'lucide-react';
-import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, ProjectStageType } from '@/types/project';
+import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, ProjectStageType, ProjectStageMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 import StageDetailDialog from './StageDetailDialog';
+import { useProjectAllStageMembers } from '@/hooks/useProjects';
 
 interface ProjectTimelineProps {
   stages: ProjectStage[];
@@ -36,8 +37,23 @@ const STAGE_ORDER: ProjectStageType[] = [
   'venda',
 ];
 
+const AGENT_TYPE_LABELS: Record<string, string> = {
+  proprietario: 'Proprietário',
+  engenheiro: 'Engenheiro',
+  desenvolvedor: 'Desenvolvedor',
+  certificadora: 'Certificadora',
+  investidor: 'Investidor',
+  projeto: 'Projeto',
+  comprador: 'Comprador',
+  auditor: 'Auditor',
+  financeira: 'Financeira',
+  advogado: 'Advogado',
+  outro: 'Outro',
+};
+
 export default function ProjectTimeline({ stages, onStageUpdate, projectId }: ProjectTimelineProps) {
   const [selectedStage, setSelectedStage] = useState<ProjectStage | null>(null);
+  const { membersByStage, refetch: refetchMembers } = useProjectAllStageMembers(projectId);
 
   const sortedStages = [...stages].sort((a, b) => 
     STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage)
@@ -66,6 +82,13 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
     return { text: new Date(deadline).toLocaleDateString('pt-BR'), color: 'outline' as const };
   };
 
+  // Refresh members when dialog closes
+  useEffect(() => {
+    if (!selectedStage) {
+      refetchMembers();
+    }
+  }, [selectedStage, refetchMembers]);
+
   return (
     <div className="space-y-6">
       {/* Overall Progress */}
@@ -91,6 +114,7 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
             const Icon = STAGE_ICONS[stage.stage];
             const statusConfig = STATUS_CONFIG[stage.status];
             const deadlineStatus = getDeadlineStatus(stage.deadline);
+            const stageMembers = membersByStage[stage.id] || [];
 
             return (
               <div key={stage.id} className="relative">
@@ -126,6 +150,38 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
                       </div>
                       <span className="font-medium text-sm">{config.label}</span>
                     </div>
+
+                    {/* Responsible Members - Shown at top of stage */}
+                    {stageMembers.length > 0 && (
+                      <div className="mb-3 p-2 bg-muted/50 rounded-md">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5">
+                          <User className="w-3 h-3" />
+                          <span>Realizado por:</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {stageMembers.slice(0, 2).map((member) => (
+                            <div 
+                              key={member.id}
+                              className="flex items-center gap-1.5 bg-background px-1.5 py-0.5 rounded text-xs"
+                              title={`${member.profile?.name} - ${AGENT_TYPE_LABELS[member.profile?.agent_type] || 'Membro'}`}
+                            >
+                              <Avatar className="w-4 h-4">
+                                <AvatarImage src={member.profile?.avatar_url || undefined} />
+                                <AvatarFallback className="text-[8px]">
+                                  {member.profile?.name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate max-w-[60px]">{member.profile?.name?.split(' ')[0]}</span>
+                            </div>
+                          ))}
+                          {stageMembers.length > 2 && (
+                            <span className="text-xs text-muted-foreground px-1">
+                              +{stageMembers.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Status Badge */}
                     <Badge 

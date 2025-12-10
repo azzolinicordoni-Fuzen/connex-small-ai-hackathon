@@ -16,12 +16,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
-  Calendar, Users, MessageSquare, Settings, X, Plus, Filter
+  Calendar, Users, MessageSquare, Settings, X, Plus, Filter, Send, User
 } from 'lucide-react';
 import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, StageStatus } from '@/types/project';
-import { useStageMembers } from '@/hooks/useProjects';
+import { useStageMembers, useStageComments } from '@/hooks/useProjects';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface StageDetailDialogProps {
   stage: ProjectStage;
@@ -52,16 +55,33 @@ export default function StageDetailDialog({
   onUpdate,
   projectId 
 }: StageDetailDialogProps) {
+  const { user } = useAuth();
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [status, setStatus] = useState<StageStatus>(stage.status);
   const [progress, setProgress] = useState(stage.progress_percentage);
   const [deadline, setDeadline] = useState(stage.deadline?.split('T')[0] || '');
   const [notes, setNotes] = useState(stage.notes || '');
   const [availableConnections, setAvailableConnections] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [newComment, setNewComment] = useState('');
   
   const { members, addMember, removeMember } = useStageMembers(stage.id);
+  const { comments, loading: commentsLoading, addComment } = useStageComments(stage.id, projectId);
   const config = STAGE_CONFIG[stage.stage];
 
+  // Fetch current user's profile id
+  useEffect(() => {
+    const fetchProfileId = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (data) setCurrentProfileId(data.id);
+    };
+    fetchProfileId();
+  }, [user]);
   // Group connections by agent_type
   const connectionsByType = useMemo(() => {
     const grouped: Record<string, any[]> = {};
@@ -143,7 +163,12 @@ export default function StageDetailDialog({
       return;
     }
     await addMember(profileId);
-    toast.success('Membro adicionado à etapa');
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !currentProfileId) return;
+    await addComment(currentProfileId, newComment.trim());
+    setNewComment('');
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -176,6 +201,35 @@ export default function StageDetailDialog({
           </DialogTitle>
         </DialogHeader>
 
+        {/* Responsible Members Header */}
+        {members.length > 0 && (
+          <div className="p-3 bg-muted/50 rounded-lg border mb-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <User className="w-4 h-4" />
+              <span>Sendo realizado por:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {members.map((member) => (
+                <div 
+                  key={member.id}
+                  className="flex items-center gap-2 bg-background px-2 py-1 rounded-md border"
+                >
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={member.profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs">
+                      {member.profile?.name?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{member.profile?.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {AGENT_TYPE_LABELS[member.profile?.agent_type] || 'Membro'}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details" className="gap-1">
@@ -184,11 +238,11 @@ export default function StageDetailDialog({
             </TabsTrigger>
             <TabsTrigger value="members" className="gap-1">
               <Users className="w-4 h-4" />
-              Membros
+              Membros ({members.length})
             </TabsTrigger>
             <TabsTrigger value="comments" className="gap-1">
               <MessageSquare className="w-4 h-4" />
-              Comentários
+              Comentários ({comments.length})
             </TabsTrigger>
           </TabsList>
 
@@ -391,10 +445,68 @@ export default function StageDetailDialog({
             </TabsContent>
 
             <TabsContent value="comments" className="space-y-4 mt-4">
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Comentários desta etapa aparecerão aqui.
-                Use o chat do projeto para comentários gerais.
-              </p>
+              {/* Comments Info */}
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  💡 Os comentários desta etapa são exclusivos e separados do chat geral do projeto.
+                  Use para observações técnicas, atualizações de status e registros de decisão.
+                </p>
+              </div>
+
+              {/* Comments List */}
+              <div className="space-y-3">
+                {commentsLoading ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Carregando...</p>
+                ) : comments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Nenhum comentário nesta etapa ainda.
+                  </p>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="p-3 border rounded-lg bg-muted/20">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="w-8 h-8 shrink-0">
+                          <AvatarImage src={comment.sender?.avatar_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {comment.sender?.name?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-sm">{comment.sender?.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(comment.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </span>
+                          </div>
+                          <p className="text-sm mt-1 whitespace-pre-wrap">{comment.content}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Add Comment */}
+              <div className="space-y-2 pt-2 border-t">
+                <Label>Adicionar Comentário</Label>
+                <div className="flex gap-2">
+                  <Textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Escreva um comentário sobre esta etapa..."
+                    rows={2}
+                    className="resize-none"
+                  />
+                </div>
+                <Button 
+                  onClick={handleAddComment} 
+                  disabled={!newComment.trim()}
+                  className="w-full"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar Comentário
+                </Button>
+              </div>
             </TabsContent>
           </ScrollArea>
         </Tabs>
