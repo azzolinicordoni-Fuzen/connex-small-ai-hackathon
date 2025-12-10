@@ -3,16 +3,15 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { 
   Search, 
   MapPin, 
-  UserPlus, 
-  MessageSquare,
   TreePine,
   HardHat,
   Briefcase,
@@ -21,18 +20,21 @@ import {
   FolderOpen,
   Users,
   Ruler,
-  Eye,
   Globe,
-  Lock,
   Building2,
   Scale,
   Banknote,
-  ClipboardCheck
+  ClipboardCheck,
+  Filter,
+  SlidersHorizontal,
+  Loader2
 } from "lucide-react";
-import { toast } from "sonner";
 import { useOnlineProjects } from "@/hooks/useProjects";
+import { useConnections, useDiscoverProfiles } from "@/hooks/useConnections";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { STAGE_CONFIG, ProjectStageType } from "@/types/project";
+import AgentCard from "@/components/conexoes/AgentCard";
 
 const agentTypeIcons: Record<string, any> = {
   proprietario: TreePine,
@@ -63,75 +65,15 @@ const agentTypeLabels: Record<string, string> = {
 };
 
 const filters = [
-  { id: "todos", label: "Todos" },
-  { id: "proprietario", label: "Proprietários" },
-  { id: "engenheiro", label: "Engenheiros" },
-  { id: "desenvolvedor", label: "Desenvolvedores" },
-  { id: "certificadora", label: "Certificadoras" },
-  { id: "investidor", label: "Investidores" },
-];
-
-const mockAgents = [
-  {
-    id: 1,
-    name: "João Silva",
-    type: "proprietario",
-    location: "Mato Grosso",
-    bio: "Proprietário de 5.000 hectares com interesse em projetos de carbono e reflorestamento.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-    connections: 234,
-    projects: 3,
-  },
-  {
-    id: 2,
-    name: "Maria Santos",
-    type: "engenheiro",
-    location: "São Paulo",
-    bio: "Engenheira florestal com 15 anos de experiência em projetos de restauração.",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
-    connections: 567,
-    projects: 12,
-  },
-  {
-    id: 3,
-    name: "Carlos Oliveira",
-    type: "desenvolvedor",
-    location: "Goiás",
-    bio: "Desenvolvedor de projetos de crédito de carbono com mais de 50 projetos implementados.",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
-    connections: 890,
-    projects: 52,
-  },
-  {
-    id: 4,
-    name: "Ana Costa",
-    type: "certificadora",
-    location: "Paraná",
-    bio: "Representante da Verra Brasil, especialista em certificação de projetos VCS.",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
-    connections: 1234,
-    projects: 89,
-  },
-  {
-    id: 5,
-    name: "Ricardo Lima",
-    type: "investidor",
-    location: "Rio de Janeiro",
-    bio: "Gestor de fundo de investimento focado em agricultura sustentável e créditos de carbono.",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
-    connections: 456,
-    projects: 8,
-  },
-  {
-    id: 6,
-    name: "Fernanda Alves",
-    type: "proprietario",
-    location: "Tocantins",
-    bio: "Proprietária de fazenda com área de reserva legal disponível para projetos ambientais.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
-    connections: 123,
-    projects: 1,
-  },
+  { id: "todos", label: "Todos", icon: Users },
+  { id: "proprietario", label: "Proprietários", icon: TreePine },
+  { id: "desenvolvedor", label: "Desenvolvedores", icon: Briefcase },
+  { id: "certificadora", label: "Certificadoras", icon: Award },
+  { id: "auditor", label: "Auditores", icon: ClipboardCheck },
+  { id: "investidor", label: "Investidores", icon: Landmark },
+  { id: "comprador", label: "Compradores", icon: Building2 },
+  { id: "financeira", label: "Financeiras", icon: Banknote },
+  { id: "advogado", label: "Advogados", icon: Scale },
 ];
 
 interface ProjectStageData {
@@ -143,11 +85,30 @@ interface ProjectStageData {
 }
 
 export default function Conexoes() {
+  const { user } = useAuth();
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("agentes");
   const [projectStages, setProjectStages] = useState<Record<string, ProjectStageData[]>>({});
+  const [loadingConnection, setLoadingConnection] = useState<string | null>(null);
 
+  // Get current user's profile id
+  useEffect(() => {
+    const fetchProfileId = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (data) setCurrentProfileId(data.id);
+    };
+    fetchProfileId();
+  }, [user]);
+
+  const { profiles, loading: profilesLoading } = useDiscoverProfiles(currentProfileId || undefined);
+  const { connections, getConnectionStatus, sendConnectionRequest } = useConnections(currentProfileId || undefined);
   const { projects: onlineProjects, loading: projectsLoading } = useOnlineProjects();
 
   // Fetch stages for online projects
@@ -167,7 +128,6 @@ export default function Conexoes() {
         return;
       }
 
-      // Group stages by project
       const stagesByProject: Record<string, ProjectStageData[]> = {};
       (data || []).forEach((stage: any) => {
         if (!stagesByProject[stage.project_id]) {
@@ -182,12 +142,12 @@ export default function Conexoes() {
     fetchProjectStages();
   }, [onlineProjects]);
 
-  const filteredAgents = mockAgents.filter((agent) => {
-    const matchesFilter = activeFilter === "todos" || agent.type === activeFilter;
+  const filteredProfiles = profiles.filter((profile) => {
+    const matchesFilter = activeFilter === "todos" || profile.agent_type === activeFilter;
     const matchesSearch = 
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.bio.toLowerCase().includes(searchQuery.toLowerCase());
+      profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (profile.location || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (profile.bio || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -199,8 +159,10 @@ export default function Conexoes() {
     return matchesSearch;
   });
 
-  const handleConnect = (name: string) => {
-    toast.success(`Solicitação de conexão enviada para ${name}`);
+  const handleConnect = async (profileId: string) => {
+    setLoadingConnection(profileId);
+    await sendConnectionRequest(profileId);
+    setLoadingConnection(null);
   };
 
   const getVisibleStages = (projectId: string) => {
@@ -213,6 +175,12 @@ export default function Conexoes() {
     if (stages.length === 0) return 0;
     return Math.round(stages.reduce((sum, s) => sum + (s.progress_percentage || 0), 0) / stages.length);
   };
+
+  // Count profiles by type for filter badges
+  const profileCounts = profiles.reduce((acc, p) => {
+    acc[p.agent_type] = (acc[p.agent_type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="min-h-screen bg-background">
@@ -232,16 +200,19 @@ export default function Conexoes() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList>
-              <TabsTrigger value="agentes" className="gap-2">
+            <TabsList className="bg-muted/50">
+              <TabsTrigger value="agentes" className="gap-2 data-[state=active]:bg-background">
                 <Users className="w-4 h-4" />
                 Agentes
+                <Badge variant="secondary" className="ml-1 bg-primary/10 text-primary">
+                  {profiles.length}
+                </Badge>
               </TabsTrigger>
-              <TabsTrigger value="projetos" className="gap-2">
+              <TabsTrigger value="projetos" className="gap-2 data-[state=active]:bg-background">
                 <FolderOpen className="w-4 h-4" />
                 Projetos em Andamento
                 {onlineProjects.length > 0 && (
-                  <Badge variant="secondary" className="ml-1">
+                  <Badge variant="secondary" className="ml-1 bg-green-100 text-green-700">
                     {onlineProjects.length}
                   </Badge>
                 )}
@@ -249,97 +220,82 @@ export default function Conexoes() {
             </TabsList>
 
             {/* Search and Filters */}
-            <div className="flex flex-col lg:flex-row gap-4 mt-6 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder={activeTab === "agentes" 
-                    ? "Buscar por nome, localização ou área de atuação..."
-                    : "Buscar projetos por nome, localização..."
-                  }
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              {activeTab === "agentes" && (
-                <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
-                  {filters.map((filter) => (
-                    <Button
-                      key={filter.id}
-                      variant={activeFilter === filter.id ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setActiveFilter(filter.id)}
-                      className="whitespace-nowrap"
-                    >
-                      {filter.label}
-                    </Button>
-                  ))}
+            <div className="flex flex-col gap-4 mt-6 mb-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    placeholder={activeTab === "agentes" 
+                      ? "Buscar por nome, localização ou área de atuação..."
+                      : "Buscar projetos por nome, localização..."
+                    }
+                    className="pl-10 h-11"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
+              </div>
+
+              {/* Agent Type Filters - Horizontal Scroll */}
+              {activeTab === "agentes" && (
+                <ScrollArea className="w-full whitespace-nowrap">
+                  <div className="flex gap-2 pb-2">
+                    {filters.map((filter) => {
+                      const count = filter.id === 'todos' 
+                        ? profiles.length 
+                        : (profileCounts[filter.id] || 0);
+                      const FilterIcon = filter.icon;
+                      
+                      return (
+                        <Button
+                          key={filter.id}
+                          variant={activeFilter === filter.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setActiveFilter(filter.id)}
+                          className="shrink-0 gap-2"
+                        >
+                          <FilterIcon className="w-4 h-4" />
+                          {filter.label}
+                          <Badge 
+                            variant={activeFilter === filter.id ? "secondary" : "outline"}
+                            className="ml-0.5 text-xs"
+                          >
+                            {count}
+                          </Badge>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               )}
             </div>
 
             {/* Agents Tab */}
             <TabsContent value="agentes">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAgents.map((agent) => {
-                  const TypeIcon = agentTypeIcons[agent.type];
-                  return (
-                    <Card key={agent.id} className="group hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4 mb-4">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={agent.avatar} alt={agent.name} />
-                            <AvatarFallback>{agent.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground truncate">{agent.name}</h3>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <MapPin className="w-3 h-3" />
-                              {agent.location}
-                            </div>
-                          </div>
-                          <Badge variant="secondary" className="flex items-center gap-1">
-                            <TypeIcon className="w-3 h-3" />
-                            {agentTypeLabels[agent.type]}
-                          </Badge>
-                        </div>
-
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {agent.bio}
-                        </p>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                          <span>{agent.connections} conexões</span>
-                          <span>{agent.projects} projetos</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button 
-                            className="flex-1" 
-                            size="sm"
-                            onClick={() => handleConnect(agent.name)}
-                          >
-                            <UserPlus className="w-4 h-4" />
-                            Conectar
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <MessageSquare className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              {filteredAgents.length === 0 && (
+              {profilesLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : filteredProfiles.length === 0 ? (
                 <div className="text-center py-16">
                   <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-semibold text-lg mb-2">Nenhum agente encontrado</h3>
                   <p className="text-muted-foreground">
                     Tente ajustar seus filtros ou termos de busca
                   </p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProfiles.map((profile) => (
+                    <AgentCard
+                      key={profile.id}
+                      profile={profile}
+                      connectionStatus={getConnectionStatus(profile.id)}
+                      onConnect={handleConnect}
+                      isLoading={loadingConnection === profile.id}
+                    />
+                  ))}
                 </div>
               )}
             </TabsContent>
@@ -348,7 +304,7 @@ export default function Conexoes() {
             <TabsContent value="projetos">
               {projectsLoading ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : filteredProjects.length === 0 ? (
                 <div className="text-center py-16">
@@ -366,8 +322,8 @@ export default function Conexoes() {
                     const TypeIcon = agentTypeIcons[project.owner?.agent_type || 'outro'];
 
                     return (
-                      <Card key={project.id} className="group hover:shadow-lg transition-shadow">
-                        <CardContent className="p-6">
+                      <Card key={project.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <CardContent className="p-5">
                           {/* Project Header */}
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
@@ -376,7 +332,7 @@ export default function Conexoes() {
                                 <Globe className="w-4 h-4 text-green-500 shrink-0" />
                               </div>
                               {project.project_type && (
-                                <Badge variant="outline" className="mt-1">{project.project_type}</Badge>
+                                <Badge variant="outline" className="mt-1.5 text-xs">{project.project_type}</Badge>
                               )}
                             </div>
                           </div>
@@ -441,27 +397,12 @@ export default function Conexoes() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{project.owner?.name || 'Anônimo'}</p>
+                              <p className="text-sm font-medium truncate">{project.owner?.name}</p>
                             </div>
-                            <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs gap-1">
                               <TypeIcon className="w-3 h-3" />
                               {agentTypeLabels[project.owner?.agent_type || 'outro']}
                             </Badge>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex gap-2 mt-4">
-                            <Button className="flex-1" size="sm">
-                              <Eye className="w-4 h-4 mr-1" />
-                              Ver Projeto
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => project.owner?.name && handleConnect(project.owner.name)}
-                            >
-                              <UserPlus className="w-4 h-4" />
-                            </Button>
                           </div>
                         </CardContent>
                       </Card>
