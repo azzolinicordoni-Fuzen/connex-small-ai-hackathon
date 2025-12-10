@@ -31,6 +31,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useMessages } from "@/hooks/useMessages";
 
 const stats = [
   { label: "Visualizações do Perfil", value: "0", change: "+0%", icon: Eye },
@@ -83,6 +84,7 @@ export default function Dashboard() {
   
   const { user, signOut, loading: authLoading } = useAuth();
   const { unreadCount } = useNotifications();
+  const { totalUnreadCount: messagesUnreadCount } = useMessages();
   const navigate = useNavigate();
 
   const navItems = [
@@ -92,7 +94,7 @@ export default function Dashboard() {
     { icon: Globe, label: "Rede de Contatos", href: "/conexoes" },
     { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
     { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
-    { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
+    { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: messagesUnreadCount || undefined },
     { icon: Bell, label: "Notificações", href: "/notificacoes", badge: unreadCount || undefined },
     { icon: Settings, label: "Configurações", href: "/configuracoes" },
   ];
