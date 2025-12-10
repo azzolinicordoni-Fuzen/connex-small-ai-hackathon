@@ -127,7 +127,7 @@ export function NewConversationDialog({
     const conversationId = await onCreateConversation(
       selectedConnection.id,
       contextCategory,
-      selectedProject || undefined
+      selectedProject && selectedProject !== 'none' ? selectedProject : undefined
     );
     
     setCreating(false);
@@ -233,7 +233,7 @@ export function NewConversationDialog({
                   <SelectValue placeholder="Selecione um projeto" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
+                  <SelectItem value="none">Nenhum</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
