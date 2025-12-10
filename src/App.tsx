@@ -12,6 +12,7 @@ import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
+import MeusProjetos from "./pages/MeusProjetos";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/feed" element={<Feed />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<Perfil />} />
+            <Route path="/meus-projetos" element={<MeusProjetos />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
