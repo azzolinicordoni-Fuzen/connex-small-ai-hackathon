@@ -3,12 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
-  MapPin, Ruler, Calendar, MoreVertical, Trash2, Edit, Eye
+  MapPin, Ruler, Calendar, MoreVertical, Trash2, Eye, Settings, Globe, Lock
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CarbonProject, ProjectStage, STAGE_CONFIG } from '@/types/project';
@@ -20,9 +21,10 @@ interface ProjectCardProps {
   stages: ProjectStage[];
   onSelect: () => void;
   onDelete: () => void;
+  onEditVisibility?: () => void;
 }
 
-export default function ProjectCard({ project, stages, onSelect, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ project, stages, onSelect, onDelete, onEditVisibility }: ProjectCardProps) {
   const completedStages = stages.filter(s => s.status === 'concluida').length;
   const overallProgress = stages.length > 0
     ? Math.round(stages.reduce((sum, s) => sum + s.progress_percentage, 0) / stages.length)
@@ -31,15 +33,35 @@ export default function ProjectCard({ project, stages, onSelect, onDelete }: Pro
   const currentStage = stages.find(s => s.status === 'em_andamento') 
     || stages.find(s => s.status === 'pendente');
 
+  const visibleStagesCount = stages.filter(s => s.is_visible).length;
+
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1" onClick={onSelect}>
-            <CardTitle className="text-lg line-clamp-1">{project.name}</CardTitle>
-            {project.project_type && (
-              <Badge variant="outline" className="mt-1">{project.project_type}</Badge>
-            )}
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg line-clamp-1">{project.name}</CardTitle>
+              {project.is_online ? (
+                <span title="Projeto online">
+                  <Globe className="w-4 h-4 text-green-500" />
+                </span>
+              ) : (
+                <span title="Projeto privado">
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              {project.project_type && (
+                <Badge variant="outline">{project.project_type}</Badge>
+              )}
+              {project.is_online && (
+                <Badge variant="secondary" className="text-xs">
+                  {project.visibility_mode === 'public' ? 'Completo' : `${visibleStagesCount} etapas`}
+                </Badge>
+              )}
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -52,6 +74,13 @@ export default function ProjectCard({ project, stages, onSelect, onDelete }: Pro
                 <Eye className="w-4 h-4 mr-2" />
                 Ver Detalhes
               </DropdownMenuItem>
+              {onEditVisibility && (
+                <DropdownMenuItem onClick={onEditVisibility}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Editar Processo
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Excluir

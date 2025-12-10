@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -16,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CarbonProject } from '@/types/project';
+import { Globe, Lock, Info } from 'lucide-react';
+import { CarbonProject, VisibilityMode } from '@/types/project';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -43,6 +46,8 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
     location: '',
     area_hectares: '',
     project_type: '',
+    is_online: false,
+    visibility_mode: 'private' as VisibilityMode,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,10 +61,20 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
       location: formData.location || null,
       area_hectares: formData.area_hectares ? Number(formData.area_hectares) : null,
       project_type: formData.project_type || null,
+      is_online: formData.is_online,
+      visibility_mode: formData.visibility_mode,
     });
 
     if (result) {
-      setFormData({ name: '', description: '', location: '', area_hectares: '', project_type: '' });
+      setFormData({ 
+        name: '', 
+        description: '', 
+        location: '', 
+        area_hectares: '', 
+        project_type: '',
+        is_online: false,
+        visibility_mode: 'private',
+      });
       onOpenChange(false);
     }
     setLoading(false);
@@ -135,6 +150,49 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <Separator />
+
+          {/* Visibility Settings */}
+          <div className="space-y-4">
+            <Label className="text-base font-semibold">Visibilidade do Projeto</Label>
+            
+            <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors">
+              <Checkbox
+                id="is_online"
+                checked={formData.is_online}
+                onCheckedChange={(checked) => setFormData({ 
+                  ...formData, 
+                  is_online: checked as boolean,
+                  visibility_mode: checked ? 'public' : 'private',
+                })}
+              />
+              <div className="flex-1">
+                <Label htmlFor="is_online" className="flex items-center gap-2 cursor-pointer font-medium">
+                  {formData.is_online ? (
+                    <Globe className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                  )}
+                  Disponibilizar projeto online
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.is_online 
+                    ? 'O projeto aparecerá na aba "Conexões → Projetos em andamento"'
+                    : 'O projeto será privado e não aparecerá para conexões'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Você pode alterar a visibilidade e selecionar quais etapas ficam visíveis depois de criar o projeto, clicando em "Editar Processo".
+              </p>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { 
   Search, 
-  Filter, 
   MapPin, 
   UserPlus, 
   MessageSquare,
@@ -18,10 +19,20 @@ import {
   Award,
   Landmark,
   FolderOpen,
-  Users
+  Users,
+  Ruler,
+  Eye,
+  Globe,
+  Lock,
+  Building2,
+  Scale,
+  Banknote,
+  ClipboardCheck
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useOnlineProjects } from "@/hooks/useProjects";
+import { supabase } from "@/integrations/supabase/client";
+import { STAGE_CONFIG, ProjectStageType } from "@/types/project";
 
 const agentTypeIcons: Record<string, any> = {
   proprietario: TreePine,
@@ -30,6 +41,10 @@ const agentTypeIcons: Record<string, any> = {
   certificadora: Award,
   investidor: Landmark,
   projeto: FolderOpen,
+  comprador: Building2,
+  auditor: ClipboardCheck,
+  financeira: Banknote,
+  advogado: Scale,
   outro: Users,
 };
 
@@ -40,6 +55,10 @@ const agentTypeLabels: Record<string, string> = {
   certificadora: "Certificadora",
   investidor: "Investidor",
   projeto: "Projeto",
+  comprador: "Comprador",
+  auditor: "Auditor",
+  financeira: "Financeira",
+  advogado: "Advogado",
   outro: "Outro",
 };
 
@@ -115,9 +134,53 @@ const mockAgents = [
   },
 ];
 
+interface ProjectStageData {
+  id: string;
+  stage: string;
+  status: string;
+  is_visible: boolean;
+  progress_percentage: number;
+}
+
 export default function Conexoes() {
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("agentes");
+  const [projectStages, setProjectStages] = useState<Record<string, ProjectStageData[]>>({});
+
+  const { projects: onlineProjects, loading: projectsLoading } = useOnlineProjects();
+
+  // Fetch stages for online projects
+  useEffect(() => {
+    const fetchProjectStages = async () => {
+      if (onlineProjects.length === 0) return;
+
+      const projectIds = onlineProjects.map(p => p.id);
+      
+      const { data, error } = await supabase
+        .from('project_stages')
+        .select('id, project_id, stage, status, is_visible, progress_percentage')
+        .in('project_id', projectIds);
+
+      if (error) {
+        console.error('Error fetching project stages:', error);
+        return;
+      }
+
+      // Group stages by project
+      const stagesByProject: Record<string, ProjectStageData[]> = {};
+      (data || []).forEach((stage: any) => {
+        if (!stagesByProject[stage.project_id]) {
+          stagesByProject[stage.project_id] = [];
+        }
+        stagesByProject[stage.project_id].push(stage);
+      });
+
+      setProjectStages(stagesByProject);
+    };
+
+    fetchProjectStages();
+  }, [onlineProjects]);
 
   const filteredAgents = mockAgents.filter((agent) => {
     const matchesFilter = activeFilter === "todos" || agent.type === activeFilter;
@@ -128,8 +191,27 @@ export default function Conexoes() {
     return matchesFilter && matchesSearch;
   });
 
+  const filteredProjects = onlineProjects.filter((project) => {
+    const matchesSearch = 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.location || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
   const handleConnect = (name: string) => {
     toast.success(`Solicitação de conexão enviada para ${name}`);
+  };
+
+  const getVisibleStages = (projectId: string) => {
+    const stages = projectStages[projectId] || [];
+    return stages.filter(s => s.is_visible);
+  };
+
+  const getProjectProgress = (projectId: string) => {
+    const stages = projectStages[projectId] || [];
+    if (stages.length === 0) return 0;
+    return Math.round(stages.reduce((sum, s) => sum + (s.progress_percentage || 0), 0) / stages.length);
   };
 
   return (
@@ -148,94 +230,247 @@ export default function Conexoes() {
             </p>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, localização ou área de atuação..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
-              {filters.map((filter) => (
-                <Button
-                  key={filter.id}
-                  variant={activeFilter === filter.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveFilter(filter.id)}
-                  className="whitespace-nowrap"
-                >
-                  {filter.label}
-                </Button>
-              ))}
-            </div>
-          </div>
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList>
+              <TabsTrigger value="agentes" className="gap-2">
+                <Users className="w-4 h-4" />
+                Agentes
+              </TabsTrigger>
+              <TabsTrigger value="projetos" className="gap-2">
+                <FolderOpen className="w-4 h-4" />
+                Projetos em Andamento
+                {onlineProjects.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {onlineProjects.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Results Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAgents.map((agent) => {
-              const TypeIcon = agentTypeIcons[agent.type];
-              return (
-                <Card key={agent.id} hover className="group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
-                      <Avatar size="lg">
-                        <AvatarImage src={agent.avatar} alt={agent.name} />
-                        <AvatarFallback>{agent.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground truncate">{agent.name}</h3>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="w-3 h-3" />
-                          {agent.location}
+            {/* Search and Filters */}
+            <div className="flex flex-col lg:flex-row gap-4 mt-6 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder={activeTab === "agentes" 
+                    ? "Buscar por nome, localização ou área de atuação..."
+                    : "Buscar projetos por nome, localização..."
+                  }
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              {activeTab === "agentes" && (
+                <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
+                  {filters.map((filter) => (
+                    <Button
+                      key={filter.id}
+                      variant={activeFilter === filter.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActiveFilter(filter.id)}
+                      className="whitespace-nowrap"
+                    >
+                      {filter.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Agents Tab */}
+            <TabsContent value="agentes">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredAgents.map((agent) => {
+                  const TypeIcon = agentTypeIcons[agent.type];
+                  return (
+                    <Card key={agent.id} className="group hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4 mb-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={agent.avatar} alt={agent.name} />
+                            <AvatarFallback>{agent.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-foreground truncate">{agent.name}</h3>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <MapPin className="w-3 h-3" />
+                              {agent.location}
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <TypeIcon className="w-3 h-3" />
+                            {agentTypeLabels[agent.type]}
+                          </Badge>
                         </div>
-                      </div>
-                      <Badge variant="emerald" className="flex items-center gap-1">
-                        <TypeIcon className="w-3 h-3" />
-                        {agentTypeLabels[agent.type]}
-                      </Badge>
-                    </div>
 
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {agent.bio}
-                    </p>
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {agent.bio}
+                        </p>
 
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                      <span>{agent.connections} conexões</span>
-                      <span>{agent.projects} projetos</span>
-                    </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                          <span>{agent.connections} conexões</span>
+                          <span>{agent.projects} projetos</span>
+                        </div>
 
-                    <div className="flex gap-2">
-                      <Button 
-                        className="flex-1" 
-                        size="sm"
-                        onClick={() => handleConnect(agent.name)}
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        Conectar
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <MessageSquare className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1" 
+                            size="sm"
+                            onClick={() => handleConnect(agent.name)}
+                          >
+                            <UserPlus className="w-4 h-4" />
+                            Conectar
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <MessageSquare className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
 
-          {filteredAgents.length === 0 && (
-            <div className="text-center py-16">
-              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Nenhum agente encontrado</h3>
-              <p className="text-muted-foreground">
-                Tente ajustar seus filtros ou termos de busca
-              </p>
-            </div>
-          )}
+              {filteredAgents.length === 0 && (
+                <div className="text-center py-16">
+                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">Nenhum agente encontrado</h3>
+                  <p className="text-muted-foreground">
+                    Tente ajustar seus filtros ou termos de busca
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Projects Tab */}
+            <TabsContent value="projetos">
+              {projectsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+              ) : filteredProjects.length === 0 ? (
+                <div className="text-center py-16">
+                  <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">Nenhum projeto disponível</h3>
+                  <p className="text-muted-foreground">
+                    Não há projetos compartilhados publicamente no momento
+                  </p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProjects.map((project) => {
+                    const visibleStages = getVisibleStages(project.id);
+                    const progress = getProjectProgress(project.id);
+                    const TypeIcon = agentTypeIcons[project.owner?.agent_type || 'outro'];
+
+                    return (
+                      <Card key={project.id} className="group hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                          {/* Project Header */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-foreground line-clamp-1">{project.name}</h3>
+                                <Globe className="w-4 h-4 text-green-500 shrink-0" />
+                              </div>
+                              {project.project_type && (
+                                <Badge variant="outline" className="mt-1">{project.project_type}</Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          {project.description && (
+                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                              {project.description}
+                            </p>
+                          )}
+
+                          {/* Project Info */}
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4">
+                            {project.location && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {project.location}
+                              </span>
+                            )}
+                            {project.area_hectares && (
+                              <span className="flex items-center gap-1">
+                                <Ruler className="w-3 h-3" />
+                                {project.area_hectares} ha
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Progress */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Progresso</span>
+                              <span className="font-medium">{progress}%</span>
+                            </div>
+                            <Progress value={progress} className="h-2" />
+                          </div>
+
+                          {/* Visible Stages */}
+                          <div className="mb-4">
+                            <p className="text-xs text-muted-foreground mb-2">Etapas visíveis:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {visibleStages.length === 0 ? (
+                                <span className="text-xs text-muted-foreground italic">Nenhuma etapa visível</span>
+                              ) : (
+                                visibleStages.map((stage) => {
+                                  const config = STAGE_CONFIG[stage.stage as ProjectStageType];
+                                  return (
+                                    <Badge key={stage.id} variant="secondary" className="text-xs">
+                                      {config?.label || stage.stage}
+                                    </Badge>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Owner */}
+                          <div className="flex items-center gap-2 pt-3 border-t">
+                            <Avatar className="w-6 h-6">
+                              <AvatarImage src={project.owner?.avatar_url || ''} />
+                              <AvatarFallback className="text-xs">
+                                {project.owner?.name?.charAt(0) || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{project.owner?.name || 'Anônimo'}</p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                              <TypeIcon className="w-3 h-3" />
+                              {agentTypeLabels[project.owner?.agent_type || 'outro']}
+                            </Badge>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2 mt-4">
+                            <Button className="flex-1" size="sm">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Ver Projeto
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => project.owner?.name && handleConnect(project.owner.name)}
+                            >
+                              <UserPlus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
