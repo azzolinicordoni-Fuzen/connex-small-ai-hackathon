@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,8 +64,8 @@ export function PostCard({ post, onLike, onDelete, isOwner }: PostCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex gap-3">
-            <div className="relative">
-              <Avatar className="h-12 w-12 ring-2 ring-border">
+            <Link to={`/perfil/${post.author.id}`} className="relative">
+              <Avatar className="h-12 w-12 ring-2 ring-border cursor-pointer transition-transform hover:scale-105">
                 <AvatarImage src={post.author.avatar_url || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                   {post.author.name.slice(0, 2).toUpperCase()}
@@ -75,12 +76,14 @@ export function PostCard({ post, onLike, onDelete, isOwner }: PostCardProps) {
                   <Crown className="w-3 h-3 text-white" />
                 </div>
               )}
-            </div>
+            </Link>
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="font-semibold text-foreground hover:text-primary cursor-pointer transition-colors">
-                  {post.author.name}
-                </h4>
+                <Link to={`/perfil/${post.author.id}`}>
+                  <h4 className="font-semibold text-foreground hover:text-primary cursor-pointer transition-colors">
+                    {post.author.name}
+                  </h4>
+                </Link>
                 {post.author.is_premium && (
                   <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600 bg-amber-50">
                     Premium
