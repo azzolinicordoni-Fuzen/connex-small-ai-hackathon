@@ -32,6 +32,7 @@ const navItems = [
   { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
   { icon: User, label: "Meu Perfil", href: "/perfil" },
   { icon: Users, label: "Conexões", href: "/conexoes" },
+  { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
   { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
   { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
   { icon: Bell, label: "Notificações", href: "/notificacoes", badge: 5 },
