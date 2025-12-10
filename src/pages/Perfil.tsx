@@ -20,6 +20,8 @@ import SubperfilCard from "@/components/perfil/SubperfilCard";
 import SubperfilDialog from "@/components/perfil/SubperfilDialog";
 import EditProfileDialog from "@/components/perfil/EditProfileDialog";
 import ConnectionCard from "@/components/conexoes/ConnectionCard";
+import ProfileCompletion from "@/components/perfil/ProfileCompletion";
+import CompleteProfileDialog from "@/components/perfil/CompleteProfileDialog";
 import { useConnections } from "@/hooks/useConnections";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string }> = {
@@ -67,6 +69,7 @@ export default function Perfil() {
   const [loading, setLoading] = useState(true);
   const [isSubperfilDialogOpen, setIsSubperfilDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
   const [editingSubperfil, setEditingSubperfil] = useState<any>(null);
   const [connectionFilter, setConnectionFilter] = useState("todos");
   const [connectionSearch, setConnectionSearch] = useState("");
@@ -321,6 +324,12 @@ export default function Perfil() {
           </div>
         </div>
 
+        {/* Profile Completion Banner */}
+        <ProfileCompletion 
+          profile={profile} 
+          onComplete={() => setIsCompleteProfileOpen(true)} 
+        />
+
         {/* Tabs */}
         <Tabs defaultValue="subperfis" className="space-y-6">
           <TabsList>
@@ -532,6 +541,13 @@ export default function Perfil() {
         onOpenChange={setIsEditProfileOpen}
         profile={profile}
         onSaved={handleProfileUpdated}
+      />
+
+      <CompleteProfileDialog
+        open={isCompleteProfileOpen}
+        onOpenChange={setIsCompleteProfileOpen}
+        profile={profile}
+        onProfileUpdated={handleProfileUpdated}
       />
     </div>
   );

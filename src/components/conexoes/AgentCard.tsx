@@ -108,6 +108,12 @@ export default function AgentCard({
   const typeColor = AGENT_COLORS[profile.agent_type] || AGENT_COLORS.outro;
   const stages = projectStages.length > 0 ? projectStages : AGENT_STAGES[profile.agent_type] || [];
 
+  // Calculate profile completeness
+  const completenessFields = [profile.name, profile.bio, profile.location, profile.avatar_url];
+  const filledFields = completenessFields.filter(f => f && f.trim && f.trim() !== "").length;
+  const isProfileComplete = filledFields >= 3;
+  const isProfileBasic = filledFields < 2;
+
   const getConnectionButton = () => {
     if (isLoading) {
       return (
@@ -151,10 +157,12 @@ export default function AgentCard({
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-      {/* Premium indicator strip */}
-      {profile.is_premium && (
+      {/* Premium/Complete indicator strip */}
+      {profile.is_premium ? (
         <div className="h-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400" />
-      )}
+      ) : isProfileComplete ? (
+        <div className="h-1 bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400" />
+      ) : null}
       
       <CardContent className="p-5">
         {/* Header: Avatar + Name + Type */}
@@ -179,6 +187,16 @@ export default function AgentCard({
               {profile.is_premium && (
                 <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 text-xs">
                   Premium
+                </Badge>
+              )}
+              {!profile.is_premium && isProfileComplete && (
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs">
+                  Verificado
+                </Badge>
+              )}
+              {isProfileBasic && (
+                <Badge variant="outline" className="text-xs opacity-60">
+                  Básico
                 </Badge>
               )}
             </div>
