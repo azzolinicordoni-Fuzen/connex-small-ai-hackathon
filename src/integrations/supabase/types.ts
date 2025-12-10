@@ -789,6 +789,94 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          category: string
+          created_at: string
+          email: boolean
+          event_type: string
+          id: string
+          in_app: boolean
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          email?: boolean
+          event_type: string
+          id?: string
+          in_app?: boolean
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          email?: boolean
+          event_type?: string
+          id?: string
+          in_app?: boolean
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          metadata: Json | null
+          profile_id: string
+          read: boolean
+          title: string
+          type: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          metadata?: Json | null
+          profile_id: string
+          read?: boolean
+          title: string
+          type: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          metadata?: Json | null
+          profile_id?: string
+          read?: boolean
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_likes: {
         Row: {
           created_at: string
