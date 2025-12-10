@@ -22,7 +22,8 @@ import {
   LogOut,
   Menu,
   X,
-  User
+  User,
+  Newspaper
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 const navItems = [
   { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
   { icon: User, label: "Meu Perfil", href: "/perfil" },
+  { icon: Newspaper, label: "Feed", href: "/feed" },
   { icon: Users, label: "Conexões", href: "/conexoes" },
   { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
   { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
