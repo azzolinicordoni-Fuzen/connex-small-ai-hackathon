@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, ArrowLeft, LayoutGrid, BarChart3, MessageSquare } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutGrid, BarChart3, MessageSquare, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
@@ -13,7 +13,9 @@ import ProjectTimeline from '@/components/projects/ProjectTimeline';
 import ProjectCharts from '@/components/projects/ProjectCharts';
 import ProjectChat from '@/components/projects/ProjectChat';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
+import EditVisibilityDialog from '@/components/projects/EditVisibilityDialog';
 import { useProjects, useProjectStages, useProjectMessages } from '@/hooks/useProjects';
+import { VisibilityMode } from '@/types/project';
 import { toast } from 'sonner';
 
 export default function MeusProjetos() {
@@ -22,12 +24,15 @@ export default function MeusProjetos() {
   const [profile, setProfile] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showVisibilityDialog, setShowVisibilityDialog] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
-  const { projects, loading, createProject, deleteProject } = useProjects(profile?.id);
-  const { stages, updateStage } = useProjectStages(selectedProjectId || undefined);
+  const { projects, loading, createProject, updateProject, deleteProject, refetch: refetchProjects } = useProjects(profile?.id);
+  const { stages, updateStage, refetch: refetchStages } = useProjectStages(selectedProjectId || editingProjectId || undefined);
   const { messages, sendMessage } = useProjectMessages(selectedProjectId || undefined);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
+  const editingProject = projects.find(p => p.id === editingProjectId);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -53,6 +58,41 @@ export default function MeusProjetos() {
 
   const handleCreateProject = async () => {
     setShowCreateDialog(true);
+  };
+
+  const handleEditVisibility = (projectId: string) => {
+    setEditingProjectId(projectId);
+    setShowVisibilityDialog(true);
+  };
+
+  const handleSaveVisibility = async (
+    visibilityMode: VisibilityMode,
+    isOnline: boolean,
+    stageVisibility: Record<string, boolean>
+  ) => {
+    if (!editingProjectId) return;
+
+    try {
+      // Update project visibility
+      await updateProject(editingProjectId, {
+        visibility_mode: visibilityMode,
+        is_online: isOnline,
+      });
+
+      // Update each stage visibility
+      for (const [stageId, isVisible] of Object.entries(stageVisibility)) {
+        await supabase
+          .from('project_stages')
+          .update({ is_visible: isVisible })
+          .eq('id', stageId);
+      }
+
+      await refetchStages();
+      await refetchProjects();
+    } catch (error) {
+      console.error('Error saving visibility:', error);
+      throw error;
+    }
   };
 
   if (authLoading || loading) {
@@ -94,6 +134,16 @@ export default function MeusProjetos() {
               Novo Projeto
             </Button>
           )}
+          {selectedProjectId && selectedProject && (
+            <Button 
+              variant="outline" 
+              onClick={() => handleEditVisibility(selectedProjectId)}
+              className="gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Editar Processo
+            </Button>
+          )}
         </div>
 
         {/* Project List or Detail View */}
@@ -121,6 +171,7 @@ export default function MeusProjetos() {
                   stages={[]}
                   onSelect={() => setSelectedProjectId(project.id)}
                   onDelete={() => deleteProject(project.id)}
+                  onEditVisibility={() => handleEditVisibility(project.id)}
                 />
               ))
             )}
@@ -172,6 +223,20 @@ export default function MeusProjetos() {
         onOpenChange={setShowCreateDialog}
         onCreate={createProject}
       />
+
+      {/* Edit Visibility Dialog */}
+      {editingProject && (
+        <EditVisibilityDialog
+          open={showVisibilityDialog}
+          onOpenChange={(open) => {
+            setShowVisibilityDialog(open);
+            if (!open) setEditingProjectId(null);
+          }}
+          project={editingProject}
+          stages={stages}
+          onSave={handleSaveVisibility}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { CarbonProject, ProjectStage, ProjectStageMember, ProjectMessage } from '@/types/project';
+import { CarbonProject, ProjectStage, ProjectStageMember, ProjectMessage, VisibilityMode, StageStatus, ProjectStageType } from '@/types/project';
 import { toast } from 'sonner';
 
 export function useProjects(profileId: string | undefined) {
@@ -18,7 +18,12 @@ export function useProjects(profileId: string | undefined) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      // Cast visibility_mode to proper type
+      const typedProjects = (data || []).map(p => ({
+        ...p,
+        visibility_mode: p.visibility_mode as VisibilityMode
+      }));
+      setProjects(typedProjects);
     } catch (error: any) {
       console.error('Error fetching projects:', error);
       toast.error('Erro ao carregar projetos');
@@ -52,7 +57,7 @@ export function useProjects(profileId: string | undefined) {
       
       toast.success('Projeto criado com sucesso!');
       await fetchProjects();
-      return data;
+      return data ? { ...data, visibility_mode: data.visibility_mode as VisibilityMode } : null;
     } catch (error: any) {
       console.error('Error creating project:', error);
       toast.error(error.message || 'Erro ao criar projeto');
@@ -119,7 +124,14 @@ export function useProjectStages(projectId: string | undefined) {
         .order('stage');
 
       if (error) throw error;
-      setStages(data || []);
+      // Cast types properly
+      const typedStages = (data || []).map(s => ({
+        ...s,
+        status: s.status as StageStatus,
+        stage: s.stage as ProjectStageType,
+        is_visible: s.is_visible ?? false
+      }));
+      setStages(typedStages);
     } catch (error: any) {
       console.error('Error fetching stages:', error);
     } finally {
@@ -293,4 +305,42 @@ export function useProjectMessages(projectId: string | undefined) {
   };
 
   return { messages, loading, sendMessage, refetch: fetchMessages };
+}
+
+// Hook for fetching online projects (for Conexoes page)
+export function useOnlineProjects() {
+  const [projects, setProjects] = useState<(CarbonProject & { owner: { id: string; name: string; avatar_url: string | null; agent_type: string } })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOnlineProjects = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('carbon_projects')
+        .select(`
+          *,
+          owner:profiles!carbon_projects_profile_id_fkey(id, name, avatar_url, agent_type)
+        `)
+        .eq('is_online', true)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const typedProjects = (data || []).map(p => ({
+        ...p,
+        visibility_mode: p.visibility_mode as VisibilityMode,
+        owner: p.owner as { id: string; name: string; avatar_url: string | null; agent_type: string }
+      }));
+      setProjects(typedProjects);
+    } catch (error: any) {
+      console.error('Error fetching online projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOnlineProjects();
+  }, [fetchOnlineProjects]);
+
+  return { projects, loading, refetch: fetchOnlineProjects };
 }

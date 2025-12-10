@@ -8,6 +8,8 @@ export type ProjectStageType =
 
 export type StageStatus = 'pendente' | 'em_andamento' | 'concluida';
 
+export type VisibilityMode = 'private' | 'partial' | 'public';
+
 export interface CarbonProject {
   id: string;
   profile_id: string;
@@ -16,6 +18,8 @@ export interface CarbonProject {
   location: string | null;
   area_hectares: number | null;
   project_type: string | null;
+  visibility_mode: VisibilityMode;
+  is_online: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +34,7 @@ export interface ProjectStage {
   completed_at: string | null;
   notes: string | null;
   progress_percentage: number;
+  is_visible: boolean;
   created_at: string;
   updated_at: string;
 }
