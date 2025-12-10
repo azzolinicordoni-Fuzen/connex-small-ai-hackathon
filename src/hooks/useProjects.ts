@@ -1,0 +1,296 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { CarbonProject, ProjectStage, ProjectStageMember, ProjectMessage } from '@/types/project';
+import { toast } from 'sonner';
+
+export function useProjects(profileId: string | undefined) {
+  const [projects, setProjects] = useState<CarbonProject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProjects = useCallback(async () => {
+    if (!profileId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('carbon_projects')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error: any) {
+      console.error('Error fetching projects:', error);
+      toast.error('Erro ao carregar projetos');
+    } finally {
+      setLoading(false);
+    }
+  }, [profileId]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const createProject = async (projectData: Partial<CarbonProject>) => {
+    if (!profileId) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('carbon_projects')
+        .insert({ 
+          name: projectData.name || 'Novo Projeto',
+          description: projectData.description,
+          location: projectData.location,
+          area_hectares: projectData.area_hectares,
+          project_type: projectData.project_type,
+          profile_id: profileId 
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      toast.success('Projeto criado com sucesso!');
+      await fetchProjects();
+      return data;
+    } catch (error: any) {
+      console.error('Error creating project:', error);
+      toast.error(error.message || 'Erro ao criar projeto');
+      return null;
+    }
+  };
+
+  const updateProject = async (projectId: string, updates: Partial<CarbonProject>) => {
+    try {
+      const { error } = await supabase
+        .from('carbon_projects')
+        .update(updates)
+        .eq('id', projectId);
+
+      if (error) throw error;
+      
+      toast.success('Projeto atualizado!');
+      await fetchProjects();
+    } catch (error: any) {
+      console.error('Error updating project:', error);
+      toast.error('Erro ao atualizar projeto');
+    }
+  };
+
+  const deleteProject = async (projectId: string) => {
+    try {
+      const { error } = await supabase
+        .from('carbon_projects')
+        .delete()
+        .eq('id', projectId);
+
+      if (error) throw error;
+      
+      toast.success('Projeto excluído!');
+      await fetchProjects();
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      toast.error('Erro ao excluir projeto');
+    }
+  };
+
+  return {
+    projects,
+    loading,
+    createProject,
+    updateProject,
+    deleteProject,
+    refetch: fetchProjects,
+  };
+}
+
+export function useProjectStages(projectId: string | undefined) {
+  const [stages, setStages] = useState<ProjectStage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStages = useCallback(async () => {
+    if (!projectId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('project_stages')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('stage');
+
+      if (error) throw error;
+      setStages(data || []);
+    } catch (error: any) {
+      console.error('Error fetching stages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchStages();
+  }, [fetchStages]);
+
+  const updateStage = async (stageId: string, updates: Partial<ProjectStage>) => {
+    try {
+      const { error } = await supabase
+        .from('project_stages')
+        .update(updates)
+        .eq('id', stageId);
+
+      if (error) throw error;
+      
+      await fetchStages();
+      toast.success('Etapa atualizada!');
+    } catch (error: any) {
+      console.error('Error updating stage:', error);
+      toast.error('Erro ao atualizar etapa');
+    }
+  };
+
+  return { stages, loading, updateStage, refetch: fetchStages };
+}
+
+export function useStageMembers(stageId: string | undefined) {
+  const [members, setMembers] = useState<ProjectStageMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMembers = useCallback(async () => {
+    if (!stageId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('project_stage_members')
+        .select(`
+          *,
+          profile:profiles!project_stage_members_member_profile_id_fkey(id, name, avatar_url, agent_type)
+        `)
+        .eq('stage_id', stageId);
+
+      if (error) throw error;
+      setMembers(data || []);
+    } catch (error: any) {
+      console.error('Error fetching members:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [stageId]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
+
+  const addMember = async (memberProfileId: string, role?: string) => {
+    if (!stageId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('project_stage_members')
+        .insert({ stage_id: stageId, member_profile_id: memberProfileId, role });
+
+      if (error) throw error;
+      
+      await fetchMembers();
+      toast.success('Membro adicionado!');
+    } catch (error: any) {
+      console.error('Error adding member:', error);
+      toast.error('Erro ao adicionar membro');
+    }
+  };
+
+  const removeMember = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_stage_members')
+        .delete()
+        .eq('id', memberId);
+
+      if (error) throw error;
+      
+      await fetchMembers();
+      toast.success('Membro removido!');
+    } catch (error: any) {
+      console.error('Error removing member:', error);
+      toast.error('Erro ao remover membro');
+    }
+  };
+
+  return { members, loading, addMember, removeMember, refetch: fetchMembers };
+}
+
+export function useProjectMessages(projectId: string | undefined) {
+  const [messages, setMessages] = useState<ProjectMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMessages = useCallback(async () => {
+    if (!projectId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('project_messages')
+        .select(`
+          *,
+          sender:profiles!project_messages_sender_id_fkey(id, name, avatar_url)
+        `)
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error: any) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchMessages();
+
+    // Subscribe to realtime updates
+    if (projectId) {
+      const channel = supabase
+        .channel(`project-messages-${projectId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'project_messages',
+            filter: `project_id=eq.${projectId}`,
+          },
+          () => {
+            fetchMessages();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [projectId, fetchMessages]);
+
+  const sendMessage = async (senderId: string, content: string, stageId?: string, isStageComment = false) => {
+    if (!projectId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('project_messages')
+        .insert({
+          project_id: projectId,
+          sender_id: senderId,
+          content,
+          stage_id: stageId || null,
+          is_stage_comment: isStageComment,
+        });
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast.error('Erro ao enviar mensagem');
+    }
+  };
+
+  return { messages, loading, sendMessage, refetch: fetchMessages };
+}

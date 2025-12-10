@@ -138,6 +138,50 @@ export type Database = {
           },
         ]
       }
+      carbon_projects: {
+        Row: {
+          area_hectares: number | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          profile_id: string
+          project_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          area_hectares?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          profile_id: string
+          project_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area_hectares?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          profile_id?: string
+          project_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carbon_projects_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificadora_details: {
         Row: {
           areas_atuacao: string[] | null
@@ -870,6 +914,195 @@ export type Database = {
         }
         Relationships: []
       }
+      project_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_stage_comment: boolean | null
+          project_id: string
+          sender_id: string
+          stage_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_stage_comment?: boolean | null
+          project_id: string
+          sender_id: string
+          stage_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_stage_comment?: boolean | null
+          project_id?: string
+          sender_id?: string
+          stage_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "carbon_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_messages_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          profile_id: string
+          project_id: string
+          read: boolean | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          profile_id: string
+          project_id: string
+          read?: boolean | null
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          profile_id?: string
+          project_id?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "carbon_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stage_members: {
+        Row: {
+          added_at: string
+          id: string
+          member_profile_id: string
+          role: string | null
+          stage_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          member_profile_id: string
+          role?: string | null
+          stage_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          member_profile_id?: string
+          role?: string | null
+          stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stage_members_member_profile_id_fkey"
+            columns: ["member_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_stage_members_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stages: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deadline: string | null
+          id: string
+          notes: string | null
+          progress_percentage: number | null
+          project_id: string
+          stage: Database["public"]["Enums"]["project_stage"]
+          started_at: string | null
+          status: Database["public"]["Enums"]["stage_status"]
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          progress_percentage?: number | null
+          project_id: string
+          stage: Database["public"]["Enums"]["project_stage"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["stage_status"]
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          progress_percentage?: number | null
+          project_id?: string
+          stage?: Database["public"]["Enums"]["project_stage"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["stage_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "carbon_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projeto_details: {
         Row: {
           car_url: string | null
@@ -1207,7 +1440,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_project_member: { Args: { p_project_id: string }; Returns: boolean }
+      is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
+      is_user_premium: { Args: never; Returns: boolean }
     }
     Enums: {
       agent_type:
@@ -1222,6 +1457,14 @@ export type Database = {
         | "auditor"
         | "financeira"
         | "advogado"
+      project_stage:
+        | "documentos"
+        | "viabilidade"
+        | "desenvolvimento"
+        | "certificacao"
+        | "auditoria"
+        | "venda"
+      stage_status: "pendente" | "em_andamento" | "concluida"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1362,6 +1605,15 @@ export const Constants = {
         "financeira",
         "advogado",
       ],
+      project_stage: [
+        "documentos",
+        "viabilidade",
+        "desenvolvimento",
+        "certificacao",
+        "auditoria",
+        "venda",
+      ],
+      stage_status: ["pendente", "em_andamento", "concluida"],
     },
   },
 } as const
