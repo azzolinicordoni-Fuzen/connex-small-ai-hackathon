@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { 
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
-  Plus, MapPin, Phone, Mail, MessageCircle, Edit, Trash2,
-  Building2, Calendar, Users
+  Plus, MapPin, Phone, Mail, MessageCircle, Edit, 
+  Building2, Users, Search, UserCheck, Clock, Filter,
+  HardHat, Briefcase, Scale, Banknote, ClipboardCheck
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,20 +19,32 @@ import { Header } from "@/components/layout/Header";
 import SubperfilCard from "@/components/perfil/SubperfilCard";
 import SubperfilDialog from "@/components/perfil/SubperfilDialog";
 import EditProfileDialog from "@/components/perfil/EditProfileDialog";
+import ConnectionCard from "@/components/conexoes/ConnectionCard";
+import { useConnections } from "@/hooks/useConnections";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string }> = {
   proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald", subperfilLabel: "Áreas" },
   desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan", subperfilLabel: "Projetos" },
   certificadora: { icon: Award, label: "Certificadora", color: "amber", subperfilLabel: "Serviços" },
-  auditor: { icon: Award, label: "Auditor / VVB", color: "orange", subperfilLabel: "Serviços" },
+  auditor: { icon: ClipboardCheck, label: "Auditor / VVB", color: "orange", subperfilLabel: "Serviços" },
   investidor: { icon: Landmark, label: "Fundo / Banco", color: "blue", subperfilLabel: "Requisições" },
-  financeira: { icon: Landmark, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos" },
-  advogado: { icon: Users, label: "Advogado / Jurídico", color: "slate", subperfilLabel: "Serviços" },
+  financeira: { icon: Banknote, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos" },
+  advogado: { icon: Scale, label: "Advogado / Jurídico", color: "slate", subperfilLabel: "Serviços" },
   comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "red", subperfilLabel: "Demandas ESG" },
   projeto: { icon: FolderOpen, label: "Projeto", color: "purple", subperfilLabel: "Projetos" },
-  engenheiro: { icon: Building2, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços" },
+  engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços" },
   outro: { icon: Users, label: "Outro Agente", color: "gray", subperfilLabel: "Subperfis" },
 };
+
+const AGENT_FILTERS = [
+  { id: "todos", label: "Todos", icon: Users },
+  { id: "proprietario", label: "Proprietários", icon: TreePine },
+  { id: "desenvolvedor", label: "Desenvolvedores", icon: Briefcase },
+  { id: "certificadora", label: "Certificadoras", icon: Award },
+  { id: "auditor", label: "Auditores", icon: ClipboardCheck },
+  { id: "investidor", label: "Investidores", icon: Landmark },
+  { id: "comprador", label: "Compradores", icon: Building2 },
+];
 
 interface Profile {
   id: string;
@@ -54,6 +68,17 @@ export default function Perfil() {
   const [isSubperfilDialogOpen, setIsSubperfilDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editingSubperfil, setEditingSubperfil] = useState<any>(null);
+  const [connectionFilter, setConnectionFilter] = useState("todos");
+  const [connectionSearch, setConnectionSearch] = useState("");
+  const [connectionTab, setConnectionTab] = useState<"all" | "pending">("all");
+
+  const { 
+    connections, 
+    loading: connectionsLoading, 
+    acceptConnection, 
+    rejectConnection, 
+    removeConnection 
+  } = useConnections(profile?.id);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -170,6 +195,30 @@ export default function Perfil() {
     setIsEditProfileOpen(false);
   };
 
+  // Filter connections
+  const filteredConnections = connections.filter(conn => {
+    // Filter by tab (all vs pending)
+    if (connectionTab === "pending" && conn.status !== "pending") return false;
+    if (connectionTab === "all" && conn.status !== "accepted") return false;
+    
+    // Filter by agent type
+    if (connectionFilter !== "todos" && conn.profile.agent_type !== connectionFilter) return false;
+    
+    // Filter by search
+    if (connectionSearch) {
+      const search = connectionSearch.toLowerCase();
+      return (
+        conn.profile.name.toLowerCase().includes(search) ||
+        (conn.profile.location || '').toLowerCase().includes(search) ||
+        (conn.profile.bio || '').toLowerCase().includes(search)
+      );
+    }
+    return true;
+  });
+
+  const pendingCount = connections.filter(c => c.status === 'pending' && !c.isRequester).length;
+  const acceptedCount = connections.filter(c => c.status === 'accepted').length;
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -234,6 +283,10 @@ export default function Perfil() {
                   <IconComponent className="w-3 h-3" />
                   {config.label}
                 </Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <UserCheck className="w-3 h-3" />
+                  {acceptedCount} conexões
+                </Badge>
               </div>
               {profile.bio && (
                 <p className="text-muted-foreground max-w-2xl mb-4">{profile.bio}</p>
@@ -272,7 +325,14 @@ export default function Perfil() {
         <Tabs defaultValue="subperfis" className="space-y-6">
           <TabsList>
             <TabsTrigger value="subperfis">{config.subperfilLabel}</TabsTrigger>
-            <TabsTrigger value="conexoes">Conexões</TabsTrigger>
+            <TabsTrigger value="conexoes" className="gap-2">
+              Minhas Conexões
+              {pendingCount > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {pendingCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="feed">Feed</TabsTrigger>
           </TabsList>
 
@@ -330,16 +390,112 @@ export default function Perfil() {
             )}
           </TabsContent>
 
-          <TabsContent value="conexoes">
-            <Card>
-              <CardHeader>
-                <CardTitle>Conexões</CardTitle>
-                <CardDescription>Suas conexões na plataforma</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Em breve...</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="conexoes" className="space-y-6">
+            {/* Connections Header */}
+            <div>
+              <h2 className="text-xl font-semibold">Minhas Conexões</h2>
+              <p className="text-sm text-muted-foreground">
+                Gerencie sua rede de contatos na plataforma
+              </p>
+            </div>
+
+            {/* Connection Tabs */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={connectionTab === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setConnectionTab("all")}
+                className="gap-2"
+              >
+                <UserCheck className="w-4 h-4" />
+                Conectados
+                <Badge variant="secondary">{acceptedCount}</Badge>
+              </Button>
+              <Button
+                variant={connectionTab === "pending" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setConnectionTab("pending")}
+                className="gap-2"
+              >
+                <Clock className="w-4 h-4" />
+                Pendentes
+                {pendingCount > 0 && (
+                  <Badge variant="destructive">{pendingCount}</Badge>
+                )}
+              </Button>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome ou especialidade..."
+                  className="pl-9"
+                  value={connectionSearch}
+                  onChange={(e) => setConnectionSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {AGENT_FILTERS.slice(0, 5).map((filter) => {
+                  const FilterIcon = filter.icon;
+                  return (
+                    <Button
+                      key={filter.id}
+                      variant={connectionFilter === filter.id ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setConnectionFilter(filter.id)}
+                      className="shrink-0 gap-1"
+                    >
+                      <FilterIcon className="w-3 h-3" />
+                      {filter.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Connections List */}
+            {connectionsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
+            ) : filteredConnections.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="w-12 h-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center mb-2">
+                    {connectionTab === "pending" 
+                      ? "Nenhuma solicitação pendente"
+                      : connectionSearch || connectionFilter !== "todos"
+                        ? "Nenhuma conexão encontrada"
+                        : "Você ainda não tem conexões"
+                    }
+                  </p>
+                  {connectionTab === "all" && !connectionSearch && connectionFilter === "todos" && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/conexoes')}
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Descobrir conexões
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-3">
+                {filteredConnections.map((connection) => (
+                  <ConnectionCard
+                    key={connection.id}
+                    connection={connection}
+                    onAccept={acceptConnection}
+                    onReject={rejectConnection}
+                    onRemove={removeConnection}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="feed">
