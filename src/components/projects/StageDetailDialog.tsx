@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
-  Calendar, Users, MessageSquare, Settings, Trash2, X
+  Calendar, Users, MessageSquare, Settings, X, Plus, Filter
 } from 'lucide-react';
 import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, StageStatus } from '@/types/project';
 import { useStageMembers } from '@/hooks/useProjects';
@@ -31,6 +31,20 @@ interface StageDetailDialogProps {
   projectId: string;
 }
 
+const AGENT_TYPE_LABELS: Record<string, string> = {
+  proprietario: 'Proprietário Rural',
+  engenheiro: 'Engenheiro',
+  desenvolvedor: 'Desenvolvedor de Projetos',
+  certificadora: 'Certificadora',
+  investidor: 'Investidor',
+  projeto: 'Projeto',
+  comprador: 'Comprador',
+  auditor: 'Auditor',
+  financeira: 'Instituição Financeira',
+  advogado: 'Advogado',
+  outro: 'Outro',
+};
+
 export default function StageDetailDialog({ 
   stage, 
   open, 
@@ -43,9 +57,37 @@ export default function StageDetailDialog({
   const [deadline, setDeadline] = useState(stage.deadline?.split('T')[0] || '');
   const [notes, setNotes] = useState(stage.notes || '');
   const [availableConnections, setAvailableConnections] = useState<any[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
   
   const { members, addMember, removeMember } = useStageMembers(stage.id);
   const config = STAGE_CONFIG[stage.stage];
+
+  // Group connections by agent_type
+  const connectionsByType = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    availableConnections.forEach(conn => {
+      const type = conn.agent_type || 'outro';
+      if (!grouped[type]) grouped[type] = [];
+      grouped[type].push(conn);
+    });
+    return grouped;
+  }, [availableConnections]);
+
+  // Get unique agent types from connections
+  const availableTypes = useMemo(() => {
+    return Object.keys(connectionsByType).sort();
+  }, [connectionsByType]);
+
+  // Filter connections based on selected filter
+  const filteredConnections = useMemo(() => {
+    if (selectedFilter === 'all') return availableConnections;
+    return connectionsByType[selectedFilter] || [];
+  }, [availableConnections, connectionsByType, selectedFilter]);
+
+  // Check if a connection is already a member
+  const isMember = (profileId: string) => {
+    return members.some(m => m.member_profile_id === profileId);
+  };
 
   useEffect(() => {
     fetchAvailableConnections();
@@ -53,7 +95,6 @@ export default function StageDetailDialog({
 
   const fetchAvailableConnections = async () => {
     try {
-      // Get all accepted connections for the project owner
       const { data: projectData } = await supabase
         .from('carbon_projects')
         .select('profile_id')
@@ -96,6 +137,15 @@ export default function StageDetailDialog({
     });
   };
 
+  const handleAddMember = async (profileId: string) => {
+    if (isMember(profileId)) {
+      toast.info('Este membro já foi adicionado a esta etapa');
+      return;
+    }
+    await addMember(profileId);
+    toast.success('Membro adicionado à etapa');
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.currentTarget.classList.add('ring-2', 'ring-primary');
@@ -110,7 +160,7 @@ export default function StageDetailDialog({
     e.currentTarget.classList.remove('ring-2', 'ring-primary');
     const profileId = e.dataTransfer.getData('profileId');
     if (profileId) {
-      addMember(profileId);
+      handleAddMember(profileId);
     }
   };
 
@@ -206,22 +256,9 @@ export default function StageDetailDialog({
             </TabsContent>
 
             <TabsContent value="members" className="space-y-4 mt-4">
-              {/* Drop Zone */}
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
-              >
-                <Users className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Arraste conexões aqui para adicionar membros
-                </p>
-              </div>
-
               {/* Current Members */}
               <div className="space-y-2">
-                <Label>Membros da Etapa</Label>
+                <Label>Membros da Etapa ({members.length})</Label>
                 {members.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhum membro adicionado</p>
                 ) : (
@@ -229,7 +266,7 @@ export default function StageDetailDialog({
                     {members.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-2 border rounded-lg"
+                        className="flex items-center justify-between p-2 border rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center gap-2">
                           <Avatar className="w-8 h-8">
@@ -240,7 +277,9 @@ export default function StageDetailDialog({
                           </Avatar>
                           <div>
                             <p className="text-sm font-medium">{member.profile?.name}</p>
-                            <p className="text-xs text-muted-foreground">{member.role || 'Membro'}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {AGENT_TYPE_LABELS[member.profile?.agent_type] || member.role || 'Membro'}
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -256,30 +295,96 @@ export default function StageDetailDialog({
                 )}
               </div>
 
-              {/* Available Connections */}
+              {/* Drop Zone */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className="border-2 border-dashed rounded-lg p-4 text-center transition-colors"
+              >
+                <Users className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                <p className="text-xs text-muted-foreground">
+                  Arraste conexões aqui ou clique no botão + para adicionar
+                </p>
+              </div>
+
+              {/* Filter by Agent Type */}
               <div className="space-y-2">
-                <Label>Conexões Disponíveis</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {availableConnections.map((profile) => (
-                    <div
-                      key={profile.id}
-                      draggable
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData('profileId', profile.id);
-                      }}
-                      className="flex items-center gap-2 p-2 border rounded-lg cursor-grab hover:bg-muted/50 active:cursor-grabbing"
+                <Label className="flex items-center gap-1">
+                  <Filter className="w-4 h-4" />
+                  Filtrar por Tipo
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant={selectedFilter === 'all' ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => setSelectedFilter('all')}
+                  >
+                    Todos ({availableConnections.length})
+                  </Badge>
+                  {availableTypes.map(type => (
+                    <Badge
+                      key={type}
+                      variant={selectedFilter === type ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => setSelectedFilter(type)}
                     >
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={profile.avatar_url || undefined} />
-                        <AvatarFallback>{profile.name?.charAt(0) || 'U'}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm truncate">{profile.name}</span>
-                    </div>
+                      {AGENT_TYPE_LABELS[type] || type} ({connectionsByType[type]?.length || 0})
+                    </Badge>
                   ))}
                 </div>
-                {availableConnections.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Nenhuma conexão disponível. Adicione conexões na página de Conexões.
+              </div>
+
+              {/* Available Connections */}
+              <div className="space-y-2">
+                <Label>Conexões Disponíveis ({filteredConnections.length})</Label>
+                <div className="grid gap-2">
+                  {filteredConnections.map((profile) => {
+                    const alreadyMember = isMember(profile.id);
+                    return (
+                      <div
+                        key={profile.id}
+                        draggable={!alreadyMember}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('profileId', profile.id);
+                        }}
+                        className={`flex items-center justify-between p-2 border rounded-lg transition-colors ${
+                          alreadyMember 
+                            ? 'opacity-50 cursor-not-allowed bg-muted/20' 
+                            : 'cursor-grab hover:bg-muted/50 active:cursor-grabbing'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={profile.avatar_url || undefined} />
+                            <AvatarFallback>{profile.name?.charAt(0) || 'U'}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{profile.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {AGENT_TYPE_LABELS[profile.agent_type] || 'Outro'}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={alreadyMember}
+                          onClick={() => handleAddMember(profile.id)}
+                          title={alreadyMember ? 'Já adicionado' : 'Adicionar à etapa'}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+                {filteredConnections.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    {selectedFilter === 'all' 
+                      ? 'Nenhuma conexão disponível. Adicione conexões na página de Conexões.'
+                      : `Nenhuma conexão do tipo "${AGENT_TYPE_LABELS[selectedFilter]}" encontrada.`
+                    }
                   </p>
                 )}
               </div>
