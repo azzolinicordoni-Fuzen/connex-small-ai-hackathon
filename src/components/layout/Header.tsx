@@ -6,8 +6,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
-const navItems = [
-  { label: "Início", href: "/" },
+const getNavItems = (isAuthenticated: boolean) => [
+  { label: "Início", href: isAuthenticated ? "/dashboard" : "/" },
   { label: "Conexões", href: "/conexoes" },
   { label: "Feed", href: "/feed" },
 ];
@@ -40,7 +40,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
+            {getNavItems(!!user).map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -97,7 +97,7 @@ export function Header() {
         {isOpen && (
           <div className="lg:hidden py-4 animate-fade-in">
             <nav className="flex flex-col gap-2">
-              {navItems.map((item) => (
+              {getNavItems(!!user).map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
