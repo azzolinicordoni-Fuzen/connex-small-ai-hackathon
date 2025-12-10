@@ -8,6 +8,7 @@ import { Plus, ArrowLeft, LayoutGrid, BarChart3, MessageSquare, Settings } from 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
+import { BackButton } from '@/components/layout/BackButton';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
 import ProjectCharts from '@/components/projects/ProjectCharts';
@@ -111,10 +112,12 @@ export default function MeusProjetos() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            {selectedProjectId && (
+            {selectedProjectId ? (
               <Button variant="ghost" size="icon" onClick={() => setSelectedProjectId(null)}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
+            ) : (
+              <BackButton />
             )}
             <div>
               <h1 className="text-2xl font-bold">

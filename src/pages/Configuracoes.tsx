@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { useNotifications } from "@/hooks/useNotifications";
+import { BackButton } from "@/components/layout/BackButton";
 
 interface Profile {
   id: string;

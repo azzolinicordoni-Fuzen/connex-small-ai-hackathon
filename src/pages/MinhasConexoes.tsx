@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
+import { BackButton } from "@/components/layout/BackButton";
 import ConnectionCard from "@/components/conexoes/ConnectionCard";
 import { useConnections } from "@/hooks/useConnections";
 
@@ -104,8 +105,11 @@ export default function MinhasConexoes() {
       <main className="container mx-auto px-4 py-8 pt-24 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Minhas Conexões</h1>
-          <p className="text-muted-foreground">
+          <div className="flex items-center gap-3 mb-2">
+            <BackButton />
+            <h1 className="text-3xl font-bold">Minhas Conexões</h1>
+          </div>
+          <p className="text-muted-foreground ml-12">
             Gerencie sua rede de contatos na plataforma
           </p>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { BackButton } from "@/components/layout/BackButton";
 import { PostCard } from "@/components/feed/PostCard";
 import { CreatePostCard } from "@/components/feed/CreatePostCard";
 import { FeedSidebar } from "@/components/feed/FeedSidebar";
@@ -62,8 +63,11 @@ export default function Feed() {
         <div className="container mx-auto px-4">
           {/* Header Section */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Feed</h1>
-            <p className="text-muted-foreground">
+            <div className="flex items-center gap-3 mb-2">
+              <BackButton />
+              <h1 className="text-3xl font-bold text-foreground">Feed</h1>
+            </div>
+            <p className="text-muted-foreground ml-12">
               Acompanhe as novidades e insights do mercado de créditos de carbono
             </p>
           </div>

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
+import { BackButton } from "@/components/layout/BackButton";
 import SubperfilCard from "@/components/perfil/SubperfilCard";
 import SubperfilDialog from "@/components/perfil/SubperfilDialog";
 import EditProfileDialog from "@/components/perfil/EditProfileDialog";
@@ -246,6 +247,10 @@ export default function Perfil() {
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Back Button */}
+        <div className="mb-4">
+          <BackButton showLabel />
+        </div>
         {/* Cover & Avatar */}
         <div className="relative mb-20">
           <div 

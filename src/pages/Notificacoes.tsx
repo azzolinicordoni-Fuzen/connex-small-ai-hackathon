@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationList } from "@/components/notifications/NotificationList";
+import { BackButton } from "@/components/layout/BackButton";
 
 interface Profile {
   id: string;
@@ -190,7 +191,8 @@ export default function Notificacoes() {
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex-1 lg:flex-none">
+          <div className="flex-1 lg:flex-none flex items-center gap-3">
+            <BackButton className="hidden lg:flex" />
             <h1 className="font-display text-xl font-semibold">Notificações</h1>
           </div>
 
