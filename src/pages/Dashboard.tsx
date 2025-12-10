@@ -28,18 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-const navItems = [
-  { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
-  { icon: User, label: "Meu Perfil", href: "/perfil" },
-  { icon: Newspaper, label: "Feed", href: "/feed" },
-  { icon: Users, label: "Conexões", href: "/conexoes" },
-  { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
-  { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
-  { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
-  { icon: Bell, label: "Notificações", href: "/notificacoes", badge: 5 },
-  { icon: Settings, label: "Configurações", href: "/configuracoes" },
-];
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const stats = [
   { label: "Visualizações do Perfil", value: "0", change: "+0%", icon: Eye },
@@ -91,7 +81,20 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   
   const { user, signOut, loading: authLoading } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
+
+  const navItems = [
+    { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
+    { icon: User, label: "Meu Perfil", href: "/perfil" },
+    { icon: Newspaper, label: "Feed", href: "/feed" },
+    { icon: Users, label: "Conexões", href: "/conexoes" },
+    { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
+    { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
+    { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
+    { icon: Bell, label: "Notificações", href: "/notificacoes", badge: unreadCount || undefined },
+    { icon: Settings, label: "Configurações", href: "/configuracoes" },
+  ];
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -239,10 +242,7 @@ export default function Dashboard() {
               <Plus className="w-4 h-4" />
               Novo Projeto
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </Button>
+            <NotificationDropdown />
           </div>
         </header>
 
