@@ -144,33 +144,39 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_online: boolean
           location: string | null
           name: string
           profile_id: string
           project_type: string | null
           updated_at: string
+          visibility_mode: string
         }
         Insert: {
           area_hectares?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          is_online?: boolean
           location?: string | null
           name: string
           profile_id: string
           project_type?: string | null
           updated_at?: string
+          visibility_mode?: string
         }
         Update: {
           area_hectares?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          is_online?: boolean
           location?: string | null
           name?: string
           profile_id?: string
           project_type?: string | null
           updated_at?: string
+          visibility_mode?: string
         }
         Relationships: [
           {
@@ -1059,6 +1065,7 @@ export type Database = {
           created_at: string
           deadline: string | null
           id: string
+          is_visible: boolean
           notes: string | null
           progress_percentage: number | null
           project_id: string
@@ -1072,6 +1079,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           id?: string
+          is_visible?: boolean
           notes?: string | null
           progress_percentage?: number | null
           project_id: string
@@ -1085,6 +1093,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           id?: string
+          is_visible?: boolean
           notes?: string | null
           progress_percentage?: number | null
           project_id?: string
