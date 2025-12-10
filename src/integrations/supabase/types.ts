@@ -514,6 +514,109 @@ export type Database = {
           },
         ]
       }
+      conversation_settings: {
+        Row: {
+          archived: boolean
+          conversation_id: string
+          created_at: string
+          id: string
+          muted: boolean
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived?: boolean
+          conversation_id: string
+          created_at?: string
+          id?: string
+          muted?: boolean
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived?: boolean
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          muted?: boolean
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_settings_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          context_category: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          participant_1_id: string
+          participant_2_id: string
+          project_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          context_category?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          participant_1_id: string
+          participant_2_id: string
+          project_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          context_category?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          participant_1_id?: string
+          participant_2_id?: string
+          project_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_participant_1_id_fkey"
+            columns: ["participant_1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_participant_2_id_fkey"
+            columns: ["participant_2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "carbon_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       desenvolvedor_subperfis: {
         Row: {
           anos_experiencia: number | null
@@ -783,6 +886,48 @@ export type Database = {
           {
             foreignKeyName: "investidor_subperfis_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read: boolean
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1537,6 +1682,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_users_connected: {
+        Args: { user1_profile_id: string; user2_profile_id: string }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { conv_id: string }
+        Returns: boolean
+      }
       is_project_member: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       is_user_premium: { Args: never; Returns: boolean }
