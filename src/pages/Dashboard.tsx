@@ -23,7 +23,8 @@ import {
   Menu,
   X,
   User,
-  Newspaper
+  Newspaper,
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,7 +89,7 @@ export default function Dashboard() {
     { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
     { icon: User, label: "Meu Perfil", href: "/perfil" },
     { icon: Newspaper, label: "Feed", href: "/feed" },
-    { icon: Users, label: "Conexões", href: "/conexoes" },
+    { icon: Globe, label: "Rede de Contatos", href: "/conexoes" },
     { icon: UserPlus, label: "Minhas Conexões", href: "/minhas-conexoes" },
     { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
     { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
