@@ -200,19 +200,21 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
       
       <div className="space-y-3">
         <Label>O que busca na plataforma?</Label>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2">
           {BUSCA_PLATAFORMA_OPTIONS.map((option) => (
-            <div
+            <label
               key={option}
-              onClick={() => handleArrayToggle("busca_plataforma", option)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.busca_plataforma || []).includes(option) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.busca_plataforma || []).includes(option)} />
+              <Checkbox 
+                checked={(formData.busca_plataforma || []).includes(option)} 
+                onCheckedChange={() => handleArrayToggle("busca_plataforma", option)}
+              />
               <span>{option}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -324,17 +326,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
       <h4 className="font-medium text-sm">Interesse no Projeto</h4>
       <div className="grid grid-cols-1 gap-2">
         {["Desenvolver projeto", "Vender créditos existentes", "Procurar parceiros / investidores"].map((interesse) => (
-          <div
+          <label
             key={interesse}
-            onClick={() => handleArrayToggle("interesse_projeto", interesse)}
             className={cn(
               "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
               (formData.interesse_projeto || []).includes(interesse) ? "border-primary bg-primary/5" : ""
             )}
           >
-            <Checkbox checked={(formData.interesse_projeto || []).includes(interesse)} />
+            <Checkbox 
+              checked={(formData.interesse_projeto || []).includes(interesse)} 
+              onCheckedChange={() => handleArrayToggle("interesse_projeto", interesse)}
+            />
             <span>{interesse}</span>
-          </div>
+          </label>
         ))}
       </div>
 
@@ -365,17 +369,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Tipos de projeto que desenvolve</Label>
         <div className="grid grid-cols-2 gap-2">
           {["REDD+", "ARR (reflorestamento)", "IFM", "Agricultura regenerativa", "Energia", "Resíduos", "Outros"].map((tipo) => (
-            <div
+            <label
               key={tipo}
-              onClick={() => handleArrayToggle("tipos_projeto", tipo)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.tipos_projeto || []).includes(tipo) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.tipos_projeto || []).includes(tipo)} />
+              <Checkbox 
+                checked={(formData.tipos_projeto || []).includes(tipo)} 
+                onCheckedChange={() => handleArrayToggle("tipos_projeto", tipo)}
+              />
               <span>{tipo}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -438,17 +444,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Padrões oferecidos</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Verra (VCS)", "Gold Standard", "Plan Vivo", "Cercarbono", "ACR", "Outros"].map((padrao) => (
-            <div
+            <label
               key={padrao}
-              onClick={() => handleArrayToggle("padroes_oferecidos", padrao)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.padroes_oferecidos || []).includes(padrao) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.padroes_oferecidos || []).includes(padrao)} />
+              <Checkbox 
+                checked={(formData.padroes_oferecidos || []).includes(padrao)} 
+                onCheckedChange={() => handleArrayToggle("padroes_oferecidos", padrao)}
+              />
               <span>{padrao}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -499,17 +507,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Padrões para os quais é acreditado</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Verra (VCS)", "Gold Standard", "Plan Vivo", "Cercarbono", "ACR", "CDM", "Outros"].map((padrao) => (
-            <div
+            <label
               key={padrao}
-              onClick={() => handleArrayToggle("padroes_acreditados", padrao)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.padroes_acreditados || []).includes(padrao) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.padroes_acreditados || []).includes(padrao)} />
+              <Checkbox 
+                checked={(formData.padroes_acreditados || []).includes(padrao)} 
+                onCheckedChange={() => handleArrayToggle("padroes_acreditados", padrao)}
+              />
               <span>{padrao}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -518,17 +528,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Tipos de projeto aceitos</Label>
         <div className="grid grid-cols-2 gap-2">
           {["REDD+", "ARR", "IFM", "Energia", "Resíduos", "Agricultura"].map((tipo) => (
-            <div
+            <label
               key={tipo}
-              onClick={() => handleArrayToggle("tipos_projeto_aceitos", tipo)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.tipos_projeto_aceitos || []).includes(tipo) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.tipos_projeto_aceitos || []).includes(tipo)} />
+              <Checkbox 
+                checked={(formData.tipos_projeto_aceitos || []).includes(tipo)} 
+                onCheckedChange={() => handleArrayToggle("tipos_projeto_aceitos", tipo)}
+              />
               <span>{tipo}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -587,17 +599,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Interesse Principal</Label>
         <div className="grid grid-cols-1 gap-2">
           {["Compra de créditos", "Pré-financiamento", "Equity em projetos"].map((interesse) => (
-            <div
+            <label
               key={interesse}
-              onClick={() => handleArrayToggle("interesse_principal", interesse)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.interesse_principal || []).includes(interesse) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.interesse_principal || []).includes(interesse)} />
+              <Checkbox 
+                checked={(formData.interesse_principal || []).includes(interesse)} 
+                onCheckedChange={() => handleArrayToggle("interesse_principal", interesse)}
+              />
               <span>{interesse}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -616,17 +630,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Tipo de crédito desejado</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Removal", "Avoidance", "Natureza", "Energia"].map((tipo) => (
-            <div
+            <label
               key={tipo}
-              onClick={() => handleArrayToggle("tipo_credito_desejado", tipo)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.tipo_credito_desejado || []).includes(tipo) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.tipo_credito_desejado || []).includes(tipo)} />
+              <Checkbox 
+                checked={(formData.tipo_credito_desejado || []).includes(tipo)} 
+                onCheckedChange={() => handleArrayToggle("tipo_credito_desejado", tipo)}
+              />
               <span>{tipo}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -658,17 +674,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Tipos de financiamento</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Crédito rural", "Project finance", "Antecipação de recebíveis", "Equity", "Outros"].map((tipo) => (
-            <div
+            <label
               key={tipo}
-              onClick={() => handleArrayToggle("tipos_financiamento", tipo)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.tipos_financiamento || []).includes(tipo) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.tipos_financiamento || []).includes(tipo)} />
+              <Checkbox 
+                checked={(formData.tipos_financiamento || []).includes(tipo)} 
+                onCheckedChange={() => handleArrayToggle("tipos_financiamento", tipo)}
+              />
               <span>{tipo}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -696,17 +714,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Modalidades</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Dívida", "CPR verde", "Antecipação", "Outro"].map((mod) => (
-            <div
+            <label
               key={mod}
-              onClick={() => handleArrayToggle("modalidades", mod)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.modalidades || []).includes(mod) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.modalidades || []).includes(mod)} />
+              <Checkbox 
+                checked={(formData.modalidades || []).includes(mod)} 
+                onCheckedChange={() => handleArrayToggle("modalidades", mod)}
+              />
               <span>{mod}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -738,17 +758,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Áreas de atuação</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Contratos", "Ambiental", "Societário", "Tributário", "Regulatório", "Due diligence"].map((area) => (
-            <div
+            <label
               key={area}
-              onClick={() => handleArrayToggle("areas_atuacao", area)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.areas_atuacao || []).includes(area) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.areas_atuacao || []).includes(area)} />
+              <Checkbox 
+                checked={(formData.areas_atuacao || []).includes(area)} 
+                onCheckedChange={() => handleArrayToggle("areas_atuacao", area)}
+              />
               <span>{area}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -766,17 +788,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Atende</Label>
         <div className="grid grid-cols-3 gap-2">
           {["Proprietários", "Desenvolvedores", "Investidores"].map((cliente) => (
-            <div
+            <label
               key={cliente}
-              onClick={() => handleArrayToggle("clientes_atendidos", cliente)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.clientes_atendidos || []).includes(cliente) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.clientes_atendidos || []).includes(cliente)} />
+              <Checkbox 
+                checked={(formData.clientes_atendidos || []).includes(cliente)} 
+                onCheckedChange={() => handleArrayToggle("clientes_atendidos", cliente)}
+              />
               <span>{cliente}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -816,17 +840,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Tipos Preferidos</Label>
         <div className="grid grid-cols-2 gap-2">
           {["Florestal", "Solo", "Metano", "Energia"].map((tipo) => (
-            <div
+            <label
               key={tipo}
-              onClick={() => handleArrayToggle("tipos_preferidos", tipo)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.tipos_preferidos || []).includes(tipo) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.tipos_preferidos || []).includes(tipo)} />
+              <Checkbox 
+                checked={(formData.tipos_preferidos || []).includes(tipo)} 
+                onCheckedChange={() => handleArrayToggle("tipos_preferidos", tipo)}
+              />
               <span>{tipo}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
@@ -963,17 +989,19 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
         <Label>Co-benefícios (ODS)</Label>
         <div className="grid grid-cols-3 gap-2">
           {["ODS 1", "ODS 2", "ODS 3", "ODS 13", "ODS 15", "Outros"].map((ods) => (
-            <div
+            <label
               key={ods}
-              onClick={() => handleArrayToggle("co_beneficios", ods)}
               className={cn(
                 "flex items-center space-x-2 border rounded-lg p-2 cursor-pointer text-sm",
                 (formData.co_beneficios || []).includes(ods) ? "border-primary bg-primary/5" : ""
               )}
             >
-              <Checkbox checked={(formData.co_beneficios || []).includes(ods)} />
+              <Checkbox 
+                checked={(formData.co_beneficios || []).includes(ods)} 
+                onCheckedChange={() => handleArrayToggle("co_beneficios", ods)}
+              />
               <span>{ods}</span>
-            </div>
+            </label>
           ))}
         </div>
       </div>
