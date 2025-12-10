@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMessages } from '@/hooks/useMessages';
 import { ConversationList } from '@/components/messages/ConversationList';
 import { ConversationView } from '@/components/messages/ConversationView';
 import { NewConversationDialog } from '@/components/messages/NewConversationDialog';
+import { BackButton } from '@/components/layout/BackButton';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export default function Mensagens() {
   const [searchParams, setSearchParams] = useSearchParams();

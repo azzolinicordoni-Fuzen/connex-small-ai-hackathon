@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { BackButton } from "@/components/layout/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -190,12 +191,17 @@ export default function Conexoes() {
         <div className="container mx-auto px-4">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-2">
-              Descobrir Conexões
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Encontre agentes relevantes para expandir sua rede e fazer negócios
-            </p>
+            <div className="flex items-center gap-3 mb-4">
+              <BackButton />
+              <div>
+                <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
+                  Descobrir Conexões
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Encontre agentes relevantes para expandir sua rede e fazer negócios
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Tabs */}
