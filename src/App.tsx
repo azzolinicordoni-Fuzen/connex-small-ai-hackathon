@@ -12,6 +12,7 @@ import MinhasConexoes from "./pages/MinhasConexoes";
 import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
+import PerfilPublico from "./pages/PerfilPublico";
 import NotFound from "./pages/NotFound";
 import MeusProjetos from "./pages/MeusProjetos";
 import Notificacoes from "./pages/Notificacoes";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/feed" element={<Feed />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<Perfil />} />
+            <Route path="/perfil/:id" element={<PerfilPublico />} />
             <Route path="/meus-projetos" element={<MeusProjetos />} />
             <Route path="/notificacoes" element={<Notificacoes />} />
             <Route path="/configuracoes" element={<Configuracoes />} />

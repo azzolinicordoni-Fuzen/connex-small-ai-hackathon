@@ -102,12 +102,18 @@ export function DashboardConnections({
             </p>
             {pendingRequests.slice(0, 3).map((conn) => (
               <div key={conn.id} className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={conn.profile.avatar_url || undefined} />
-                  <AvatarFallback>{conn.profile.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <Link to={`/perfil/${conn.profile.id}`}>
+                  <Avatar className="w-10 h-10 cursor-pointer transition-transform hover:scale-105">
+                    <AvatarImage src={conn.profile.avatar_url || undefined} />
+                    <AvatarFallback>{conn.profile.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </Link>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{conn.profile.name}</p>
+                  <Link to={`/perfil/${conn.profile.id}`}>
+                    <p className="font-medium text-sm truncate hover:text-primary transition-colors cursor-pointer">
+                      {conn.profile.name}
+                    </p>
+                  </Link>
                   <p className="text-xs text-muted-foreground">
                     {agentTypeLabels[conn.profile.agent_type] || conn.profile.agent_type}
                   </p>

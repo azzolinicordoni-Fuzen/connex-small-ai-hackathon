@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -136,14 +137,20 @@ export function FeedSidebar({ suggestedConnections = [], onConnect }: FeedSideba
             <div className="space-y-4">
               {suggestedConnections.slice(0, 3).map((person) => (
                 <div key={person.id} className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={person.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                      {person.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Link to={`/perfil/${person.id}`}>
+                    <Avatar className="h-10 w-10 cursor-pointer transition-transform hover:scale-105">
+                      <AvatarImage src={person.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                        {person.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">{person.name}</h4>
+                    <Link to={`/perfil/${person.id}`}>
+                      <h4 className="font-medium text-sm truncate hover:text-primary transition-colors cursor-pointer">
+                        {person.name}
+                      </h4>
+                    </Link>
                     <p className="text-xs text-muted-foreground truncate">{person.role}</p>
                   </div>
                   <Button 
@@ -158,9 +165,9 @@ export function FeedSidebar({ suggestedConnections = [], onConnect }: FeedSideba
               ))}
             </div>
             <Button variant="ghost" size="sm" className="w-full mt-3 text-primary" asChild>
-              <a href="/conexoes">
+              <Link to="/conexoes">
                 Ver todas as sugestões
-              </a>
+              </Link>
             </Button>
           </CardContent>
         </Card>

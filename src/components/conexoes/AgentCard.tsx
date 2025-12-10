@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,7 @@ export default function AgentCard({
   specialties = [],
   projectStages = []
 }: AgentCardProps) {
+  const navigate = useNavigate();
   const TypeIcon = AGENT_ICONS[profile.agent_type] || Users;
   const typeLabel = AGENT_LABELS[profile.agent_type] || "Outro";
   const typeColor = AGENT_COLORS[profile.agent_type] || AGENT_COLORS.outro;
@@ -113,6 +115,10 @@ export default function AgentCard({
   const filledFields = completenessFields.filter(f => f && f.trim && f.trim() !== "").length;
   const isProfileComplete = filledFields >= 3;
   const isProfileBasic = filledFields < 2;
+
+  const handleProfileClick = () => {
+    navigate(`/perfil/${profile.id}`);
+  };
 
   const getConnectionButton = () => {
     if (isLoading) {
@@ -147,7 +153,7 @@ export default function AgentCard({
         );
       default:
         return (
-          <Button className="flex-1" onClick={() => onConnect(profile.id)}>
+          <Button className="flex-1" onClick={(e) => { e.stopPropagation(); onConnect(profile.id); }}>
             <UserPlus className="w-4 h-4 mr-1" />
             Conectar
           </Button>
@@ -165,10 +171,13 @@ export default function AgentCard({
       ) : null}
       
       <CardContent className="p-5">
-        {/* Header: Avatar + Name + Type */}
-        <div className="flex items-start gap-4 mb-4">
+        {/* Header: Avatar + Name + Type - Clickable */}
+        <div 
+          className="flex items-start gap-4 mb-4 cursor-pointer"
+          onClick={handleProfileClick}
+        >
           <div className="relative">
-            <Avatar className="w-14 h-14 ring-2 ring-background shadow-md">
+            <Avatar className="w-14 h-14 ring-2 ring-background shadow-md transition-transform hover:scale-105">
               <AvatarImage src={profile.avatar_url || undefined} alt={profile.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                 {profile.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
@@ -183,7 +192,9 @@ export default function AgentCard({
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-foreground truncate">{profile.name}</h3>
+              <h3 className="font-semibold text-foreground truncate hover:text-primary transition-colors">
+                {profile.name}
+              </h3>
               {profile.is_premium && (
                 <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 text-xs">
                   Premium
@@ -272,7 +283,7 @@ export default function AgentCard({
             <Button 
               variant="outline" 
               size="icon"
-              onClick={() => onMessage(profile.id)}
+              onClick={(e) => { e.stopPropagation(); onMessage(profile.id); }}
               title="Enviar mensagem"
             >
               <MessageSquare className="w-4 h-4" />

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,7 @@ export default function ConnectionCard({
   onRemove,
   onMessage 
 }: ConnectionCardProps) {
+  const navigate = useNavigate();
   const { profile, status, isRequester } = connection;
   const TypeIcon = AGENT_ICONS[profile.agent_type] || Users;
   const typeLabel = AGENT_LABELS[profile.agent_type] || "Outro";
@@ -92,13 +94,20 @@ export default function ConnectionCard({
   const isPending = status === 'pending';
   const canAccept = isPending && !isRequester;
 
+  const handleProfileClick = () => {
+    navigate(`/perfil/${profile.id}`);
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <Avatar className="w-12 h-12">
+          {/* Avatar - Clickable */}
+          <div 
+            className="relative shrink-0 cursor-pointer"
+            onClick={handleProfileClick}
+          >
+            <Avatar className="w-12 h-12 transition-transform hover:scale-105">
               <AvatarImage src={profile.avatar_url || undefined} alt={profile.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                 {profile.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
@@ -111,10 +120,15 @@ export default function ConnectionCard({
             )}
           </div>
 
-          {/* Info */}
+          {/* Info - Clickable name */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium truncate">{profile.name}</h4>
+              <h4 
+                className="font-medium truncate cursor-pointer hover:text-primary transition-colors"
+                onClick={handleProfileClick}
+              >
+                {profile.name}
+              </h4>
               {isPending && (
                 <Badge variant="outline" className="text-xs text-amber-600 border-amber-200 bg-amber-50">
                   <Clock className="w-3 h-3 mr-1" />
