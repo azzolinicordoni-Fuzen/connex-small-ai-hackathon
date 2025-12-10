@@ -1440,6 +1440,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_create_project: { Args: { p_profile_id: string }; Returns: boolean }
       is_project_member: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       is_user_premium: { Args: never; Returns: boolean }
