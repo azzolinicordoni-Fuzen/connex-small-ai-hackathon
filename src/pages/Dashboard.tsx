@@ -308,13 +308,10 @@ export default function Dashboard() {
 
           {/* Stats - Resumo Rápido */}
           <DashboardStats
-            profileViews={0}
             activeConnections={activeConnections}
-            pendingConnections={pendingConnections}
             activeProjects={activeProjects}
             unreadNotifications={unreadCount}
             unreadMessages={messagesUnreadCount}
-            upcomingDeadlines={upcomingDeadlines}
           />
 
           {/* Main Grid */}
@@ -344,7 +341,7 @@ export default function Dashboard() {
                 onReject={handleRejectConnection}
               />
               
-              <DashboardQuickActions agentType={profile?.agent_type || 'outro'} />
+              <DashboardQuickActions />
             </div>
           </div>
         </main>

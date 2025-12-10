@@ -1,33 +1,24 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  Eye, 
   Users, 
-  UserPlus, 
   FolderOpen, 
   Bell,
-  MessageSquare,
-  Clock
+  MessageSquare
 } from "lucide-react";
 
 interface DashboardStatsProps {
-  profileViews: number;
   activeConnections: number;
-  pendingConnections: number;
   activeProjects: number;
   unreadNotifications: number;
   unreadMessages: number;
-  upcomingDeadlines: number;
 }
 
 export function DashboardStats({
-  profileViews,
   activeConnections,
-  pendingConnections,
   activeProjects,
   unreadNotifications,
-  unreadMessages,
-  upcomingDeadlines
+  unreadMessages
 }: DashboardStatsProps) {
   const stats = [
     { 
@@ -38,34 +29,18 @@ export function DashboardStats({
       color: "text-primary"
     },
     { 
-      label: "Conexões Ativas", 
+      label: "Conexões", 
       value: activeConnections, 
       icon: Users, 
       href: "/minhas-conexoes",
       color: "text-blue-500"
     },
     { 
-      label: "Solicitações Pendentes", 
-      value: pendingConnections, 
-      icon: UserPlus, 
-      href: "/minhas-conexoes",
-      color: "text-amber-500",
-      highlight: pendingConnections > 0
-    },
-    { 
-      label: "Prazos Próximos", 
-      value: upcomingDeadlines, 
-      icon: Clock, 
-      href: "/meus-projetos",
-      color: "text-orange-500",
-      highlight: upcomingDeadlines > 0
-    },
-    { 
       label: "Notificações", 
       value: unreadNotifications, 
       icon: Bell, 
       href: "/notificacoes",
-      color: "text-red-500",
+      color: "text-amber-500",
       highlight: unreadNotifications > 0
     },
     { 
@@ -79,7 +54,7 @@ export function DashboardStats({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {stats.map((stat) => (
         <Link key={stat.label} to={stat.href}>
           <Card className={`transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${stat.highlight ? 'ring-2 ring-primary/20' : ''}`}>
