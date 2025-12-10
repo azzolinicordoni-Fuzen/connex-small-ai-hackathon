@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, ArrowLeft, Crown, LayoutGrid, BarChart3, MessageSquare } from 'lucide-react';
+import { Plus, ArrowLeft, LayoutGrid, BarChart3, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
@@ -52,10 +52,6 @@ export default function MeusProjetos() {
   };
 
   const handleCreateProject = async () => {
-    if (!profile?.is_premium) {
-      toast.error('Esta funcionalidade é exclusiva para usuários Premium');
-      return;
-    }
     setShowCreateDialog(true);
   };
 
@@ -96,28 +92,9 @@ export default function MeusProjetos() {
             <Button onClick={handleCreateProject} className="gap-2">
               <Plus className="w-4 h-4" />
               Novo Projeto
-              {!profile?.is_premium && <Crown className="w-4 h-4 text-yellow-500" />}
             </Button>
           )}
         </div>
-
-        {/* Premium Required Message */}
-        {!profile?.is_premium && !selectedProjectId && (
-          <Card className="mb-6 border-yellow-500/50 bg-yellow-500/5">
-            <CardContent className="py-4 flex items-center gap-3">
-              <Crown className="w-5 h-5 text-yellow-500" />
-              <div>
-                <p className="font-medium">Funcionalidade Premium</p>
-                <p className="text-sm text-muted-foreground">
-                  A gestão de projetos é exclusiva para assinantes Premium.
-                </p>
-              </div>
-              <Button variant="outline" size="sm" className="ml-auto">
-                Upgrade
-              </Button>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Project List or Detail View */}
         {!selectedProjectId ? (
@@ -130,7 +107,7 @@ export default function MeusProjetos() {
                   <p className="text-muted-foreground mb-4">
                     Você ainda não tem projetos cadastrados
                   </p>
-                  <Button onClick={handleCreateProject} disabled={!profile?.is_premium}>
+                  <Button onClick={handleCreateProject}>
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Primeiro Projeto
                   </Button>
