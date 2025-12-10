@@ -112,18 +112,25 @@ export default function SubperfilDialog({ open, onOpenChange, agentType, profile
     }
   };
 
-  const [formData, setFormData] = useState<any>(() => editData || getInitialData());
+  const [formData, setFormData] = useState<any>(() => {
+    const initialData = getInitialData();
+    if (editData) {
+      return { ...initialData, ...editData };
+    }
+    return initialData;
+  });
 
   useEffect(() => {
     if (open) {
+      const initialData = getInitialData();
       if (editData) {
-        setFormData(editData);
+        setFormData({ ...initialData, ...editData });
       } else {
-        setFormData(getInitialData());
+        setFormData(initialData);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, editData?.id]);
 
   const handleArrayToggle = (field: string, value: string) => {
     const current = formData[field] || [];
