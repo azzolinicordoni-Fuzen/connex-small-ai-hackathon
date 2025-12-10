@@ -32,7 +32,7 @@ const navItems = [
   { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
   { icon: User, label: "Meu Perfil", href: "/perfil" },
   { icon: Users, label: "Conexões", href: "/conexoes" },
-  { icon: FolderOpen, label: "Meus Projetos", href: "/projetos" },
+  { icon: FolderOpen, label: "Meus Projetos", href: "/meus-projetos" },
   { icon: MessageSquare, label: "Mensagens", href: "/mensagens", badge: 3 },
   { icon: Bell, label: "Notificações", href: "/notificacoes", badge: 5 },
   { icon: Settings, label: "Configurações", href: "/configuracoes" },
@@ -371,9 +371,11 @@ export default function Dashboard() {
                       <span>Ver Feed</span>
                     </Link>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-                    <FolderOpen className="w-6 h-6" />
-                    <span>Criar Projeto</span>
+                  <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                    <Link to="/meus-projetos">
+                      <FolderOpen className="w-6 h-6" />
+                      <span>Criar Projeto</span>
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
