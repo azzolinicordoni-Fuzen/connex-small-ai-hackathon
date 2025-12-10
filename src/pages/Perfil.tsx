@@ -289,7 +289,7 @@ export default function Perfil() {
                 setIsSubperfilDialogOpen(true);
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Adicionar Projeto
+                Adicionar {config.subperfilLabel.slice(0, -1) || "Requisição"}
               </Button>
             </div>
 
@@ -308,7 +308,7 @@ export default function Perfil() {
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Criar primeiro projeto
+                    Criar primeiro(a) {config.subperfilLabel.slice(0, -1).toLowerCase() || "requisição"}
                   </Button>
                 </CardContent>
               </Card>
