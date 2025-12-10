@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, ArrowLeft, LayoutGrid, BarChart3, MessageSquare, Settings } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
-import { BackButton } from '@/components/layout/BackButton';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
 import ProjectCharts from '@/components/projects/ProjectCharts';
@@ -109,27 +109,30 @@ export default function MeusProjetos() {
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs 
+          items={
+            selectedProject 
+              ? [
+                  { label: 'Meus Projetos', href: '/meus-projetos' },
+                  { label: selectedProject.name }
+                ]
+              : [{ label: 'Meus Projetos' }]
+          } 
+        />
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <BackButton />
-            {selectedProjectId && (
-              <Button variant="ghost" size="sm" onClick={() => setSelectedProjectId(null)}>
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Lista
-              </Button>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold">
-                {selectedProject ? selectedProject.name : 'Meus Projetos'}
-              </h1>
-              <p className="text-muted-foreground">
-                {selectedProject 
-                  ? 'Gerencie as etapas e membros do projeto'
-                  : 'Gerencie seus projetos de crédito de carbono'
-                }
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {selectedProject ? selectedProject.name : 'Meus Projetos'}
+            </h1>
+            <p className="text-muted-foreground">
+              {selectedProject 
+                ? 'Gerencie as etapas e membros do projeto'
+                : 'Gerencie seus projetos de crédito de carbono'
+              }
+            </p>
           </div>
           {!selectedProjectId && (
             <Button onClick={handleCreateProject} className="gap-2">
