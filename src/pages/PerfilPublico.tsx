@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -17,6 +17,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BackButton } from "@/components/layout/BackButton";
 import { useConnections } from "@/hooks/useConnections";
+import { UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string }> = {
   proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald" },
@@ -30,6 +31,20 @@ const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; co
   projeto: { icon: FolderOpen, label: "Projeto", color: "purple" },
   engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal" },
   outro: { icon: Users, label: "Outro Agente", color: "gray" },
+};
+
+const AGENT_COLORS: Record<string, string> = {
+  proprietario: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  desenvolvedor: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+  certificadora: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  auditor: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  investidor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  financeira: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+  advogado: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-400",
+  comprador: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  projeto: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  engenheiro: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+  outro: "bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400",
 };
 
 interface PublicProfile {
@@ -50,6 +65,7 @@ export default function PerfilPublico() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [subprofiles, setSubprofiles] = useState<UnifiedSubprofile[]>([]);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingConnection, setLoadingConnection] = useState(false);
@@ -76,20 +92,32 @@ export default function PerfilPublico() {
     fetchCurrentProfileId();
   }, [user, id]);
 
-  // Fetch the public profile
+  // Fetch the public profile and its subprofiles
   useEffect(() => {
     const fetchProfile = async () => {
       if (!id) return;
       
       try {
-        const { data, error } = await supabase
+        // Fetch profile
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("id, name, bio, location, phone, whatsapp, avatar_url, cover_url, agent_type, is_premium")
           .eq("id", id)
           .single();
 
-        if (error) throw error;
-        setProfile(data);
+        if (profileError) throw profileError;
+        setProfile(profileData);
+
+        // Fetch subprofiles from the unified view
+        const { data: subprofilesData, error: subprofilesError } = await supabase
+          .from('unified_subprofiles' as any)
+          .select('*')
+          .eq('profile_id', id)
+          .order('created_at', { ascending: false });
+
+        if (!subprofilesError && subprofilesData) {
+          setSubprofiles(subprofilesData as unknown as UnifiedSubprofile[]);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Perfil não encontrado");
@@ -275,6 +303,9 @@ export default function PerfilPublico() {
                   <IconComponent className="w-3 h-3" />
                   {config.label}
                 </Badge>
+                <Badge variant="secondary">
+                  {subprofiles.length} subperfil{subprofiles.length !== 1 ? 's' : ''}
+                </Badge>
               </div>
               {profile.bio && (
                 <p className="text-muted-foreground max-w-2xl mb-4">{profile.bio}</p>
@@ -308,15 +339,63 @@ export default function PerfilPublico() {
           </div>
         </div>
 
-        {/* Privacy Notice for non-connected users */}
-        {connectionStatus !== 'accepted' && (
+        {/* Subprofiles Section */}
+        {subprofiles.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">
+              Subperfis de {profile.name}
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {subprofiles.map((sp) => {
+                const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
+                const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
+                const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
+
+                return (
+                  <Card key={sp.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${typeColor}`}>
+                          <TypeIcon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate">{sp.name}</h3>
+                          <p className="text-sm text-muted-foreground">{typeLabel}</p>
+                          {sp.description && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              {sp.description}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {sp.detail_1 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {sp.detail_1}
+                              </Badge>
+                            )}
+                            {sp.detail_2 && (
+                              <Badge variant="outline" className="text-xs">
+                                {sp.detail_2}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state for no subprofiles */}
+        {subprofiles.length === 0 && (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Users className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Conecte-se para ver mais</h3>
+              <h3 className="font-semibold text-lg mb-2">Nenhum subperfil cadastrado</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                Conecte-se com {profile.name} para ver informações completas de contato, 
-                subperfis e poder enviar mensagens.
+                Este perfil ainda não possui subperfis cadastrados.
               </p>
             </CardContent>
           </Card>
