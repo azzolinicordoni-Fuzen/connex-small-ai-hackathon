@@ -10,6 +10,13 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Search, 
   MapPin, 
@@ -28,14 +35,15 @@ import {
   ClipboardCheck,
   Filter,
   SlidersHorizontal,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { useOnlineProjects } from "@/hooks/useProjects";
-import { useConnections, useDiscoverProfiles } from "@/hooks/useConnections";
+import { useSubprofileConnections, useDiscoverSubprofiles, useMySubprofiles, UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { STAGE_CONFIG, ProjectStageType } from "@/types/project";
-import AgentCard from "@/components/conexoes/AgentCard";
+import SubprofileCard from "@/components/conexoes/SubprofileCard";
 
 const agentTypeIcons: Record<string, any> = {
   proprietario: TreePine,
@@ -75,6 +83,7 @@ const filters = [
   { id: "comprador", label: "Compradores", icon: Building2 },
   { id: "financeira", label: "Financeiras", icon: Banknote },
   { id: "advogado", label: "Advogados", icon: Scale },
+  { id: "projeto", label: "Projetos", icon: FolderOpen },
 ];
 
 interface ProjectStageData {
@@ -90,9 +99,11 @@ export default function Conexoes() {
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("agentes");
+  const [activeTab, setActiveTab] = useState("subperfis");
   const [projectStages, setProjectStages] = useState<Record<string, ProjectStageData[]>>({});
   const [loadingConnection, setLoadingConnection] = useState<string | null>(null);
+  const [showSelectSubprofileDialog, setShowSelectSubprofileDialog] = useState(false);
+  const [targetSubprofile, setTargetSubprofile] = useState<UnifiedSubprofile | null>(null);
 
   // Get current user's profile id
   useEffect(() => {
@@ -108,8 +119,9 @@ export default function Conexoes() {
     fetchProfileId();
   }, [user]);
 
-  const { profiles, loading: profilesLoading } = useDiscoverProfiles(currentProfileId || undefined);
-  const { connections, getConnectionStatus, sendConnectionRequest } = useConnections(currentProfileId || undefined);
+  const { subprofiles, loading: subprofilesLoading } = useDiscoverSubprofiles(currentProfileId || undefined);
+  const { subprofiles: mySubprofiles, loading: mySubprofilesLoading } = useMySubprofiles(currentProfileId || undefined);
+  const { getConnectionStatus, sendConnectionRequest } = useSubprofileConnections(currentProfileId || undefined);
   const { projects: onlineProjects, loading: projectsLoading } = useOnlineProjects();
 
   // Fetch stages for online projects
@@ -143,12 +155,13 @@ export default function Conexoes() {
     fetchProjectStages();
   }, [onlineProjects]);
 
-  const filteredProfiles = profiles.filter((profile) => {
-    const matchesFilter = activeFilter === "todos" || profile.agent_type === activeFilter;
+  const filteredSubprofiles = subprofiles.filter((sp) => {
+    const matchesFilter = activeFilter === "todos" || sp.subprofile_type === activeFilter;
     const matchesSearch = 
-      profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (profile.location || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (profile.bio || '').toLowerCase().includes(searchQuery.toLowerCase());
+      sp.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (sp.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (sp.profile?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (sp.profile?.location || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -160,10 +173,36 @@ export default function Conexoes() {
     return matchesSearch;
   });
 
-  const handleConnect = async (profileId: string) => {
-    setLoadingConnection(profileId);
-    await sendConnectionRequest(profileId);
+  const handleConnect = (targetSp: UnifiedSubprofile) => {
+    if (mySubprofiles.length === 0) {
+      // No subprofiles to connect with
+      setTargetSubprofile(null);
+      setShowSelectSubprofileDialog(true);
+      return;
+    }
+    
+    if (mySubprofiles.length === 1) {
+      // Auto-select the only subprofile
+      handleSendConnection(mySubprofiles[0], targetSp);
+    } else {
+      // Show dialog to select which subprofile to connect with
+      setTargetSubprofile(targetSp);
+      setShowSelectSubprofileDialog(true);
+    }
+  };
+
+  const handleSendConnection = async (mySp: UnifiedSubprofile, targetSp: UnifiedSubprofile) => {
+    setLoadingConnection(targetSp.id);
+    await sendConnectionRequest(
+      mySp.id,
+      mySp.subprofile_type,
+      targetSp.id,
+      targetSp.subprofile_type,
+      targetSp.profile_id
+    );
     setLoadingConnection(null);
+    setShowSelectSubprofileDialog(false);
+    setTargetSubprofile(null);
   };
 
   const getVisibleStages = (projectId: string) => {
@@ -177,9 +216,9 @@ export default function Conexoes() {
     return Math.round(stages.reduce((sum, s) => sum + (s.progress_percentage || 0), 0) / stages.length);
   };
 
-  // Count profiles by type for filter badges
-  const profileCounts = profiles.reduce((acc, p) => {
-    acc[p.agent_type] = (acc[p.agent_type] || 0) + 1;
+  // Count subprofiles by type for filter badges
+  const subprofileCounts = subprofiles.reduce((acc, sp) => {
+    acc[sp.subprofile_type] = (acc[sp.subprofile_type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -195,10 +234,10 @@ export default function Conexoes() {
               <BackButton />
               <div>
                 <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
-                  Descobrir Conexões
+                  Rede de Conexões
                 </h1>
                 <p className="text-muted-foreground text-lg">
-                  Encontre agentes relevantes para expandir sua rede e fazer negócios
+                  Conecte seus subperfis com outros agentes do mercado de carbono
                 </p>
               </div>
             </div>
@@ -207,11 +246,11 @@ export default function Conexoes() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <TabsList className="bg-muted/50">
-              <TabsTrigger value="agentes" className="gap-2 data-[state=active]:bg-background">
+              <TabsTrigger value="subperfis" className="gap-2 data-[state=active]:bg-background">
                 <Users className="w-4 h-4" />
-                Agentes
+                Subperfis
                 <Badge variant="secondary" className="ml-1 bg-primary/10 text-primary">
-                  {profiles.length}
+                  {subprofiles.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="projetos" className="gap-2 data-[state=active]:bg-background">
@@ -231,8 +270,8 @@ export default function Conexoes() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    placeholder={activeTab === "agentes" 
-                      ? "Buscar por nome, localização ou área de atuação..."
+                    placeholder={activeTab === "subperfis" 
+                      ? "Buscar por nome do subperfil, perfil ou localização..."
                       : "Buscar projetos por nome, localização..."
                     }
                     className="pl-10 h-11"
@@ -242,14 +281,14 @@ export default function Conexoes() {
                 </div>
               </div>
 
-              {/* Agent Type Filters - Horizontal Scroll */}
-              {activeTab === "agentes" && (
+              {/* Type Filters - Horizontal Scroll */}
+              {activeTab === "subperfis" && (
                 <ScrollArea className="w-full whitespace-nowrap">
                   <div className="flex gap-2 pb-2">
                     {filters.map((filter) => {
                       const count = filter.id === 'todos' 
-                        ? profiles.length 
-                        : (profileCounts[filter.id] || 0);
+                        ? subprofiles.length 
+                        : (subprofileCounts[filter.id] || 0);
                       const FilterIcon = filter.icon;
                       
                       return (
@@ -277,29 +316,29 @@ export default function Conexoes() {
               )}
             </div>
 
-            {/* Agents Tab */}
-            <TabsContent value="agentes">
-              {profilesLoading ? (
+            {/* Subprofiles Tab */}
+            <TabsContent value="subperfis">
+              {subprofilesLoading ? (
                 <div className="flex items-center justify-center py-16">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
-              ) : filteredProfiles.length === 0 ? (
+              ) : filteredSubprofiles.length === 0 ? (
                 <div className="text-center py-16">
                   <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-semibold text-lg mb-2">Nenhum agente encontrado</h3>
+                  <h3 className="font-semibold text-lg mb-2">Nenhum subperfil encontrado</h3>
                   <p className="text-muted-foreground">
                     Tente ajustar seus filtros ou termos de busca
                   </p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProfiles.map((profile) => (
-                    <AgentCard
-                      key={profile.id}
-                      profile={profile}
-                      connectionStatus={getConnectionStatus(profile.id)}
-                      onConnect={handleConnect}
-                      isLoading={loadingConnection === profile.id}
+                  {filteredSubprofiles.map((sp) => (
+                    <SubprofileCard
+                      key={sp.id}
+                      subprofile={sp}
+                      connectionStatus={getConnectionStatus(sp.id)}
+                      onConnect={() => handleConnect(sp)}
+                      isLoading={loadingConnection === sp.id}
                     />
                   ))}
                 </div>
@@ -422,6 +461,55 @@ export default function Conexoes() {
       </main>
 
       <Footer />
+
+      {/* Select Subprofile Dialog */}
+      <Dialog open={showSelectSubprofileDialog} onOpenChange={setShowSelectSubprofileDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {mySubprofiles.length === 0 
+                ? "Crie um Subperfil" 
+                : "Selecione um Subperfil"}
+            </DialogTitle>
+            <DialogDescription>
+              {mySubprofiles.length === 0 
+                ? "Você precisa criar pelo menos um subperfil antes de se conectar com outros agentes. Acesse seu perfil para criar um."
+                : `Selecione qual dos seus subperfis você quer conectar com "${targetSubprofile?.name}"`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {mySubprofiles.length === 0 ? (
+            <div className="flex flex-col items-center py-6">
+              <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
+              <Button onClick={() => window.location.href = '/perfil'}>
+                Ir para Meu Perfil
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2 mt-4">
+              {mySubprofiles.map((mySp) => {
+                const TypeIcon = agentTypeIcons[mySp.subprofile_type] || Users;
+                return (
+                  <Button
+                    key={mySp.id}
+                    variant="outline"
+                    className="w-full justify-start gap-3 h-auto py-3"
+                    onClick={() => targetSubprofile && handleSendConnection(mySp, targetSubprofile)}
+                  >
+                    <TypeIcon className="w-5 h-5 text-primary" />
+                    <div className="text-left">
+                      <p className="font-medium">{mySp.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {agentTypeLabels[mySp.subprofile_type] || mySp.subprofile_type}
+                      </p>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
