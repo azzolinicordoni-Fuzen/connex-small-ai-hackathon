@@ -1677,11 +1677,89 @@ export type Database = {
           },
         ]
       }
+      subprofile_connections: {
+        Row: {
+          addressee_profile_id: string
+          addressee_subprofile_id: string
+          addressee_subprofile_type: string
+          created_at: string
+          id: string
+          requester_profile_id: string
+          requester_subprofile_id: string
+          requester_subprofile_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addressee_profile_id: string
+          addressee_subprofile_id: string
+          addressee_subprofile_type: string
+          created_at?: string
+          id?: string
+          requester_profile_id: string
+          requester_subprofile_id: string
+          requester_subprofile_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addressee_profile_id?: string
+          addressee_subprofile_id?: string
+          addressee_subprofile_type?: string
+          created_at?: string
+          id?: string
+          requester_profile_id?: string
+          requester_subprofile_id?: string
+          requester_subprofile_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subprofile_connections_addressee_profile_id_fkey"
+            columns: ["addressee_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subprofile_connections_requester_profile_id_fkey"
+            columns: ["requester_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      unified_subprofiles: {
+        Row: {
+          busca_plataforma: string[] | null
+          contato_preferido: string | null
+          created_at: string | null
+          description: string | null
+          detail_1: string | null
+          detail_2: string | null
+          detail_3: string | null
+          id: string | null
+          mostrar_localizacao_precisa: boolean | null
+          mostrar_nome_publico: boolean | null
+          mostrar_telefone: boolean | null
+          name: string | null
+          permitir_mensagens: boolean | null
+          profile_id: string | null
+          subprofile_type: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      are_subprofiles_connected: {
+        Args: { subprofile1_id: string; subprofile2_id: string }
+        Returns: boolean
+      }
       are_users_connected: {
         Args: { user1_profile_id: string; user2_profile_id: string }
         Returns: boolean
