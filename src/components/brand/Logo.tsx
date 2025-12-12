@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Leaf } from "lucide-react";
 
 interface LogoProps {
   variant?: "default" | "light" | "dark";
@@ -16,11 +15,45 @@ const sizeClasses = {
 };
 
 const iconSizes = {
-  sm: "w-4 h-4",
-  md: "w-5 h-5",
-  lg: "w-6 h-6",
-  xl: "w-8 h-8",
+  sm: 20,
+  md: 24,
+  lg: 28,
+  xl: 36,
 };
+
+// Circular "O" icon with dots pattern inspired by the brand
+function CircularO({ size = 24, className }: { size?: number; className?: string }) {
+  const dotCount = 24;
+  const radius = size * 0.38;
+  const dotRadius = size * 0.04;
+  const center = size / 2;
+  
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox={`0 0 ${size} ${size}`}
+      className={className}
+    >
+      {Array.from({ length: dotCount }).map((_, i) => {
+        const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
+        const x = center + radius * Math.cos(angle);
+        const y = center + radius * Math.sin(angle);
+        // Vary dot size slightly for organic feel
+        const r = dotRadius * (0.8 + Math.random() * 0.4);
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={r}
+            fill="#9eff1f"
+          />
+        );
+      })}
+    </svg>
+  );
+}
 
 export function Logo({ 
   variant = "default", 
@@ -30,15 +63,10 @@ export function Logo({
 }: LogoProps) {
   const textColor = variant === "light" 
     ? "text-white" 
-    : variant === "dark" 
-      ? "text-foreground" 
-      : "text-foreground";
-  
-  const iconBgColor = "bg-primary";
-  const iconColor = "text-primary-foreground";
+    : "text-foreground";
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn("flex items-center gap-0.5", className)}>
       {showText && (
         <span className={cn(
           "font-display font-bold tracking-tight",
@@ -48,16 +76,7 @@ export function Logo({
           C
         </span>
       )}
-      <div className={cn(
-        "rounded-full flex items-center justify-center",
-        size === "sm" && "w-5 h-5",
-        size === "md" && "w-6 h-6",
-        size === "lg" && "w-7 h-7",
-        size === "xl" && "w-9 h-9",
-        iconBgColor
-      )}>
-        <Leaf className={cn(iconSizes[size], iconColor)} />
-      </div>
+      <CircularO size={iconSizes[size]} />
       {showText && (
         <span className={cn(
           "font-display font-bold tracking-tight",
@@ -73,21 +92,8 @@ export function Logo({
 
 export function LogoIcon({ size = "md", className }: { size?: "sm" | "md" | "lg" | "xl"; className?: string }) {
   return (
-    <div className={cn(
-      "rounded-full bg-primary flex items-center justify-center",
-      size === "sm" && "w-6 h-6",
-      size === "md" && "w-8 h-8",
-      size === "lg" && "w-10 h-10",
-      size === "xl" && "w-12 h-12",
-      className
-    )}>
-      <Leaf className={cn(
-        "text-primary-foreground",
-        size === "sm" && "w-3 h-3",
-        size === "md" && "w-4 h-4",
-        size === "lg" && "w-5 h-5",
-        size === "xl" && "w-6 h-6",
-      )} />
+    <div className={cn("flex items-center justify-center", className)}>
+      <CircularO size={iconSizes[size] * 1.5} />
     </div>
   );
 }
