@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
-  Leaf, 
   Home, 
   Users, 
   FolderOpen, 
@@ -33,6 +32,7 @@ import { DashboardConnections } from "@/components/dashboard/DashboardConnection
 import { DashboardActivity } from "@/components/dashboard/DashboardActivity";
 import { DashboardProfile } from "@/components/dashboard/DashboardProfile";
 import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
+import { Logo } from "@/components/brand/Logo";
 import { toast } from "sonner";
 
 interface Profile {
@@ -213,10 +213,7 @@ export default function Dashboard() {
           {/* Logo */}
           <div className="p-4 border-b border-border">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <Leaf className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-display font-bold text-xl">AgroConnect</span>
+              <Logo variant="dark" size="md" />
             </Link>
           </div>
 
