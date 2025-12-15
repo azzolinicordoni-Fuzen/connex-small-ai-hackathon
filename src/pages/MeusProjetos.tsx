@@ -58,6 +58,10 @@ export default function MeusProjetos() {
   };
 
   const handleCreateProject = async () => {
+    if (!profile?.id) {
+      toast.error('Aguarde o carregamento do perfil');
+      return;
+    }
     setShowCreateDialog(true);
   };
 
