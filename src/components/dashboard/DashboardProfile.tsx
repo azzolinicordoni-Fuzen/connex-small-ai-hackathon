@@ -1,14 +1,12 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   User, 
   ChevronRight,
   CheckCircle2,
-  Circle,
-  Sparkles
+  AlertCircle
 } from "lucide-react";
 
 interface Profile {
@@ -32,28 +30,25 @@ const agentTypeLabels: Record<string, string> = {
   engenheiro: "Engenheiro",
   desenvolvedor: "Desenvolvedor de Projetos",
   certificadora: "Certificadora",
-  investidor: "Investidor",
+  investidor: "Investidor / Comprador",
   projeto: "Projeto",
   comprador: "Comprador",
   auditor: "Auditor",
   financeira: "Instituição Financeira",
-  advogado: "Advogado",
+  juridico: "Jurídico",
   outro: "Outro",
 };
 
 export function DashboardProfile({ profile }: DashboardProfileProps) {
   const completionItems = [
     { label: "Foto de perfil", done: !!profile?.avatar_url },
-    { label: "Foto de capa", done: !!profile?.cover_url },
     { label: "Biografia", done: !!profile?.bio },
     { label: "Localização", done: !!profile?.location },
     { label: "Telefone", done: !!profile?.phone },
-    { label: "WhatsApp", done: !!profile?.whatsapp },
   ];
 
   const completedCount = completionItems.filter(item => item.done).length;
-  const completionPercent = Math.round((completedCount / completionItems.length) * 100);
-  const isComplete = completionPercent === 100;
+  const isComplete = completedCount === completionItems.length;
 
   return (
     <Card>
@@ -80,11 +75,12 @@ export function DashboardProfile({ profile }: DashboardProfileProps) {
               {isComplete ? (
                 <Badge className="bg-emerald-500/10 text-emerald-600 border-0">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Completo
+                  Verificado
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="text-xs">
-                  {completionPercent}% completo
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Básico
                 </Badge>
               )}
             </div>
@@ -94,40 +90,15 @@ export function DashboardProfile({ profile }: DashboardProfileProps) {
           </div>
         </div>
 
-        {/* Completion Progress */}
-        {!isComplete && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Completude do perfil</span>
-              <span className="font-medium">{completionPercent}%</span>
-            </div>
-            <Progress value={completionPercent} className="h-2" />
-            
-            <div className="space-y-2">
-              {completionItems.filter(item => !item.done).slice(0, 3).map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm">
-                  <Circle className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <Button variant="outline" className="w-full" size="sm" asChild>
-              <Link to="/perfil">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Completar perfil
-              </Link>
-            </Button>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="text-center py-2">
-            <p className="text-sm text-muted-foreground">
-              Seu perfil está completo! Continue ativo para aumentar sua visibilidade.
-            </p>
-          </div>
-        )}
+        {/* Status Info */}
+        <div className="text-center py-2">
+          <p className="text-sm text-muted-foreground">
+            {isComplete 
+              ? "Seu perfil está completo! Continue ativo para aumentar sua visibilidade."
+              : "Complete seu perfil para aparecer melhor nas conexões."
+            }
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
