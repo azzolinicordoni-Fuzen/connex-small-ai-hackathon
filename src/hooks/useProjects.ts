@@ -321,6 +321,7 @@ export function useProjectMessages(projectId: string | undefined) {
           sender:profiles!project_messages_sender_id_fkey(id, name, avatar_url)
         `)
         .eq('project_id', projectId)
+        .or('is_stage_comment.is.null,is_stage_comment.eq.false')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
