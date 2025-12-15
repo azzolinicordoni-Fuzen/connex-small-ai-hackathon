@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
   Plus, MapPin, Phone, Mail, MessageCircle, Edit, 
-  Building2, Users, UserCheck, Layers,
+  Building2, Users, UserCheck, Layers, Target, Briefcase, FileText,
   HardHat, Scale, Banknote, ClipboardCheck
 } from "lucide-react";
 import { toast } from "sonner";
@@ -223,84 +223,88 @@ export default function Perfil() {
         </div>
 
         {/* Profile Info */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{profile.name}</h1>
-                {profile.is_premium && (
-                  <Badge variant="emerald">Premium</Badge>
-                )}
-                <ProfileStatusBadge profile={profile} />
-              </div>
-              <div className="flex items-center gap-2 mb-4">
-                <Badge variant="outline" className="gap-1">
-                  <IconComponent className="w-3 h-3" />
-                  {config.label}
-                </Badge>
-                <Badge variant="secondary" className="gap-1">
-                  <UserCheck className="w-3 h-3" />
-                  {acceptedCount} conexões
-                </Badge>
-              </div>
-              
-              {/* Description Section */}
-              {(profile.bio || profile.areas_atuacao || profile.objetivo_plataforma) && (
-                <div className="grid gap-4 sm:grid-cols-3 mb-6 mt-4">
-                  {profile.bio && (
-                    <Card className="p-4 bg-muted/30">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                        Sobre o Perfil
-                      </h4>
-                      <p className="text-sm">{profile.bio}</p>
-                    </Card>
-                  )}
-                  {profile.areas_atuacao && (
-                    <Card className="p-4 bg-muted/30">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                        Áreas de Atuação
-                      </h4>
-                      <p className="text-sm">{profile.areas_atuacao}</p>
-                    </Card>
-                  )}
-                  {profile.objetivo_plataforma && (
-                    <Card className="p-4 bg-muted/30">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                        Objetivo na Plataforma
-                      </h4>
-                      <p className="text-sm">{profile.objetivo_plataforma}</p>
-                    </Card>
-                  )}
-                </div>
+        <div className="mb-8 space-y-6">
+          {/* Header: Name, Badges */}
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <h1 className="text-3xl font-bold">{profile.name}</h1>
+              {profile.is_premium && (
+                <Badge variant="emerald">Premium</Badge>
               )}
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {profile.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    {profile.location}
-                  </span>
-                )}
-                {profile.phone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-4 h-4" />
-                    {profile.phone}
-                  </span>
-                )}
-                {profile.whatsapp && (
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4" />
-                    {profile.whatsapp}
-                  </span>
-                )}
-                {user?.email && (
-                  <span className="flex items-center gap-1">
-                    <Mail className="w-4 h-4" />
-                    {user.email}
-                  </span>
-                )}
-              </div>
+              <ProfileStatusBadge profile={profile} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="gap-1">
+                <IconComponent className="w-3 h-3" />
+                {config.label}
+              </Badge>
+              <Badge variant="secondary" className="gap-1">
+                <UserCheck className="w-3 h-3" />
+                {acceptedCount} conexões
+              </Badge>
             </div>
           </div>
+
+          {/* Contact Info Row */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground border-y border-border/50 py-4">
+            {profile.location && (
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary/70" />
+                {profile.location}
+              </span>
+            )}
+            {profile.phone && (
+              <span className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary/70" />
+                {profile.phone}
+              </span>
+            )}
+            {profile.whatsapp && (
+              <span className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-primary/70" />
+                {profile.whatsapp}
+              </span>
+            )}
+            {user?.email && (
+              <span className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary/70" />
+                {user.email}
+              </span>
+            )}
+          </div>
+
+          {/* Description Cards */}
+          {(profile.bio || profile.areas_atuacao || profile.objetivo_plataforma) && (
+            <div className="grid gap-4 md:grid-cols-3">
+              {profile.bio && (
+                <Card className="p-4 border-l-4 border-l-primary/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <h4 className="text-sm font-semibold">Sobre o Perfil</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.bio}</p>
+                </Card>
+              )}
+              {profile.areas_atuacao && (
+                <Card className="p-4 border-l-4 border-l-emerald-500/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Briefcase className="w-4 h-4 text-emerald-500" />
+                    <h4 className="text-sm font-semibold">Áreas de Atuação</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.areas_atuacao}</p>
+                </Card>
+              )}
+              {profile.objetivo_plataforma && (
+                <Card className="p-4 border-l-4 border-l-blue-500/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-4 h-4 text-blue-500" />
+                    <h4 className="text-sm font-semibold">Objetivo na Plataforma</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.objetivo_plataforma}</p>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Main Content with Tabs */}
