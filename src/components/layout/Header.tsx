@@ -27,7 +27,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <Logo 
               variant={isLanding ? "light" : "dark"} 
               size="lg" 
