@@ -27,16 +27,12 @@ import { useConnections } from "@/hooks/useConnections";
 import { useProjects } from "@/hooks/useProjects";
 import { usePosts } from "@/hooks/usePosts";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { DashboardProjects } from "@/components/dashboard/DashboardProjects";
-import { DashboardConnections } from "@/components/dashboard/DashboardConnections";
 import { DashboardActivity } from "@/components/dashboard/DashboardActivity";
-import { DashboardProfile } from "@/components/dashboard/DashboardProfile";
-import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
 import { DashboardNewsletter } from "@/components/dashboard/DashboardNewsletter";
 import { DashboardCalculator } from "@/components/dashboard/DashboardCalculator";
 import { DashboardCarbonMarket } from "@/components/dashboard/DashboardCarbonMarket";
 import { Logo } from "@/components/brand/Logo";
-import { toast } from "sonner";
+
 
 interface Profile {
   id: string;
@@ -74,7 +70,7 @@ export default function Dashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
   const { unreadCount } = useNotifications();
   const { totalUnreadCount: messagesUnreadCount } = useMessages();
-  const { connections, loading: connectionsLoading, acceptConnection, rejectConnection } = useConnections(profile?.id || '');
+  const { connections } = useConnections(profile?.id || '');
   const { projects, loading: projectsLoading } = useProjects(profile?.id || '');
   const { posts, loading: postsLoading } = usePosts();
   const navigate = useNavigate();
@@ -162,16 +158,6 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const handleAcceptConnection = async (connectionId: string) => {
-    await acceptConnection(connectionId);
-    toast.success("Conexão aceita!");
-  };
-
-  const handleRejectConnection = async (connectionId: string) => {
-    await rejectConnection(connectionId);
-    toast.success("Solicitação rejeitada");
-  };
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -184,16 +170,7 @@ export default function Dashboard() {
 
   // Calculate stats from real data
   const activeConnections = connections.filter(c => c.status === 'accepted').length;
-  const pendingConnections = connections.filter(c => c.status === 'pending' && !c.isRequester).length;
   const activeProjects = projectsWithStages.length;
-
-  // Transform connections for the component
-  const transformedConnections = connections.map(conn => ({
-    id: conn.id,
-    status: conn.status,
-    profile: conn.profile,
-    isRequester: conn.isRequester
-  }));
 
   // Transform posts for the component
   const transformedPosts = posts.map(post => ({
@@ -318,45 +295,27 @@ export default function Dashboard() {
 
           {/* Main Grid - New Layout */}
           <div className="grid lg:grid-cols-12 gap-6">
-            {/* Left Column - Projects & Newsletter */}
+            {/* Left Column - Newsletter */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Projects Section */}
-              <DashboardProjects 
-                projects={projectsWithStages} 
-                loading={loading} 
-              />
-              
               {/* Newsletter Section */}
               <DashboardNewsletter />
+              
+              {/* Activity Section */}
+              <DashboardActivity 
+                posts={transformedPosts} 
+                loading={postsLoading} 
+              />
             </div>
 
-            {/* Right Column - Calculator, Market & Profile */}
+            {/* Right Column - Calculator & Market */}
             <div className="lg:col-span-4 space-y-6">
               {/* Carbon Market */}
               <DashboardCarbonMarket />
               
               {/* Calculator */}
               <DashboardCalculator />
-              
-              {/* Profile Completion */}
-              <DashboardProfile profile={profile} />
-              
-              {/* Connections */}
-              <DashboardConnections 
-                connections={transformedConnections}
-                pendingCount={pendingConnections}
-                loading={connectionsLoading}
-                onAccept={handleAcceptConnection}
-                onReject={handleRejectConnection}
-              />
             </div>
           </div>
-
-          {/* Activity Section - Full Width */}
-          <DashboardActivity 
-            posts={transformedPosts} 
-            loading={postsLoading} 
-          />
         </main>
       </div>
     </div>
