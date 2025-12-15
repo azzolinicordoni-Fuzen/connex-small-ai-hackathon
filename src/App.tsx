@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import RecuperarSenha from "./pages/RecuperarSenha";
+import RedefinirSenha from "./pages/RedefinirSenha";
 import Cadastro from "./pages/Cadastro";
 import Conexoes from "./pages/Conexoes";
 import MinhasConexoes from "./pages/MinhasConexoes";
@@ -18,7 +20,6 @@ import MeusProjetos from "./pages/MeusProjetos";
 import Notificacoes from "./pages/Notificacoes";
 import Configuracoes from "./pages/Configuracoes";
 import Mensagens from "./pages/Mensagens";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,6 +32,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenha />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/conexoes" element={<Conexoes />} />
             <Route path="/minhas-conexoes" element={<MinhasConexoes />} />
