@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
@@ -88,20 +86,6 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
     }));
   }, [profile, userEmail]);
 
-  const calculateCompletion = () => {
-    const requiredFields = [
-      formData.name,
-      formData.bio,
-      formData.phone || formData.whatsapp,
-      formData.estado,
-      formData.cidade,
-      formData.avatar_url,
-    ];
-    const filled = requiredFields.filter(f => f && String(f).trim() !== "").length;
-    return Math.round((filled / requiredFields.length) * 100);
-  };
-
-  const completion = calculateCompletion();
 
   const handleSave = async () => {
     setLoading(true);
@@ -164,26 +148,15 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Edit className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle>Editar Perfil</CardTitle>
-              <CardDescription>
-                Perfil Central (Conta Principal)
-              </CardDescription>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Edit className="w-5 h-5 text-primary" />
           </div>
-          <div className="text-right">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm text-muted-foreground">Progresso</span>
-              <Badge variant={completion === 100 ? "emerald" : "secondary"}>
-                {completion}%
-              </Badge>
-            </div>
-            <Progress value={completion} className="w-32 h-2" />
+          <div>
+            <CardTitle>Editar Perfil</CardTitle>
+            <CardDescription>
+              Perfil Central (Conta Principal)
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
