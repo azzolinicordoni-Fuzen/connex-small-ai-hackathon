@@ -36,24 +36,70 @@ export function useProjects(profileId: string | undefined) {
     fetchProjects();
   }, [fetchProjects]);
 
-  const createProject = async (projectData: Partial<CarbonProject>) => {
+  const createProject = async (projectData: Partial<CarbonProject> & { stagesData?: Record<ProjectStageType, { selected: boolean; notes: string; deadline: string; progress: number; responsavel: string; metadata: Record<string, any> }> }) => {
     if (!profileId) return null;
     
     try {
+      const { stagesData, ...projectFields } = projectData;
+      
       const { data, error } = await supabase
         .from('carbon_projects')
         .insert({ 
-          name: projectData.name || 'Novo Projeto',
-          description: projectData.description,
-          location: projectData.location,
-          area_hectares: projectData.area_hectares,
-          project_type: projectData.project_type,
+          name: projectFields.name || 'Novo Projeto',
+          description: projectFields.description,
+          location: projectFields.location,
+          area_hectares: projectFields.area_hectares,
+          project_type: projectFields.project_type,
+          is_online: projectFields.is_online || false,
+          visibility_mode: projectFields.visibility_mode || 'private',
           profile_id: profileId 
         })
         .select()
         .single();
 
       if (error) throw error;
+      
+      // If stagesData is provided, update the auto-created stages
+      if (data && stagesData) {
+        // Wait a moment for trigger to create stages
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Fetch the created stages
+        const { data: stages } = await supabase
+          .from('project_stages')
+          .select('id, stage')
+          .eq('project_id', data.id);
+        
+        if (stages) {
+          // Update each stage with the form data
+          for (const stage of stages) {
+            const stageKey = stage.stage as ProjectStageType;
+            const stageFormData = stagesData[stageKey];
+            
+            if (stageFormData) {
+              // Build notes with metadata
+              let notes = stageFormData.notes || '';
+              if (Object.keys(stageFormData.metadata).length > 0) {
+                notes = `${notes}\n\n---\nMetadata: ${JSON.stringify(stageFormData.metadata)}`;
+              }
+              if (stageFormData.responsavel) {
+                notes = `Responsável: ${stageFormData.responsavel}\n${notes}`;
+              }
+
+              await supabase
+                .from('project_stages')
+                .update({
+                  status: stageFormData.selected ? 'pendente' : 'pendente',
+                  is_visible: stageFormData.selected,
+                  progress_percentage: stageFormData.progress,
+                  deadline: stageFormData.deadline || null,
+                  notes: notes.trim() || null,
+                })
+                .eq('id', stage.id);
+            }
+          }
+        }
+      }
       
       toast.success('Projeto criado com sucesso!');
       await fetchProjects();
