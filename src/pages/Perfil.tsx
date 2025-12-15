@@ -15,25 +15,24 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { BackButton } from "@/components/layout/BackButton";
-import SubperfilCard from "@/components/perfil/SubperfilCard";
-import SubperfilDialog from "@/components/perfil/SubperfilDialog";
+import SubperfilDetailCard from "@/components/perfil/SubperfilDetailCard";
+import SubperfilFormDialog from "@/components/perfil/SubperfilFormDialog";
 import EditProfileDialog from "@/components/perfil/EditProfileDialog";
 import ProfileStatusBadge from "@/components/perfil/ProfileStatusBadge";
-import ProfileTechnicalInfo from "@/components/perfil/ProfileTechnicalInfo";
 import { useConnections } from "@/hooks/useConnections";
 
-const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string }> = {
-  proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald", subperfilLabel: "Áreas" },
-  desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan", subperfilLabel: "Projetos" },
-  certificadora: { icon: Award, label: "Certificadora", color: "amber", subperfilLabel: "Serviços" },
-  auditor: { icon: ClipboardCheck, label: "Auditor", color: "orange", subperfilLabel: "Serviços" },
-  investidor: { icon: Landmark, label: "Investidor / Comprador", color: "blue", subperfilLabel: "Requisições" },
-  financeira: { icon: Banknote, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos" },
-  juridico: { icon: Scale, label: "Jurídico", color: "slate", subperfilLabel: "Serviços" },
-  comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "red", subperfilLabel: "Demandas ESG" },
-  projeto: { icon: FolderOpen, label: "Projeto", color: "purple", subperfilLabel: "Projetos" },
-  engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços" },
-  outro: { icon: Users, label: "Outro Agente", color: "gray", subperfilLabel: "Subperfis" },
+const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string; singularLabel: string }> = {
+  proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald", subperfilLabel: "Áreas", singularLabel: "Área" },
+  desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan", subperfilLabel: "Projetos", singularLabel: "Projeto" },
+  certificadora: { icon: Award, label: "Certificadora", color: "amber", subperfilLabel: "Serviços", singularLabel: "Serviço" },
+  auditor: { icon: ClipboardCheck, label: "Auditor", color: "orange", subperfilLabel: "Serviços", singularLabel: "Serviço" },
+  investidor: { icon: Landmark, label: "Investidor / Comprador", color: "blue", subperfilLabel: "Requisições", singularLabel: "Requisição" },
+  financeira: { icon: Banknote, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos", singularLabel: "Produto" },
+  juridico: { icon: Scale, label: "Jurídico", color: "slate", subperfilLabel: "Serviços", singularLabel: "Serviço" },
+  comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "red", subperfilLabel: "Demandas ESG", singularLabel: "Demanda" },
+  projeto: { icon: FolderOpen, label: "Projeto", color: "purple", subperfilLabel: "Projetos", singularLabel: "Projeto" },
+  engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços", singularLabel: "Serviço" },
+  outro: { icon: Users, label: "Outro Agente", color: "gray", subperfilLabel: "Subperfis", singularLabel: "Subperfil" },
 };
 
 interface Profile {
@@ -285,30 +284,61 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Main Content - Two Column Layout */}
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Left Column - Subperfis */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">{config.subperfilLabel}</h2>
-                <p className="text-sm text-muted-foreground">
-                  Gerencie seus {config.subperfilLabel.toLowerCase()} cadastrados
-                </p>
-              </div>
-              <Button onClick={() => {
-                setEditingSubperfil(null);
-                setIsSubperfilDialogOpen(true);
-              }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar
-              </Button>
+        {/* Main Content */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">{config.subperfilLabel}</h2>
+              <p className="text-sm text-muted-foreground">
+                Gerencie seus {config.subperfilLabel.toLowerCase()} cadastrados
+              </p>
             </div>
+            <Button onClick={() => {
+              setEditingSubperfil(null);
+              setIsSubperfilDialogOpen(true);
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar {config.singularLabel}
+            </Button>
+          </div>
 
-            {subperfis.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <IconComponent className="w-12 h-12 text-muted-foreground mb-4" />
+          {subperfis.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <IconComponent className="w-12 h-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center mb-4">
+                  Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
+                </p>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setEditingSubperfil(null);
+                    setIsSubperfilDialogOpen(true);
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar primeiro(a) {config.singularLabel.toLowerCase()}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {subperfis.map((subperfil) => (
+                <SubperfilDetailCard
+                  key={subperfil.id}
+                  subperfil={subperfil}
+                  agentType={profile.agent_type}
+                  onEdit={() => {
+                    setEditingSubperfil(subperfil);
+                    setIsSubperfilDialogOpen(true);
+                  }}
+                  onDelete={() => handleDeleteSubperfil(subperfil.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
                   <p className="text-muted-foreground text-center mb-4">
                     Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
                   </p>
@@ -325,9 +355,9 @@ export default function Perfil() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 {subperfis.map((subperfil) => (
-                  <SubperfilCard
+                  <SubperfilDetailCard
                     key={subperfil.id}
                     subperfil={subperfil}
                     agentType={profile.agent_type}
@@ -341,19 +371,11 @@ export default function Perfil() {
               </div>
             )}
           </div>
-
-          {/* Right Column - Technical Info */}
-          <div className="space-y-6">
-            <ProfileTechnicalInfo 
-              profile={profile} 
-              onProfileUpdated={handleProfileUpdated}
-            />
-          </div>
         </div>
       </main>
 
       {/* Dialogs */}
-      <SubperfilDialog
+      <SubperfilFormDialog
         key={editingSubperfil?.id || "new-subperfil"}
         open={isSubperfilDialogOpen}
         onOpenChange={(open) => {
