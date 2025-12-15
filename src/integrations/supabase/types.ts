@@ -1108,6 +1108,7 @@ export type Database = {
       profiles: {
         Row: {
           agent_type: Database["public"]["Enums"]["agent_type"]
+          areas_atuacao: string | null
           avatar_url: string | null
           bio: string | null
           cover_url: string | null
@@ -1118,6 +1119,7 @@ export type Database = {
           location: string | null
           name: string
           nome_publico: string | null
+          objetivo_plataforma: string | null
           phone: string | null
           tipo_perfil: string | null
           updated_at: string
@@ -1126,6 +1128,7 @@ export type Database = {
         }
         Insert: {
           agent_type: Database["public"]["Enums"]["agent_type"]
+          areas_atuacao?: string | null
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
@@ -1136,6 +1139,7 @@ export type Database = {
           location?: string | null
           name: string
           nome_publico?: string | null
+          objetivo_plataforma?: string | null
           phone?: string | null
           tipo_perfil?: string | null
           updated_at?: string
@@ -1144,6 +1148,7 @@ export type Database = {
         }
         Update: {
           agent_type?: Database["public"]["Enums"]["agent_type"]
+          areas_atuacao?: string | null
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
@@ -1154,6 +1159,7 @@ export type Database = {
           location?: string | null
           name?: string
           nome_publico?: string | null
+          objetivo_plataforma?: string | null
           phone?: string | null
           tipo_perfil?: string | null
           updated_at?: string

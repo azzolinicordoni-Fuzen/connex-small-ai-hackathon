@@ -22,6 +22,8 @@ interface Profile {
   tipo_perfil?: string | null;
   cpf_cnpj?: string | null;
   bio: string | null;
+  areas_atuacao?: string | null;
+  objetivo_plataforma?: string | null;
   location: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -82,6 +84,8 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
       tipo_perfil: profile.tipo_perfil || "pessoa_fisica",
       cpf_cnpj: profile.cpf_cnpj || "",
       bio: profile.bio || "",
+      areas_atuacao: profile.areas_atuacao || "",
+      objetivo_plataforma: profile.objetivo_plataforma || "",
       phone: profile.phone || "",
       whatsapp: profile.whatsapp || "",
       avatar_url: profile.avatar_url || "",
@@ -110,6 +114,8 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
           tipo_perfil: formData.tipo_perfil || 'pessoa_fisica',
           cpf_cnpj: formData.cpf_cnpj || null,
           bio: formData.bio || null,
+          areas_atuacao: formData.areas_atuacao || null,
+          objetivo_plataforma: formData.objetivo_plataforma || null,
           location: location || null,
           phone: formData.phone || null,
           whatsapp: formData.whatsapp || null,
