@@ -44,6 +44,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     description: '',
+    objetivo: '',
     project_type: '',
     country: 'Brasil',
     state: '',
@@ -75,7 +76,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!basicInfo.name.trim()) return;
+    if (!basicInfo.name.trim() || !basicInfo.objetivo.trim() || !basicInfo.description.trim()) return;
 
     setLoading(true);
     
@@ -83,14 +84,21 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
     const locationParts = [basicInfo.municipality, basicInfo.state, basicInfo.country].filter(Boolean);
     const location = locationParts.join(', ');
 
+    // Build structured description with objetivo and bioma
+    const structuredDescription = JSON.stringify({
+      objetivo: basicInfo.objetivo,
+      descricao: basicInfo.description,
+      bioma: basicInfo.bioma,
+      status: basicInfo.status,
+    });
+
     const result = await onCreate({
       name: basicInfo.name,
-      description: basicInfo.description || null,
+      description: structuredDescription,
       location: location || null,
       project_type: basicInfo.project_type || null,
       is_online: isOnline,
       visibility_mode: visibilityMode,
-      // Pass stage data for processing
       stagesData,
     });
 
@@ -99,6 +107,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
       setBasicInfo({
         name: '',
         description: '',
+        objetivo: '',
         project_type: '',
         country: 'Brasil',
         state: '',
@@ -201,7 +210,10 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading || !basicInfo.name.trim()}>
+            <Button 
+              type="submit" 
+              disabled={loading || !basicInfo.name.trim() || !basicInfo.objetivo.trim() || !basicInfo.description.trim()}
+            >
                 {loading ? 'Criando...' : 'Criar Projeto'}
               </Button>
             </div>
