@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { 
-  MapPin, Ruler, Calendar, MoreVertical, Trash2, Eye, Settings, Globe, Lock
+  MapPin, Calendar, MoreVertical, Trash2, Eye, Settings, Globe, Lock, Target, FileText, Leaf
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -24,16 +23,31 @@ interface ProjectCardProps {
   onEditVisibility?: () => void;
 }
 
+interface ParsedDescription {
+  objetivo?: string;
+  descricao?: string;
+  bioma?: string;
+  status?: string;
+}
+
+function parseProjectDescription(description: string | null): ParsedDescription {
+  if (!description) return {};
+  
+  try {
+    return JSON.parse(description);
+  } catch {
+    // Legacy format - just return description as descricao
+    return { descricao: description };
+  }
+}
+
 export default function ProjectCard({ project, stages, onSelect, onDelete, onEditVisibility }: ProjectCardProps) {
   const completedStages = stages.filter(s => s.status === 'concluida').length;
-  const overallProgress = stages.length > 0
-    ? Math.round(stages.reduce((sum, s) => sum + s.progress_percentage, 0) / stages.length)
-    : 0;
-
   const currentStage = stages.find(s => s.status === 'em_andamento') 
     || stages.find(s => s.status === 'pendente');
-
   const visibleStagesCount = stages.filter(s => s.is_visible).length;
+
+  const parsed = parseProjectDescription(project.description);
 
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
@@ -52,13 +66,22 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               {project.project_type && (
                 <Badge variant="outline">{project.project_type}</Badge>
               )}
-              {project.is_online && (
-                <Badge variant="secondary" className="text-xs">
-                  {project.visibility_mode === 'public' ? 'Completo' : `${visibleStagesCount} etapas`}
+              {parsed.bioma && (
+                <Badge variant="secondary" className="gap-1">
+                  <Leaf className="w-3 h-3" />
+                  {parsed.bioma}
+                </Badge>
+              )}
+              {parsed.status && (
+                <Badge 
+                  variant={parsed.status === 'concluido' ? 'default' : 'outline'}
+                  className={parsed.status === 'concluido' ? 'bg-green-500/10 text-green-600 border-green-500/30' : ''}
+                >
+                  {parsed.status === 'concluido' ? 'Concluído' : 'Em Andamento'}
                 </Badge>
               )}
             </div>
@@ -89,25 +112,39 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent onClick={onSelect}>
-        {project.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-            {project.description}
-          </p>
+      <CardContent onClick={onSelect} className="space-y-3">
+        {/* Objetivo */}
+        {parsed.objetivo && (
+          <div className="p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+            <div className="flex items-start gap-2">
+              <Target className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-primary mb-0.5">Objetivo</p>
+                <p className="text-sm text-foreground line-clamp-2">{parsed.objetivo}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Descrição */}
+        {parsed.descricao && (
+          <div className="p-2.5 rounded-lg bg-muted/50 border">
+            <div className="flex items-start gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-0.5">Descrição</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{parsed.descricao}</p>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Info Row */}
-        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4">
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
           {project.location && (
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {project.location}
-            </span>
-          )}
-          {project.area_hectares && (
-            <span className="flex items-center gap-1">
-              <Ruler className="w-3 h-3" />
-              {project.area_hectares} ha
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -116,49 +153,44 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
           </span>
         </div>
 
-        {/* Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Progresso Geral</span>
-            <span className="font-medium">{overallProgress}%</span>
-          </div>
-          <Progress value={overallProgress} className="h-2" />
-        </div>
-
         {/* Stage Indicators */}
-        <div className="flex justify-between mt-4">
-          {stages.map((stage) => {
-            const config = STAGE_CONFIG[stage.stage];
-            return (
-              <div
-                key={stage.id}
-                className="flex flex-col items-center gap-1"
-                title={config.label}
-              >
+        <div className="pt-2 border-t">
+          <div className="flex justify-between mb-2">
+            <span className="text-xs text-muted-foreground">Etapas do Projeto</span>
+            <span className="text-xs text-muted-foreground">{completedStages}/{stages.length} concluídas</span>
+          </div>
+          <div className="flex justify-between gap-1">
+            {stages.map((stage) => {
+              const config = STAGE_CONFIG[stage.stage];
+              return (
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    stage.status === 'concluida' ? 'bg-green-500' :
-                    stage.status === 'em_andamento' ? 'bg-yellow-500' :
-                    'bg-gray-300'
-                  }`}
-                />
-                <span className="text-[10px] text-muted-foreground hidden sm:block">
-                  {config.label.slice(0, 3)}
-                </span>
-              </div>
-            );
-          })}
+                  key={stage.id}
+                  className="flex flex-col items-center gap-1 flex-1"
+                  title={`${config.label} - ${stage.status === 'concluida' ? 'Concluída' : stage.status === 'em_andamento' ? 'Em Andamento' : 'Pendente'}`}
+                >
+                  <div
+                    className={`w-full h-1.5 rounded-full ${
+                      stage.status === 'concluida' ? 'bg-green-500' :
+                      stage.status === 'em_andamento' ? 'bg-yellow-500' :
+                      'bg-muted'
+                    }`}
+                  />
+                  <span className="text-[9px] text-muted-foreground hidden sm:block truncate">
+                    {config.label.slice(0, 4)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Current Stage Badge */}
         {currentStage && (
-          <div className="mt-4 pt-3 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Etapa Atual:</span>
-              <Badge variant="secondary">
-                {STAGE_CONFIG[currentStage.stage].label}
-              </Badge>
-            </div>
+          <div className="flex items-center justify-between pt-2 border-t">
+            <span className="text-xs text-muted-foreground">Etapa Atual:</span>
+            <Badge variant="secondary" className="text-xs">
+              {STAGE_CONFIG[currentStage.stage].label}
+            </Badge>
           </div>
         )}
       </CardContent>

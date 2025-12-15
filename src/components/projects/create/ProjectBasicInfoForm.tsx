@@ -40,6 +40,7 @@ interface ProjectBasicInfoFormProps {
   formData: {
     name: string;
     description: string;
+    objetivo: string;
     project_type: string;
     country: string;
     state: string;
@@ -163,13 +164,26 @@ export default function ProjectBasicInfoForm({ formData, onChange }: ProjectBasi
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Descrição Resumida</Label>
+        <Label htmlFor="objetivo">Objetivo do Projeto *</Label>
+        <Textarea
+          id="objetivo"
+          value={formData.objetivo}
+          onChange={(e) => onChange({ objetivo: e.target.value })}
+          placeholder="Qual o objetivo principal deste projeto de créditos de carbono?"
+          rows={2}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Descrição Resumida *</Label>
         <Textarea
           id="description"
           value={formData.description}
           onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="Descreva brevemente o projeto e seus objetivos..."
+          placeholder="Descreva brevemente o projeto, suas características e diferenciais..."
           rows={3}
+          required
         />
       </div>
     </div>
