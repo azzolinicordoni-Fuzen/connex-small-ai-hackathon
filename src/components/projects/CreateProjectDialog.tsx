@@ -45,7 +45,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
     name: '',
     description: '',
     objetivo: '',
-    project_type: '',
+    project_types: [] as string[],
     country: 'Brasil',
     state: '',
     municipality: '',
@@ -84,19 +84,23 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
     const locationParts = [basicInfo.municipality, basicInfo.state, basicInfo.country].filter(Boolean);
     const location = locationParts.join(', ');
 
-    // Build structured description with objetivo and bioma
+    // Build structured description with objetivo, bioma and project_types
     const structuredDescription = JSON.stringify({
       objetivo: basicInfo.objetivo,
       descricao: basicInfo.description,
       bioma: basicInfo.bioma,
       status: basicInfo.status,
+      project_types: basicInfo.project_types,
     });
+
+    // For backwards compatibility, store primary type in project_type field
+    const primaryType = basicInfo.project_types.length > 0 ? basicInfo.project_types[0] : null;
 
     const result = await onCreate({
       name: basicInfo.name,
       description: structuredDescription,
       location: location || null,
-      project_type: basicInfo.project_type || null,
+      project_type: primaryType,
       is_online: isOnline,
       visibility_mode: visibilityMode,
       stagesData,
@@ -108,7 +112,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
         name: '',
         description: '',
         objetivo: '',
-        project_type: '',
+        project_types: [],
         country: 'Brasil',
         state: '',
         municipality: '',
@@ -129,6 +133,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
   };
 
   const selectedStagesCount = Object.values(stagesData).filter(s => s.selected).length;
+  const isFormValid = basicInfo.name.trim() && basicInfo.objetivo.trim() && basicInfo.description.trim() && basicInfo.project_types.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -205,6 +210,9 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
                 ? `${selectedStagesCount} etapa(s) selecionada(s)`
                 : 'Nenhuma etapa selecionada'
               }
+              {basicInfo.project_types.length > 0 && (
+                <span className="ml-2">• {basicInfo.project_types.length} tipo(s)</span>
+              )}
             </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -212,7 +220,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onCreate }: Cr
               </Button>
             <Button 
               type="submit" 
-              disabled={loading || !basicInfo.name.trim() || !basicInfo.objetivo.trim() || !basicInfo.description.trim()}
+              disabled={loading || !isFormValid}
             >
                 {loading ? 'Criando...' : 'Criar Projeto'}
               </Button>
