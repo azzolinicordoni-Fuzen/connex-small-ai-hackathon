@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
   Plus, MapPin, Phone, Mail, MessageCircle, Edit, 
-  Building2, Users, UserCheck, FileText, Layers,
+  Building2, Users, UserCheck, Layers,
   HardHat, Scale, Banknote, ClipboardCheck
 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,6 @@ import { Header } from "@/components/layout/Header";
 import { BackButton } from "@/components/layout/BackButton";
 import SubperfilDetailCard from "@/components/perfil/SubperfilDetailCard";
 import SubperfilFormDialog from "@/components/perfil/SubperfilFormDialog";
-import EditProfileDialog from "@/components/perfil/EditProfileDialog";
 import ProfileStatusBadge from "@/components/perfil/ProfileStatusBadge";
 import CompleteProfileTab from "@/components/perfil/CompleteProfileTab";
 import { useConnections } from "@/hooks/useConnections";
@@ -57,7 +56,6 @@ export default function Perfil() {
   const [subperfis, setSubperfis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubperfilDialogOpen, setIsSubperfilDialogOpen] = useState(false);
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editingSubperfil, setEditingSubperfil] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("subperfis");
 
@@ -174,11 +172,6 @@ export default function Perfil() {
     setEditingSubperfil(null);
   };
 
-  const handleProfileUpdated = () => {
-    fetchProfile();
-    setIsEditProfileOpen(false);
-  };
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -222,15 +215,6 @@ export default function Perfil() {
               </AvatarFallback>
             </Avatar>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="absolute bottom-4 right-4"
-            onClick={() => setIsEditProfileOpen(true)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Editar Perfil
-          </Button>
         </div>
 
         {/* Profile Info */}
@@ -295,8 +279,8 @@ export default function Perfil() {
               {config.subperfilLabel}
             </TabsTrigger>
             <TabsTrigger value="completar" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Completar Perfil
+              <Edit className="w-4 h-4" />
+              Editar Perfil
             </TabsTrigger>
           </TabsList>
 
@@ -358,6 +342,7 @@ export default function Perfil() {
             <CompleteProfileTab 
               profile={profile} 
               onProfileUpdated={fetchProfile}
+              userEmail={user?.email}
             />
           </TabsContent>
         </Tabs>
@@ -375,14 +360,6 @@ export default function Perfil() {
         profileId={profile.id}
         editData={editingSubperfil}
         onSaved={handleSubperfilSaved}
-      />
-
-      <EditProfileDialog
-        key={`edit-${profile.id}`}
-        open={isEditProfileOpen}
-        onOpenChange={setIsEditProfileOpen}
-        profile={profile}
-        onSaved={handleProfileUpdated}
       />
     </div>
   );
