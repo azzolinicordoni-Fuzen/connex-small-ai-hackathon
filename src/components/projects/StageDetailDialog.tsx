@@ -191,7 +191,7 @@ export default function StageDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>{config.label}</span>
@@ -246,7 +246,7 @@ export default function StageDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="h-[500px] pr-4">
             <TabsContent value="details" className="space-y-4 mt-4">
               {/* Status */}
               <div className="space-y-2">
