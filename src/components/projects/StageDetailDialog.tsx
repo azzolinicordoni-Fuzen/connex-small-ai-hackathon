@@ -189,7 +189,7 @@ export default function StageDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-w-4xl max-h-[95vh] w-[95vw] md:w-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>{config.label}</span>
@@ -244,7 +244,7 @@ export default function StageDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <div className="h-[350px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+          <div className="h-[450px] overflow-y-auto pr-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
             <TabsContent value="details" className="space-y-4 mt-4">
               {/* Status */}
               <div className="space-y-2">
