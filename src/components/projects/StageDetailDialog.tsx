@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -245,7 +244,7 @@ export default function StageDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <div className="h-[500px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+          <div className="h-[350px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
             <TabsContent value="details" className="space-y-4 mt-4">
               {/* Status */}
               <div className="space-y-2">
@@ -269,20 +268,6 @@ export default function StageDetailDialog({
                 </RadioGroup>
               </div>
 
-              {/* Progress */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Progresso</Label>
-                  <span className="text-sm font-medium">{progress}%</span>
-                </div>
-                <Slider
-                  value={[progress]}
-                  onValueChange={(val) => setProgress(val[0])}
-                  max={100}
-                  step={5}
-                />
-              </div>
-
               {/* Deadline */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-1">
@@ -293,17 +278,6 @@ export default function StageDetailDialog({
                   type="date"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                />
-              </div>
-
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label>Notas</Label>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Adicione notas sobre esta etapa..."
-                  rows={4}
                 />
               </div>
             </TabsContent>
