@@ -111,13 +111,13 @@ export default function MeusProjetos() {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Back Button */}
         <Button 
-          variant="ghost" 
+          variant={selectedProjectId ? "outline" : "ghost"}
           size="sm" 
           onClick={() => selectedProjectId ? setSelectedProjectId(null) : navigate('/dashboard')}
-          className="mb-4 gap-2 text-muted-foreground hover:text-foreground"
+          className="mb-4 gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar
+          {selectedProjectId ? 'Voltar para Projetos' : 'Voltar'}
         </Button>
 
         {/* Breadcrumbs */}
