@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
   Plus, MapPin, Phone, Mail, MessageCircle, Edit, 
-  Building2, Users, UserCheck,
+  Building2, Users, UserCheck, FileText, Layers,
   HardHat, Scale, Banknote, ClipboardCheck
 } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import SubperfilDetailCard from "@/components/perfil/SubperfilDetailCard";
 import SubperfilFormDialog from "@/components/perfil/SubperfilFormDialog";
 import EditProfileDialog from "@/components/perfil/EditProfileDialog";
 import ProfileStatusBadge from "@/components/perfil/ProfileStatusBadge";
+import CompleteProfileTab from "@/components/perfil/CompleteProfileTab";
 import { useConnections } from "@/hooks/useConnections";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string; singularLabel: string }> = {
@@ -57,6 +59,7 @@ export default function Perfil() {
   const [isSubperfilDialogOpen, setIsSubperfilDialogOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editingSubperfil, setEditingSubperfil] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("subperfis");
 
   const { connections } = useConnections(profile?.id);
   const acceptedCount = connections.filter(c => c.status === 'accepted').length;
@@ -284,60 +287,80 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">{config.subperfilLabel}</h2>
-              <p className="text-sm text-muted-foreground">
-                Gerencie seus {config.subperfilLabel.toLowerCase()} cadastrados
-              </p>
-            </div>
-            <Button onClick={() => {
-              setEditingSubperfil(null);
-              setIsSubperfilDialogOpen(true);
-            }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar {config.singularLabel}
-            </Button>
-          </div>
+        {/* Main Content with Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="subperfis" className="flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              {config.subperfilLabel}
+            </TabsTrigger>
+            <TabsTrigger value="completar" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Completar Perfil
+            </TabsTrigger>
+          </TabsList>
 
-          {subperfis.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <IconComponent className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center mb-4">
-                  Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
+          <TabsContent value="subperfis" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">{config.subperfilLabel}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie seus {config.subperfilLabel.toLowerCase()} cadastrados
                 </p>
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setEditingSubperfil(null);
-                    setIsSubperfilDialogOpen(true);
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar primeiro(a) {config.singularLabel.toLowerCase()}
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {subperfis.map((subperfil) => (
-                <SubperfilDetailCard
-                  key={subperfil.id}
-                  subperfil={subperfil}
-                  agentType={profile.agent_type}
-                  onEdit={() => {
-                    setEditingSubperfil(subperfil);
-                    setIsSubperfilDialogOpen(true);
-                  }}
-                  onDelete={() => handleDeleteSubperfil(subperfil.id)}
-                />
-              ))}
+              </div>
+              <Button onClick={() => {
+                setEditingSubperfil(null);
+                setIsSubperfilDialogOpen(true);
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar {config.singularLabel}
+              </Button>
             </div>
-          )}
-        </div>
+
+            {subperfis.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <IconComponent className="w-12 h-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-center mb-4">
+                    Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setEditingSubperfil(null);
+                      setIsSubperfilDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar primeiro(a) {config.singularLabel.toLowerCase()}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {subperfis.map((subperfil) => (
+                  <SubperfilDetailCard
+                    key={subperfil.id}
+                    subperfil={subperfil}
+                    agentType={profile.agent_type}
+                    onEdit={() => {
+                      setEditingSubperfil(subperfil);
+                      setIsSubperfilDialogOpen(true);
+                    }}
+                    onDelete={() => handleDeleteSubperfil(subperfil.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="completar">
+            <CompleteProfileTab 
+              profile={profile} 
+              onProfileUpdated={fetchProfile}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Dialogs */}
