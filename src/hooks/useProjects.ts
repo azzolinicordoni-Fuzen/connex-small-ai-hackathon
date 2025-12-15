@@ -37,7 +37,36 @@ export function useProjects(profileId: string | undefined) {
   }, [fetchProjects]);
 
   const createProject = async (projectData: Partial<CarbonProject> & { stagesData?: Record<ProjectStageType, { selected: boolean; notes: string; deadline: string; progress: number; responsavel: string; metadata: Record<string, any> }> }) => {
-    if (!profileId) return null;
+    if (!profileId) {
+      toast.error('Perfil não encontrado. Faça login novamente.');
+      return null;
+    }
+    
+    // Verify session before creating
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Sessão expirada. Faça login novamente.');
+      return null;
+    }
+
+    // Verify profile belongs to current user
+    const { data: profileCheck, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, user_id')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profileCheck) {
+      console.error('Profile check error:', profileError);
+      toast.error('Erro ao verificar perfil');
+      return null;
+    }
+
+    if (profileCheck.user_id !== session.user.id) {
+      console.error('Profile mismatch:', { profileUserId: profileCheck.user_id, authUserId: session.user.id });
+      toast.error('Perfil não corresponde ao usuário logado');
+      return null;
+    }
     
     try {
       const { stagesData, ...projectFields } = projectData;
