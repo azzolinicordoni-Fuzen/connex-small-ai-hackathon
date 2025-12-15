@@ -7,9 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
-  User, MapPin, Phone, FileText, Globe, 
-  CheckCircle2, AlertCircle, Save, Upload
+  User, MapPin, Phone, FileText, Globe, Building2,
+  CheckCircle2, AlertCircle, Save, Edit, Mail, Linkedin,
+  Instagram, Facebook, Twitter
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,44 +33,72 @@ interface Profile {
 interface Props {
   profile: Profile;
   onProfileUpdated: () => void;
+  userEmail?: string;
 }
 
-export default function CompleteProfileTab({ profile, onProfileUpdated }: Props) {
+export default function CompleteProfileTab({ profile, onProfileUpdated, userEmail }: Props) {
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("basico");
+  const [activeTab, setActiveTab] = useState("identificacao");
+  const [showPhone, setShowPhone] = useState(true);
+  
   const [formData, setFormData] = useState({
+    // Identificação
     name: profile.name || "",
-    bio: profile.bio || "",
-    location: profile.location || "",
-    phone: profile.phone || "",
-    whatsapp: profile.whatsapp || "",
+    nome_publico: "",
+    tipo_perfil: "pessoa_fisica",
+    cpf_cnpj: "",
     avatar_url: profile.avatar_url || "",
     cover_url: profile.cover_url || "",
+    // Contato
+    email: userEmail || "",
+    phone: profile.phone || "",
+    whatsapp: profile.whatsapp || "",
+    website: "",
+    linkedin: "",
+    instagram: "",
+    facebook: "",
+    twitter: "",
+    outras_redes: "",
+    // Localização
+    pais: "Brasil",
+    estado: "",
+    cidade: "",
+    endereco: "",
+    // Descrição
+    bio: profile.bio || "",
+    areas_atuacao: "",
+    objetivo_plataforma: "",
   });
 
   useEffect(() => {
-    setFormData({
+    // Parse location into parts if possible
+    const locationParts = profile.location?.split(", ") || [];
+    
+    setFormData(prev => ({
+      ...prev,
       name: profile.name || "",
       bio: profile.bio || "",
-      location: profile.location || "",
       phone: profile.phone || "",
       whatsapp: profile.whatsapp || "",
       avatar_url: profile.avatar_url || "",
       cover_url: profile.cover_url || "",
-    });
-  }, [profile]);
+      cidade: locationParts[0] || "",
+      estado: locationParts[1] || "",
+      email: userEmail || prev.email,
+    }));
+  }, [profile, userEmail]);
 
   const calculateCompletion = () => {
-    const fields = [
+    const requiredFields = [
       formData.name,
       formData.bio,
-      formData.location,
-      formData.phone,
-      formData.whatsapp,
+      formData.phone || formData.whatsapp,
+      formData.estado,
+      formData.cidade,
       formData.avatar_url,
     ];
-    const filled = fields.filter(f => f && f.trim() !== "").length;
-    return Math.round((filled / fields.length) * 100);
+    const filled = requiredFields.filter(f => f && String(f).trim() !== "").length;
+    return Math.round((filled / requiredFields.length) * 100);
   };
 
   const completion = calculateCompletion();
@@ -76,12 +107,17 @@ export default function CompleteProfileTab({ profile, onProfileUpdated }: Props)
     setLoading(true);
 
     try {
+      // Combine location fields
+      const location = [formData.cidade, formData.estado, formData.pais]
+        .filter(Boolean)
+        .join(", ");
+
       const { error } = await supabase
         .from("profiles")
         .update({
           name: formData.name,
           bio: formData.bio || null,
-          location: formData.location || null,
+          location: location || null,
           phone: formData.phone || null,
           whatsapp: formData.whatsapp || null,
           avatar_url: formData.avatar_url || null,
@@ -103,33 +139,42 @@ export default function CompleteProfileTab({ profile, onProfileUpdated }: Props)
 
   const getSectionStatus = (section: string) => {
     switch (section) {
-      case "basico":
-        return formData.name ? "complete" : "incomplete";
-      case "sobre":
-        return formData.bio ? "complete" : "incomplete";
-      case "localizacao":
-        return formData.location ? "complete" : "incomplete";
+      case "identificacao":
+        return formData.name && formData.avatar_url ? "complete" : "incomplete";
       case "contato":
         return formData.phone || formData.whatsapp ? "complete" : "incomplete";
-      case "midia":
-        return formData.avatar_url ? "complete" : "incomplete";
+      case "localizacao":
+        return formData.estado && formData.cidade ? "complete" : "incomplete";
+      case "descricao":
+        return formData.bio ? "complete" : "incomplete";
       default:
         return "incomplete";
     }
+  };
+
+  const StatusIcon = ({ section }: { section: string }) => {
+    const status = getSectionStatus(section);
+    return status === "complete" ? (
+      <CheckCircle2 className="w-4 h-4 text-green-500" />
+    ) : (
+      <AlertCircle className="w-4 h-4 text-amber-500" />
+    );
   };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Completar Perfil
-            </CardTitle>
-            <CardDescription>
-              Preencha suas informações para aparecer melhor nas conexões
-            </CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Edit className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Editar Perfil</CardTitle>
+              <CardDescription>
+                Perfil Central (Conta Principal)
+              </CardDescription>
+            </div>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-2 mb-1">
@@ -144,130 +189,90 @@ export default function CompleteProfileTab({ profile, onProfileUpdated }: Props)
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 mb-6">
-            <TabsTrigger value="basico" className="flex items-center gap-1 text-xs sm:text-sm">
-              {getSectionStatus("basico") === "complete" ? (
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-              ) : (
-                <AlertCircle className="w-3 h-3 text-amber-500" />
-              )}
-              <span className="hidden sm:inline">Básico</span>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="identificacao" className="flex items-center gap-1 text-xs sm:text-sm">
+              <StatusIcon section="identificacao" />
               <User className="w-3 h-3 sm:hidden" />
-            </TabsTrigger>
-            <TabsTrigger value="sobre" className="flex items-center gap-1 text-xs sm:text-sm">
-              {getSectionStatus("sobre") === "complete" ? (
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-              ) : (
-                <AlertCircle className="w-3 h-3 text-amber-500" />
-              )}
-              <span className="hidden sm:inline">Sobre</span>
-              <FileText className="w-3 h-3 sm:hidden" />
-            </TabsTrigger>
-            <TabsTrigger value="localizacao" className="flex items-center gap-1 text-xs sm:text-sm">
-              {getSectionStatus("localizacao") === "complete" ? (
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-              ) : (
-                <AlertCircle className="w-3 h-3 text-amber-500" />
-              )}
-              <span className="hidden sm:inline">Local</span>
-              <MapPin className="w-3 h-3 sm:hidden" />
+              <span className="hidden sm:inline">Identificação</span>
             </TabsTrigger>
             <TabsTrigger value="contato" className="flex items-center gap-1 text-xs sm:text-sm">
-              {getSectionStatus("contato") === "complete" ? (
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-              ) : (
-                <AlertCircle className="w-3 h-3 text-amber-500" />
-              )}
-              <span className="hidden sm:inline">Contato</span>
+              <StatusIcon section="contato" />
               <Phone className="w-3 h-3 sm:hidden" />
+              <span className="hidden sm:inline">Contato</span>
             </TabsTrigger>
-            <TabsTrigger value="midia" className="flex items-center gap-1 text-xs sm:text-sm">
-              {getSectionStatus("midia") === "complete" ? (
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-              ) : (
-                <AlertCircle className="w-3 h-3 text-amber-500" />
-              )}
-              <span className="hidden sm:inline">Mídia</span>
-              <Globe className="w-3 h-3 sm:hidden" />
+            <TabsTrigger value="localizacao" className="flex items-center gap-1 text-xs sm:text-sm">
+              <StatusIcon section="localizacao" />
+              <MapPin className="w-3 h-3 sm:hidden" />
+              <span className="hidden sm:inline">Localização</span>
+            </TabsTrigger>
+            <TabsTrigger value="descricao" className="flex items-center gap-1 text-xs sm:text-sm">
+              <StatusIcon section="descricao" />
+              <FileText className="w-3 h-3 sm:hidden" />
+              <span className="hidden sm:inline">Descrição</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="basico" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome / Razão Social *</Label>
-              <Input
-                id="name"
-                placeholder="Seu nome ou nome da empresa"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Este nome será exibido publicamente no seu perfil
-              </p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="sobre" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bio">Biografia / Descrição</Label>
-              <Textarea
-                id="bio"
-                placeholder="Conte um pouco sobre você, sua empresa ou suas atividades no mercado de carbono..."
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                rows={5}
-                maxLength={500}
-              />
-              <p className="text-xs text-muted-foreground">
-                {formData.bio.length}/500 caracteres
-              </p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="localizacao" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Localização</Label>
-              <Input
-                id="location"
-                placeholder="Ex: São Paulo, SP - Brasil"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Informe sua cidade, estado ou região de atuação
-              </p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="contato" className="space-y-4">
+          {/* IDENTIFICAÇÃO */}
+          <TabsContent value="identificacao" className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
+                <Label htmlFor="name">Nome Completo / Razão Social *</Label>
                 <Input
-                  id="phone"
-                  placeholder="(00) 0000-0000"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  id="name"
+                  placeholder="Seu nome ou nome da empresa"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="whatsapp">WhatsApp</Label>
+                <Label htmlFor="nome_publico">Nome Público do Perfil</Label>
                 <Input
-                  id="whatsapp"
-                  placeholder="(00) 00000-0000"
-                  value={formData.whatsapp}
-                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                  id="nome_publico"
+                  placeholder="Como deseja ser chamado na plataforma"
+                  value={formData.nome_publico}
+                  onChange={(e) => setFormData({ ...formData, nome_publico: e.target.value })}
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Seus contatos podem ser configurados como públicos ou privados nas configurações de privacidade
-            </p>
-          </TabsContent>
 
-          <TabsContent value="midia" className="space-y-4">
-            <div className="space-y-4">
+            <div className="space-y-3">
+              <Label>Tipo de Perfil Central</Label>
+              <RadioGroup
+                value={formData.tipo_perfil}
+                onValueChange={(value) => setFormData({ ...formData, tipo_perfil: value })}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-secondary/50 flex-1">
+                  <RadioGroupItem value="pessoa_fisica" id="pf" />
+                  <Label htmlFor="pf" className="cursor-pointer flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Pessoa Física
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-secondary/50 flex-1">
+                  <RadioGroupItem value="pessoa_juridica" id="pj" />
+                  <Label htmlFor="pj" className="cursor-pointer flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    Pessoa Jurídica
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cpf_cnpj">
+                {formData.tipo_perfil === "pessoa_fisica" ? "CPF" : "CNPJ"}
+              </Label>
+              <Input
+                id="cpf_cnpj"
+                placeholder={formData.tipo_perfil === "pessoa_fisica" ? "000.000.000-00" : "00.000.000/0000-00"}
+                value={formData.cpf_cnpj}
+                onChange={(e) => setFormData({ ...formData, cpf_cnpj: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="avatar_url">URL da Foto de Perfil</Label>
                 <Input
@@ -277,11 +282,11 @@ export default function CompleteProfileTab({ profile, onProfileUpdated }: Props)
                   onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Cole o link de uma imagem para usar como avatar
+                  Logo ou foto institucional
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cover_url">URL da Imagem de Capa</Label>
+                <Label htmlFor="cover_url">URL da Foto de Capa</Label>
                 <Input
                   id="cover_url"
                   placeholder="https://exemplo.com/sua-capa.jpg"
@@ -289,9 +294,223 @@ export default function CompleteProfileTab({ profile, onProfileUpdated }: Props)
                   onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Cole o link de uma imagem para usar como capa do perfil
+                  Banner do perfil
                 </p>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* CONTATO */}
+          <TabsContent value="contato" className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail Principal (validado)</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                Este é o e-mail da sua conta. Para alterá-lo, acesse as configurações.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="phone">Telefone</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Mostrar</span>
+                    <Switch
+                      checked={showPhone}
+                      onCheckedChange={setShowPhone}
+                    />
+                  </div>
+                </div>
+                <Input
+                  id="phone"
+                  placeholder="(00) 0000-0000"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp">WhatsApp (opcional)</Label>
+                <Input
+                  id="whatsapp"
+                  placeholder="(00) 00000-0000"
+                  value={formData.whatsapp}
+                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="website">Website</Label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="website"
+                  placeholder="https://seusite.com.br"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="linkedin">LinkedIn</Label>
+              <div className="relative">
+                <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="linkedin"
+                  placeholder="https://linkedin.com/in/seuperfil"
+                  value={formData.linkedin}
+                  onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                <div className="relative">
+                  <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="instagram"
+                    placeholder="@usuario"
+                    value={formData.instagram}
+                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="facebook">Facebook</Label>
+                <div className="relative">
+                  <Facebook className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="facebook"
+                    placeholder="facebook.com/pagina"
+                    value={formData.facebook}
+                    onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="twitter">X (Twitter)</Label>
+                <div className="relative">
+                  <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="twitter"
+                    placeholder="@usuario"
+                    value={formData.twitter}
+                    onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="outras_redes">Outras Redes Profissionais (opcional)</Label>
+              <Textarea
+                id="outras_redes"
+                placeholder="Outros links de redes sociais ou portfólios..."
+                value={formData.outras_redes}
+                onChange={(e) => setFormData({ ...formData, outras_redes: e.target.value })}
+                rows={2}
+              />
+            </div>
+          </TabsContent>
+
+          {/* LOCALIZAÇÃO */}
+          <TabsContent value="localizacao" className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="pais">País</Label>
+              <Input
+                id="pais"
+                value={formData.pais}
+                onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="estado">Estado *</Label>
+                <Input
+                  id="estado"
+                  placeholder="Ex: São Paulo"
+                  value={formData.estado}
+                  onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cidade">Cidade *</Label>
+                <Input
+                  id="cidade"
+                  placeholder="Ex: São Paulo"
+                  value={formData.cidade}
+                  onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="endereco">Endereço (opcional)</Label>
+              <Input
+                id="endereco"
+                placeholder="Rua, número, bairro..."
+                value={formData.endereco}
+                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                Este campo é opcional e pode ser mantido privado
+              </p>
+            </div>
+          </TabsContent>
+
+          {/* DESCRIÇÃO INSTITUCIONAL */}
+          <TabsContent value="descricao" className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="bio">Sobre o Perfil (Bio Institucional) *</Label>
+              <Textarea
+                id="bio"
+                placeholder="Conte sobre você, sua empresa ou suas atividades no mercado de carbono..."
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                rows={5}
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground">
+                {formData.bio.length}/500 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="areas_atuacao">Áreas de Atuação</Label>
+              <Textarea
+                id="areas_atuacao"
+                placeholder="Ex: Projetos de carbono florestal, consultoria ambiental, certificação..."
+                value={formData.areas_atuacao}
+                onChange={(e) => setFormData({ ...formData, areas_atuacao: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="objetivo_plataforma">Objetivo dentro da Plataforma</Label>
+              <Textarea
+                id="objetivo_plataforma"
+                placeholder="O que você busca na plataforma? Ex: Conectar com investidores, desenvolver projetos..."
+                value={formData.objetivo_plataforma}
+                onChange={(e) => setFormData({ ...formData, objetivo_plataforma: e.target.value })}
+                rows={3}
+              />
             </div>
           </TabsContent>
         </Tabs>
