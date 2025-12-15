@@ -118,9 +118,10 @@ export function useProjects(profileId: string | undefined) {
               await supabase
                 .from('project_stages')
                 .update({
-                  status: stageFormData.selected ? 'pendente' : 'pendente',
+                  // Selected stages start as 'em_andamento', unselected as 'pendente' (blocked)
+                  status: stageFormData.selected ? 'em_andamento' : 'pendente',
                   is_visible: stageFormData.selected,
-                  progress_percentage: stageFormData.progress,
+                  progress_percentage: stageFormData.selected ? stageFormData.progress : 0,
                   deadline: stageFormData.deadline || null,
                   notes: notes.trim() || null,
                 })

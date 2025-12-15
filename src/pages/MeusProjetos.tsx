@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings, ArrowLeft } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings, ArrowLeft, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
@@ -13,6 +13,7 @@ import ProjectCard from '@/components/projects/ProjectCard';
 import ProjectTimeline from '@/components/projects/ProjectTimeline';
 import ProjectCharts from '@/components/projects/ProjectCharts';
 import ProjectChat from '@/components/projects/ProjectChat';
+import ProjectDetailHeader from '@/components/projects/ProjectDetailHeader';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import EditVisibilityDialog from '@/components/projects/EditVisibilityDialog';
 import { useProjects, useProjectStages, useProjectMessages } from '@/hooks/useProjects';
@@ -137,35 +138,34 @@ export default function MeusProjetos() {
         />
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">
-              {selectedProject ? selectedProject.name : 'Meus Projetos'}
-            </h1>
-            <p className="text-muted-foreground">
-              {selectedProject 
-                ? 'Gerencie as etapas e membros do projeto'
-                : 'Gerencie seus projetos de crédito de carbono'
-              }
-            </p>
-          </div>
-          {!selectedProjectId && (
+        {!selectedProjectId && (
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold">Meus Projetos</h1>
+              <p className="text-muted-foreground">
+                Gerencie seus projetos de crédito de carbono
+              </p>
+            </div>
             <Button onClick={handleCreateProject} className="gap-2">
               <Plus className="w-4 h-4" />
               Novo Projeto
             </Button>
-          )}
-          {selectedProjectId && selectedProject && (
+          </div>
+        )}
+
+        {/* Header Actions for Selected Project */}
+        {selectedProjectId && selectedProject && (
+          <div className="flex items-center justify-end gap-2 mb-4">
             <Button 
               variant="outline" 
               onClick={() => handleEditVisibility(selectedProjectId)}
               className="gap-2"
             >
-              <Settings className="w-4 h-4" />
-              Editar Processo
+              <Edit className="w-4 h-4" />
+              Editar Projeto
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Project List or Detail View */}
         {!selectedProjectId ? (
@@ -199,42 +199,47 @@ export default function MeusProjetos() {
           </div>
         ) : (
           // Project Detail View
-          <Tabs defaultValue="timeline" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="timeline" className="gap-1">
-                <LayoutGrid className="w-4 h-4" />
-                Timeline
-              </TabsTrigger>
-              <TabsTrigger value="charts" className="gap-1">
-                <BarChart3 className="w-4 h-4" />
-                Indicadores
-              </TabsTrigger>
-              <TabsTrigger value="chat" className="gap-1">
-                <MessageSquare className="w-4 h-4" />
-                Chat
-              </TabsTrigger>
-            </TabsList>
+          <>
+            {/* Project Header with all key info */}
+            <ProjectDetailHeader project={selectedProject!} stages={stages} />
+            
+            <Tabs defaultValue="timeline" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="timeline" className="gap-1">
+                  <LayoutGrid className="w-4 h-4" />
+                  Timeline
+                </TabsTrigger>
+                <TabsTrigger value="charts" className="gap-1">
+                  <BarChart3 className="w-4 h-4" />
+                  Indicadores
+                </TabsTrigger>
+                <TabsTrigger value="chat" className="gap-1">
+                  <MessageSquare className="w-4 h-4" />
+                  Chat
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="timeline">
-              <ProjectTimeline
-                stages={stages}
-                onStageUpdate={updateStage}
-                projectId={selectedProjectId}
-              />
-            </TabsContent>
+              <TabsContent value="timeline">
+                <ProjectTimeline
+                  stages={stages}
+                  onStageUpdate={updateStage}
+                  projectId={selectedProjectId}
+                />
+              </TabsContent>
 
-            <TabsContent value="charts">
-              <ProjectCharts stages={stages} />
-            </TabsContent>
+              <TabsContent value="charts">
+                <ProjectCharts stages={stages} />
+              </TabsContent>
 
-            <TabsContent value="chat">
-              <ProjectChat
-                messages={messages}
-                onSendMessage={(content) => profile && sendMessage(profile.id, content)}
-                currentUserId={profile?.id || ''}
-              />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="chat">
+                <ProjectChat
+                  messages={messages}
+                  onSendMessage={(content) => profile && sendMessage(profile.id, content)}
+                  currentUserId={profile?.id || ''}
+                />
+              </TabsContent>
+            </Tabs>
+          </>
         )}
       </main>
 

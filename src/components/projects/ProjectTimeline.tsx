@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   FileText, Search, Hammer, Award, ClipboardCheck, DollarSign,
-  Calendar, ChevronRight, User
+  Calendar, ChevronRight, User, Lock, CheckCircle2, Circle, ArrowRight
 } from 'lucide-react';
-import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, ProjectStageType, ProjectStageMember } from '@/types/project';
+import { ProjectStage, STAGE_CONFIG, STATUS_CONFIG, ProjectStageType } from '@/types/project';
 import { cn } from '@/lib/utils';
 import StageDetailDialog from './StageDetailDialog';
 import { useProjectAllStageMembers } from '@/hooks/useProjects';
@@ -59,17 +58,38 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
     STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage)
   );
 
-  const overallProgress = stages.length > 0
-    ? Math.round(stages.reduce((sum, s) => sum + s.progress_percentage, 0) / stages.length)
-    : 0;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'concluida': return 'bg-green-500';
-      case 'em_andamento': return 'bg-yellow-500';
-      default: return 'bg-gray-300';
+  // Find the next stage that can be unlocked
+  const getNextUnlockableStage = () => {
+    for (let i = 0; i < sortedStages.length; i++) {
+      if (sortedStages[i].status === 'pendente') {
+        // Check if previous stage is completed or in progress
+        if (i === 0 || sortedStages[i - 1].status !== 'pendente') {
+          return sortedStages[i].id;
+        }
+      }
     }
+    return null;
   };
+
+  const nextUnlockableId = getNextUnlockableStage();
+
+  // Check if a stage is locked (cannot be edited because previous stages are pending)
+  const isStageBlocked = (index: number) => {
+    if (index === 0) return false;
+    // A stage is blocked if ANY previous stage is still pending
+    for (let i = 0; i < index; i++) {
+      if (sortedStages[i].status === 'pendente') {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (!selectedStage) {
+      refetchMembers();
+    }
+  }, [selectedStage, refetchMembers]);
 
   const getDeadlineStatus = (deadline: string | null) => {
     if (!deadline) return null;
@@ -82,148 +102,235 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
     return { text: new Date(deadline).toLocaleDateString('pt-BR'), color: 'outline' as const };
   };
 
-  // Refresh members when dialog closes
-  useEffect(() => {
-    if (!selectedStage) {
-      refetchMembers();
-    }
-  }, [selectedStage, refetchMembers]);
-
   return (
     <div className="space-y-6">
-      {/* Overall Progress */}
-      <Card className="bg-gradient-to-r from-primary/10 to-primary/5">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Progresso Geral</span>
-            <span className="text-2xl font-bold text-primary">{overallProgress}%</span>
+      {/* Horizontal Timeline - Desktop */}
+      <div className="hidden md:block">
+        {/* Timeline connector line */}
+        <div className="relative px-8">
+          <div className="absolute top-8 left-8 right-8 h-1 bg-border rounded-full overflow-hidden">
+            {/* Progress fill */}
+            <div 
+              className="absolute h-full bg-green-500 transition-all duration-500"
+              style={{ 
+                width: `${(sortedStages.filter(s => s.status === 'concluida').length / sortedStages.length) * 100}%` 
+              }}
+            />
           </div>
-          <Progress value={overallProgress} className="h-2" />
-        </CardContent>
-      </Card>
+          
+          {/* Stage nodes */}
+          <div className="flex justify-between relative">
+            {sortedStages.map((stage, index) => {
+              const config = STAGE_CONFIG[stage.stage];
+              const Icon = STAGE_ICONS[stage.stage];
+              const stageMembers = membersByStage[stage.id] || [];
+              const isBlocked = isStageBlocked(index);
+              const isNextUnlockable = stage.id === nextUnlockableId;
+              const deadlineStatus = getDeadlineStatus(stage.deadline);
 
-      {/* Timeline */}
-      <div className="relative">
-        {/* Horizontal Timeline Line */}
-        <div className="absolute top-12 left-0 right-0 h-1 bg-border hidden md:block" />
-        
-        {/* Mobile: Vertical Layout, Desktop: Horizontal */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          {sortedStages.map((stage, index) => {
-            const config = STAGE_CONFIG[stage.stage];
-            const Icon = STAGE_ICONS[stage.stage];
-            const statusConfig = STATUS_CONFIG[stage.status];
-            const deadlineStatus = getDeadlineStatus(stage.deadline);
-            const stageMembers = membersByStage[stage.id] || [];
-
-            return (
-              <div key={stage.id} className="relative">
-                {/* Desktop: Connection dot */}
-                <div className={cn(
-                  "hidden md:block absolute top-10 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-4 border-background z-10",
-                  getStatusColor(stage.status)
-                )} />
-
-                {/* Mobile: Left connection line */}
-                {index > 0 && (
-                  <div className="md:hidden absolute -top-4 left-6 w-0.5 h-4 bg-border" />
-                )}
-
-                <Card 
-                  className={cn(
-                    "cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1",
-                    stage.status === 'concluida' && "border-green-500/50",
-                    stage.status === 'em_andamento' && "border-yellow-500/50"
-                  )}
-                  onClick={() => setSelectedStage(stage)}
-                >
-                  <CardContent className="p-4">
-                    {/* Stage Icon & Name */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className={cn(
-                        "p-2 rounded-lg",
-                        stage.status === 'concluida' ? 'bg-green-100 text-green-600' :
-                        stage.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-muted text-muted-foreground'
-                      )}>
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <span className="font-medium text-sm">{config.label}</span>
-                    </div>
-
-                    {/* Responsible Members - Shown at top of stage */}
-                    {stageMembers.length > 0 && (
-                      <div className="mb-3 p-2 bg-muted/50 rounded-md">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5">
-                          <User className="w-3 h-3" />
-                          <span>Realizado por:</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {stageMembers.slice(0, 2).map((member) => (
-                            <div 
-                              key={member.id}
-                              className="flex items-center gap-1.5 bg-background px-1.5 py-0.5 rounded text-xs"
-                              title={`${member.profile?.name} - ${AGENT_TYPE_LABELS[member.profile?.agent_type] || 'Membro'}`}
-                            >
-                              <Avatar className="w-4 h-4">
-                                <AvatarImage src={member.profile?.avatar_url || undefined} />
-                                <AvatarFallback className="text-[8px]">
-                                  {member.profile?.name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="truncate max-w-[60px]">{member.profile?.name?.split(' ')[0]}</span>
-                            </div>
-                          ))}
-                          {stageMembers.length > 2 && (
-                            <span className="text-xs text-muted-foreground px-1">
-                              +{stageMembers.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+              return (
+                <div key={stage.id} className="flex flex-col items-center" style={{ width: `${100/6}%` }}>
+                  {/* Status indicator node */}
+                  <div 
+                    className={cn(
+                      "w-16 h-16 rounded-full flex items-center justify-center border-4 transition-all z-10 bg-background",
+                      stage.status === 'concluida' && "border-green-500 bg-green-50",
+                      stage.status === 'em_andamento' && "border-yellow-500 bg-yellow-50",
+                      stage.status === 'pendente' && !isBlocked && "border-gray-300 bg-gray-50",
+                      stage.status === 'pendente' && isBlocked && "border-gray-200 bg-gray-100 opacity-60",
+                      isNextUnlockable && "ring-2 ring-primary ring-offset-2"
                     )}
+                  >
+                    {stage.status === 'concluida' ? (
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    ) : stage.status === 'em_andamento' ? (
+                      <Icon className="w-6 h-6 text-yellow-600" />
+                    ) : isBlocked ? (
+                      <Lock className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <Circle className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
 
-                    {/* Status Badge */}
-                    <Badge 
-                      variant={stage.status === 'concluida' ? 'emerald' : 'secondary'}
-                      className="mb-2"
-                    >
-                      {statusConfig.label}
+                  {/* Stage label */}
+                  <span className={cn(
+                    "text-xs font-medium mt-2 text-center",
+                    stage.status === 'concluida' && "text-green-600",
+                    stage.status === 'em_andamento' && "text-yellow-600",
+                    stage.status === 'pendente' && "text-muted-foreground",
+                    isBlocked && "opacity-60"
+                  )}>
+                    {config.label}
+                  </span>
+
+                  {/* Status badge */}
+                  <Badge 
+                    variant={
+                      stage.status === 'concluida' ? 'emerald' : 
+                      stage.status === 'em_andamento' ? 'secondary' : 
+                      'outline'
+                    }
+                    className={cn("text-[10px] mt-1", isBlocked && "opacity-60")}
+                  >
+                    {STATUS_CONFIG[stage.status].label}
+                  </Badge>
+
+                  {/* Responsible members */}
+                  {stageMembers.length > 0 && (
+                    <div className="flex -space-x-2 mt-2">
+                      {stageMembers.slice(0, 3).map((member) => (
+                        <Avatar 
+                          key={member.id} 
+                          className="w-6 h-6 border-2 border-background"
+                          title={member.profile?.name}
+                        >
+                          <AvatarImage src={member.profile?.avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px]">
+                            {member.profile?.name?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                      {stageMembers.length > 3 && (
+                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[8px] border-2 border-background">
+                          +{stageMembers.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Deadline */}
+                  {deadlineStatus && !isBlocked && (
+                    <Badge variant={deadlineStatus.color} className="text-[9px] mt-1">
+                      {deadlineStatus.text}
                     </Badge>
+                  )}
 
-                    {/* Progress */}
-                    <div className="mb-2">
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>Progresso</span>
-                        <span>{stage.progress_percentage}%</span>
-                      </div>
-                      <Progress value={stage.progress_percentage} className="h-1.5" />
+                  {/* Next unlockable indicator */}
+                  {isNextUnlockable && (
+                    <Badge variant="default" className="text-[9px] mt-2 animate-pulse">
+                      Próxima etapa
+                    </Badge>
+                  )}
+
+                  {/* View details button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("text-xs mt-2", isBlocked && "opacity-60")}
+                    onClick={() => !isBlocked && setSelectedStage(stage)}
+                    disabled={isBlocked}
+                  >
+                    {isBlocked ? 'Bloqueada' : 'Detalhes'}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: Vertical Card Layout */}
+      <div className="md:hidden space-y-3">
+        {sortedStages.map((stage, index) => {
+          const config = STAGE_CONFIG[stage.stage];
+          const Icon = STAGE_ICONS[stage.stage];
+          const stageMembers = membersByStage[stage.id] || [];
+          const isBlocked = isStageBlocked(index);
+          const isNextUnlockable = stage.id === nextUnlockableId;
+          const deadlineStatus = getDeadlineStatus(stage.deadline);
+
+          return (
+            <div key={stage.id} className="relative">
+              {/* Connector line */}
+              {index > 0 && (
+                <div className={cn(
+                  "absolute -top-3 left-6 w-0.5 h-3",
+                  sortedStages[index - 1].status === 'concluida' ? "bg-green-500" : "bg-border"
+                )} />
+              )}
+              
+              <Card 
+                className={cn(
+                  "transition-all",
+                  stage.status === 'concluida' && "border-green-500/50 bg-green-50/30",
+                  stage.status === 'em_andamento' && "border-yellow-500/50 bg-yellow-50/30",
+                  stage.status === 'pendente' && !isBlocked && "border-border",
+                  isBlocked && "opacity-60 bg-muted/50",
+                  isNextUnlockable && "ring-2 ring-primary",
+                  !isBlocked && "cursor-pointer hover:shadow-md"
+                )}
+                onClick={() => !isBlocked && setSelectedStage(stage)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    {/* Icon */}
+                    <div className={cn(
+                      "p-2 rounded-lg shrink-0",
+                      stage.status === 'concluida' && "bg-green-100 text-green-600",
+                      stage.status === 'em_andamento' && "bg-yellow-100 text-yellow-600",
+                      stage.status === 'pendente' && "bg-muted text-muted-foreground"
+                    )}>
+                      {isBlocked ? (
+                        <Lock className="w-5 h-5" />
+                      ) : stage.status === 'concluida' ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : (
+                        <Icon className="w-5 h-5" />
+                      )}
                     </div>
 
-                    {/* Deadline */}
-                    {deadlineStatus && (
-                      <div className="flex items-center gap-1 text-xs">
-                        <Calendar className="w-3 h-3" />
-                        <Badge variant={deadlineStatus.color} className="text-xs">
-                          {deadlineStatus.text}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium">{config.label}</span>
+                        <Badge 
+                          variant={
+                            stage.status === 'concluida' ? 'emerald' : 
+                            stage.status === 'em_andamento' ? 'secondary' : 
+                            'outline'
+                          }
+                          className="text-xs"
+                        >
+                          {STATUS_CONFIG[stage.status].label}
                         </Badge>
                       </div>
-                    )}
 
-                    {/* View Details */}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full mt-2 text-xs"
-                    >
-                      Detalhes <ChevronRight className="w-3 h-3 ml-1" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            );
-          })}
-        </div>
+                      {/* Members */}
+                      {stageMembers.length > 0 && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <User className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            {stageMembers.map(m => m.profile?.name?.split(' ')[0]).join(', ')}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Deadline & Next indicator */}
+                      <div className="flex items-center gap-2 mt-2">
+                        {deadlineStatus && !isBlocked && (
+                          <Badge variant={deadlineStatus.color} className="text-[10px]">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {deadlineStatus.text}
+                          </Badge>
+                        )}
+                        {isNextUnlockable && (
+                          <Badge variant="default" className="text-[10px] animate-pulse">
+                            <ArrowRight className="w-3 h-3 mr-1" />
+                            Próxima
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {!isBlocked && (
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          );
+        })}
       </div>
 
       {/* Stage Detail Dialog */}
