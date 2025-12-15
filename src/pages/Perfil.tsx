@@ -339,40 +339,6 @@ export default function Perfil() {
           )}
         </div>
       </main>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Você ainda não tem {config.subperfilLabel.toLowerCase()} cadastrados
-                  </p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setEditingSubperfil(null);
-                      setIsSubperfilDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Criar primeiro(a) {config.subperfilLabel.slice(0, -1).toLowerCase() || "requisição"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {subperfis.map((subperfil) => (
-                  <SubperfilDetailCard
-                    key={subperfil.id}
-                    subperfil={subperfil}
-                    agentType={profile.agent_type}
-                    onEdit={() => {
-                      setEditingSubperfil(subperfil);
-                      setIsSubperfilDialogOpen(true);
-                    }}
-                    onDelete={() => handleDeleteSubperfil(subperfil.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
 
       {/* Dialogs */}
       <SubperfilFormDialog
