@@ -1111,12 +1111,15 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           cover_url: string | null
+          cpf_cnpj: string | null
           created_at: string
           id: string
           is_premium: boolean | null
           location: string | null
           name: string
+          nome_publico: string | null
           phone: string | null
+          tipo_perfil: string | null
           updated_at: string
           user_id: string
           whatsapp: string | null
@@ -1126,12 +1129,15 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
+          cpf_cnpj?: string | null
           created_at?: string
           id?: string
           is_premium?: boolean | null
           location?: string | null
           name: string
+          nome_publico?: string | null
           phone?: string | null
+          tipo_perfil?: string | null
           updated_at?: string
           user_id: string
           whatsapp?: string | null
@@ -1141,12 +1147,15 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
+          cpf_cnpj?: string | null
           created_at?: string
           id?: string
           is_premium?: boolean | null
           location?: string | null
           name?: string
+          nome_publico?: string | null
           phone?: string | null
+          tipo_perfil?: string | null
           updated_at?: string
           user_id?: string
           whatsapp?: string | null
