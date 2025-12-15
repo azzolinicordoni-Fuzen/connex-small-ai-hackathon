@@ -275,7 +275,7 @@ export default function Perfil() {
 
           {/* Description Cards */}
           {(profile.bio || profile.areas_atuacao || profile.objetivo_plataforma) && (
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-3">
               {profile.bio && (
                 <Card className="p-4 border-l-4 border-l-primary/50">
                   <div className="flex items-center gap-2 mb-2">
