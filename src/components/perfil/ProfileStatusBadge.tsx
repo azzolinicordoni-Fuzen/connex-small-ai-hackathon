@@ -34,9 +34,9 @@ export default function ProfileStatusBadge({ profile }: ProfileStatusBadgeProps)
   }
 
   return (
-    <Badge variant="secondary" className="gap-1">
+    <Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-600 border-amber-200">
       <AlertCircle className="w-3 h-3" />
-      Perfil Básico
+      Incompleto
     </Badge>
   );
 }
