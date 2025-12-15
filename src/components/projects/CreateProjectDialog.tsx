@@ -6,202 +6,205 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Globe, Lock, Info } from 'lucide-react';
-import { CarbonProject, VisibilityMode } from '@/types/project';
+import { CarbonProject, VisibilityMode, ProjectStageType } from '@/types/project';
+import ProjectBasicInfoForm from './create/ProjectBasicInfoForm';
+import StageCheckboxSelector, { StageData } from './create/StageCheckboxSelector';
 
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (data: Partial<CarbonProject>) => Promise<CarbonProject | null>;
+  onCreate: (data: Partial<CarbonProject> & { stagesData?: Record<ProjectStageType, StageData> }) => Promise<CarbonProject | null>;
 }
 
-const PROJECT_TYPES = [
-  'REDD+',
-  'ARR (Reflorestamento)',
-  'IFM',
-  'Agricultura Regenerativa',
-  'Energia Renovável',
-  'Gestão de Resíduos',
-  'Conservação de Solo',
-  'Outro',
+const INITIAL_STAGE_DATA: StageData = {
+  selected: false,
+  notes: '',
+  deadline: '',
+  progress: 0,
+  responsavel: '',
+  metadata: {},
+};
+
+const STAGES_ORDER: ProjectStageType[] = [
+  'documentos',
+  'viabilidade', 
+  'desenvolvimento',
+  'certificacao',
+  'auditoria',
+  'venda'
 ];
 
 export default function CreateProjectDialog({ open, onOpenChange, onCreate }: CreateProjectDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  
+  const [basicInfo, setBasicInfo] = useState({
     name: '',
     description: '',
-    location: '',
-    area_hectares: '',
     project_type: '',
-    is_online: false,
-    visibility_mode: 'private' as VisibilityMode,
+    country: 'Brasil',
+    state: '',
+    municipality: '',
+    bioma: '',
+    status: 'em_andamento',
   });
+
+  const [stagesData, setStagesData] = useState<Record<ProjectStageType, StageData>>(
+    STAGES_ORDER.reduce((acc, stage) => ({
+      ...acc,
+      [stage]: { ...INITIAL_STAGE_DATA },
+    }), {} as Record<ProjectStageType, StageData>)
+  );
+
+  const [isOnline, setIsOnline] = useState(false);
+  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>('private');
+
+  const handleBasicInfoChange = (updates: Partial<typeof basicInfo>) => {
+    setBasicInfo(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleStageChange = (stage: ProjectStageType, updates: Partial<StageData>) => {
+    setStagesData(prev => ({
+      ...prev,
+      [stage]: { ...prev[stage], ...updates },
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!basicInfo.name.trim()) return;
 
     setLoading(true);
+    
+    // Build location string
+    const locationParts = [basicInfo.municipality, basicInfo.state, basicInfo.country].filter(Boolean);
+    const location = locationParts.join(', ');
+
     const result = await onCreate({
-      name: formData.name,
-      description: formData.description || null,
-      location: formData.location || null,
-      area_hectares: formData.area_hectares ? Number(formData.area_hectares) : null,
-      project_type: formData.project_type || null,
-      is_online: formData.is_online,
-      visibility_mode: formData.visibility_mode,
+      name: basicInfo.name,
+      description: basicInfo.description || null,
+      location: location || null,
+      project_type: basicInfo.project_type || null,
+      is_online: isOnline,
+      visibility_mode: visibilityMode,
+      // Pass stage data for processing
+      stagesData,
     });
 
     if (result) {
-      setFormData({ 
-        name: '', 
-        description: '', 
-        location: '', 
-        area_hectares: '', 
+      // Reset form
+      setBasicInfo({
+        name: '',
+        description: '',
         project_type: '',
-        is_online: false,
-        visibility_mode: 'private',
+        country: 'Brasil',
+        state: '',
+        municipality: '',
+        bioma: '',
+        status: 'em_andamento',
       });
+      setStagesData(
+        STAGES_ORDER.reduce((acc, stage) => ({
+          ...acc,
+          [stage]: { ...INITIAL_STAGE_DATA },
+        }), {} as Record<ProjectStageType, StageData>)
+      );
+      setIsOnline(false);
+      setVisibilityMode('private');
       onOpenChange(false);
     }
     setLoading(false);
   };
 
+  const selectedStagesCount = Object.values(stagesData).filter(s => s.selected).length;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[85vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Novo Projeto de Carbono</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b">
+          <DialogTitle>Novo Projeto de Créditos de Carbono</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Preencha as informações básicas e selecione as etapas que deseja configurar
+          </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 pr-2">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome do Projeto *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Projeto REDD+ Amazônia"
-              required
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+            {/* Basic Information */}
+            <ProjectBasicInfoForm 
+              formData={basicInfo}
+              onChange={handleBasicInfoChange}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descreva brevemente o projeto..."
-              rows={3}
+            <Separator />
+
+            {/* Stage Selection */}
+            <StageCheckboxSelector
+              stagesData={stagesData}
+              onChange={handleStageChange}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Localização</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Ex: Pará, Brasil"
-              />
-            </div>
+            <Separator />
 
-            <div className="space-y-2">
-              <Label htmlFor="area">Área (hectares)</Label>
-              <Input
-                id="area"
-                type="number"
-                value={formData.area_hectares}
-                onChange={(e) => setFormData({ ...formData, area_hectares: e.target.value })}
-                placeholder="Ex: 5000"
-              />
-            </div>
-          </div>
+            {/* Visibility Settings */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground border-b pb-2">Visibilidade</h3>
+              
+              <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors">
+                <Checkbox
+                  id="is_online"
+                  checked={isOnline}
+                  onCheckedChange={(checked) => {
+                    setIsOnline(checked as boolean);
+                    setVisibilityMode(checked ? 'public' : 'private');
+                  }}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="is_online" className="flex items-center gap-2 cursor-pointer font-medium">
+                    {isOnline ? (
+                      <Globe className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Lock className="w-4 h-4 text-muted-foreground" />
+                    )}
+                    Disponibilizar projeto online
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {isOnline 
+                      ? 'O projeto aparecerá na aba "Conexões → Projetos em andamento"'
+                      : 'O projeto será privado e não aparecerá para conexões'
+                    }
+                  </p>
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label>Tipo de Projeto</Label>
-            <Select
-              value={formData.project_type}
-              onValueChange={(value) => setFormData({ ...formData, project_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {PROJECT_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Separator />
-
-          {/* Visibility Settings */}
-          <div className="space-y-4">
-            <Label className="text-base font-semibold">Visibilidade do Projeto</Label>
-            
-            <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors">
-              <Checkbox
-                id="is_online"
-                checked={formData.is_online}
-                onCheckedChange={(checked) => setFormData({ 
-                  ...formData, 
-                  is_online: checked as boolean,
-                  visibility_mode: checked ? 'public' : 'private',
-                })}
-              />
-              <div className="flex-1">
-                <Label htmlFor="is_online" className="flex items-center gap-2 cursor-pointer font-medium">
-                  {formData.is_online ? (
-                    <Globe className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                  )}
-                  Disponibilizar projeto online
-                </Label>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formData.is_online 
-                    ? 'O projeto aparecerá na aba "Conexões → Projetos em andamento"'
-                    : 'O projeto será privado e não aparecerá para conexões'
-                  }
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  Você pode alterar a visibilidade e configurar quais etapas ficam visíveis depois de criar o projeto, clicando em "Editar Processo".
                 </p>
               </div>
             </div>
-
-            {/* Info Box */}
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">
-                Você pode alterar a visibilidade e selecionar quais etapas ficam visíveis depois de criar o projeto, clicando em "Editar Processo".
-              </p>
-            </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? 'Criando...' : 'Criar Projeto'}
-            </Button>
+          {/* Footer */}
+          <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-t bg-muted/30">
+            <div className="text-xs text-muted-foreground">
+              {selectedStagesCount > 0 
+                ? `${selectedStagesCount} etapa(s) selecionada(s)`
+                : 'Nenhuma etapa selecionada'
+              }
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading || !basicInfo.name.trim()}>
+                {loading ? 'Criando...' : 'Criar Projeto'}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
