@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
@@ -109,6 +109,17 @@ export default function MeusProjetos() {
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Back Button */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => selectedProjectId ? setSelectedProjectId(null) : navigate('/dashboard')}
+          className="mb-4 gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar
+        </Button>
+
         {/* Breadcrumbs */}
         <Breadcrumbs 
           items={
