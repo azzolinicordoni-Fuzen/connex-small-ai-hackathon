@@ -92,7 +92,8 @@ export default function SubperfilFormDialog({ open, onOpenChange, agentType, pro
       case "proprietario":
         return { 
           nome_area: "", hectares: "", tipo_uso: "", tipo_projeto_desejado: [], 
-          bioma: "", documentacao_fundiaria: false, interesse_projeto: [],
+          bioma: "", descricao_bioma: "", documentacao_fundiaria: null, 
+          observacoes_documentacao: "", interesse_projeto: [],
           descricao: "", ...commonFields 
         };
       case "investidor":
@@ -619,18 +620,47 @@ export default function SubperfilFormDialog({ open, onOpenChange, agentType, pro
                   </div>
                 ))}
               </RadioGroup>
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="descricao_bioma">Descrição do Bioma</Label>
+                <Textarea
+                  id="descricao_bioma"
+                  placeholder="Descreva as características do bioma da sua propriedade..."
+                  value={formData.descricao_bioma || ""}
+                  onChange={(e) => setFormData({ ...formData, descricao_bioma: e.target.value })}
+                  rows={3}
+                />
+              </div>
             </FormSection>
 
-            <FormSection title="Documentação">
-              <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                <Checkbox
-                  id="doc_fundiaria"
-                  checked={formData.documentacao_fundiaria || false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, documentacao_fundiaria: checked })}
-                />
-                <Label htmlFor="doc_fundiaria" className="cursor-pointer">
-                  Possui documentação fundiária regularizada
-                </Label>
+            <FormSection title="Documentação Fundiária">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Possui documentação fundiária regularizada?</Label>
+                  <RadioGroup
+                    value={formData.documentacao_fundiaria === true ? "sim" : formData.documentacao_fundiaria === false ? "nao" : ""}
+                    onValueChange={(value) => setFormData({ ...formData, documentacao_fundiaria: value === "sim" })}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-secondary/50 flex-1">
+                      <RadioGroupItem value="sim" id="doc-sim" />
+                      <Label htmlFor="doc-sim" className="cursor-pointer">Sim</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-secondary/50 flex-1">
+                      <RadioGroupItem value="nao" id="doc-nao" />
+                      <Label htmlFor="doc-nao" className="cursor-pointer">Não</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="observacoes_documentacao">Observações</Label>
+                  <Textarea
+                    id="observacoes_documentacao"
+                    placeholder="Observações sobre a documentação..."
+                    value={formData.observacoes_documentacao || ""}
+                    onChange={(e) => setFormData({ ...formData, observacoes_documentacao: e.target.value })}
+                    rows={3}
+                  />
+                </div>
               </div>
             </FormSection>
           </>
