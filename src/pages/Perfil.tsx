@@ -43,6 +43,8 @@ interface Profile {
   tipo_perfil?: string | null;
   cpf_cnpj?: string | null;
   bio: string | null;
+  areas_atuacao?: string | null;
+  objetivo_plataforma?: string | null;
   location: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -241,8 +243,35 @@ export default function Perfil() {
                   {acceptedCount} conexões
                 </Badge>
               </div>
-              {profile.bio && (
-                <p className="text-muted-foreground max-w-2xl mb-4">{profile.bio}</p>
+              
+              {/* Description Section */}
+              {(profile.bio || profile.areas_atuacao || profile.objetivo_plataforma) && (
+                <div className="grid gap-4 sm:grid-cols-3 mb-6 mt-4">
+                  {profile.bio && (
+                    <Card className="p-4 bg-muted/30">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        Sobre o Perfil
+                      </h4>
+                      <p className="text-sm">{profile.bio}</p>
+                    </Card>
+                  )}
+                  {profile.areas_atuacao && (
+                    <Card className="p-4 bg-muted/30">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        Áreas de Atuação
+                      </h4>
+                      <p className="text-sm">{profile.areas_atuacao}</p>
+                    </Card>
+                  )}
+                  {profile.objetivo_plataforma && (
+                    <Card className="p-4 bg-muted/30">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        Objetivo na Plataforma
+                      </h4>
+                      <p className="text-sm">{profile.objetivo_plataforma}</p>
+                    </Card>
+                  )}
+                </div>
               )}
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                 {profile.location && (
