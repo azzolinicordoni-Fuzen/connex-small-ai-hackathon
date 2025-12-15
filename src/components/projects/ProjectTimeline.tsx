@@ -154,7 +154,7 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
 
                   {/* Stage label */}
                   <span className={cn(
-                    "text-xs font-medium mt-2 text-center",
+                    "text-sm font-semibold mt-3 text-center",
                     stage.status === 'concluida' && "text-green-600",
                     stage.status === 'em_andamento' && "text-yellow-600",
                     stage.status === 'pendente' && "text-muted-foreground",
@@ -282,7 +282,7 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-medium">{config.label}</span>
+                        <span className="font-semibold text-base">{config.label}</span>
                         <Badge 
                           variant={
                             stage.status === 'concluida' ? 'emerald' : 
