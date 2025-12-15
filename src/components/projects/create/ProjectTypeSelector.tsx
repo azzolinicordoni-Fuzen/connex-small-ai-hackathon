@@ -3,7 +3,6 @@ import { ChevronDown, ChevronRight, Check } from 'lucide-react';
 import { PROJECT_CATEGORIES, ProjectCategory } from '@/constants/projectTypes';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ProjectTypeSelectorProps {
   selectedTypes: string[];
@@ -57,7 +56,10 @@ export function ProjectTypeSelector({
         )}
       </div>
 
-      <ScrollArea className="border rounded-lg" style={{ maxHeight }}>
+      <div 
+        className="border rounded-lg overflow-y-auto" 
+        style={{ maxHeight }}
+      >
         <div className="p-2 space-y-1">
           {PROJECT_CATEGORIES.map((category) => {
             const isExpanded = expandedCategories.includes(category.id);
@@ -127,7 +129,7 @@ export function ProjectTypeSelector({
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Selected Types Preview */}
       {selectedTypes.length > 0 && (
