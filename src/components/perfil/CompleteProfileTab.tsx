@@ -140,7 +140,7 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
   const getSectionStatus = (section: string) => {
     switch (section) {
       case "identificacao":
-        return formData.name && formData.avatar_url ? "complete" : "incomplete";
+        return formData.name && formData.tipo_perfil && formData.cpf_cnpj ? "complete" : "incomplete";
       case "contato":
         return formData.phone || formData.whatsapp ? "complete" : "incomplete";
       case "localizacao":
