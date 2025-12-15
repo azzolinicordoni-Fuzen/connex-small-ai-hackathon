@@ -13,7 +13,6 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
   Calendar, Users, MessageSquare, Settings, X, Plus, Filter, Send, User
@@ -246,7 +245,7 @@ export default function StageDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[500px] pr-4">
+          <div className="h-[500px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
             <TabsContent value="details" className="space-y-4 mt-4">
               {/* Status */}
               <div className="space-y-2">
@@ -508,7 +507,7 @@ export default function StageDetailDialog({
                 </Button>
               </div>
             </TabsContent>
-          </ScrollArea>
+          </div>
         </Tabs>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
