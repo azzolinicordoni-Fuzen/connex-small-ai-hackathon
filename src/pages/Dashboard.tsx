@@ -32,6 +32,9 @@ import { DashboardConnections } from "@/components/dashboard/DashboardConnection
 import { DashboardActivity } from "@/components/dashboard/DashboardActivity";
 import { DashboardProfile } from "@/components/dashboard/DashboardProfile";
 import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
+import { DashboardNewsletter } from "@/components/dashboard/DashboardNewsletter";
+import { DashboardCalculator } from "@/components/dashboard/DashboardCalculator";
+import { DashboardCarbonMarket } from "@/components/dashboard/DashboardCarbonMarket";
 import { Logo } from "@/components/brand/Logo";
 import { toast } from "sonner";
 
@@ -77,7 +80,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const navItems = [
-    { icon: Home, label: "Visão Geral", href: "/dashboard", active: true },
+    { icon: Home, label: "Carbon Hub", href: "/dashboard", active: true },
     { icon: User, label: "Meu Perfil", href: "/perfil" },
     { icon: Newspaper, label: "Feed", href: "/feed" },
     { icon: Globe, label: "Rede de Contatos", href: "/conexoes" },
@@ -283,7 +286,7 @@ export default function Dashboard() {
           </button>
 
           <div className="flex-1 lg:flex-none">
-            <h1 className="font-display text-xl font-semibold">Visão Geral</h1>
+            <h1 className="font-display text-xl font-semibold">Carbon Hub</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -294,13 +297,15 @@ export default function Dashboard() {
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 space-y-6">
           {/* Welcome Message */}
-          <div>
-            <h2 className="text-2xl font-display font-bold">
-              Bem-vindo, {profile?.name?.split(" ")[0] || "Usuário"}!
-            </h2>
-            <p className="text-muted-foreground">
-              Aqui está o resumo das suas atividades e o que precisa da sua atenção
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-display font-bold">
+                Bem-vindo ao Carbon Hub, {profile?.name?.split(" ")[0] || "Usuário"}!
+              </h2>
+              <p className="text-muted-foreground">
+                Seu painel central de gestão de projetos, mercado e oportunidades
+              </p>
+            </div>
           </div>
 
           {/* Stats - Resumo Rápido */}
@@ -311,25 +316,32 @@ export default function Dashboard() {
             unreadMessages={messagesUnreadCount}
           />
 
-          {/* Main Grid */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Projects */}
-            <div className="lg:col-span-2 space-y-6">
+          {/* Main Grid - New Layout */}
+          <div className="grid lg:grid-cols-12 gap-6">
+            {/* Left Column - Projects & Newsletter */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* Projects Section */}
               <DashboardProjects 
                 projects={projectsWithStages} 
                 loading={loading} 
               />
               
-              <DashboardActivity 
-                posts={transformedPosts} 
-                loading={postsLoading} 
-              />
+              {/* Newsletter Section */}
+              <DashboardNewsletter />
             </div>
 
-            {/* Right Column - Profile, Connections, Actions */}
-            <div className="space-y-6">
+            {/* Right Column - Calculator, Market & Profile */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* Carbon Market */}
+              <DashboardCarbonMarket />
+              
+              {/* Calculator */}
+              <DashboardCalculator />
+              
+              {/* Profile Completion */}
               <DashboardProfile profile={profile} />
               
+              {/* Connections */}
               <DashboardConnections 
                 connections={transformedConnections}
                 pendingCount={pendingConnections}
@@ -337,10 +349,14 @@ export default function Dashboard() {
                 onAccept={handleAcceptConnection}
                 onReject={handleRejectConnection}
               />
-              
-              <DashboardQuickActions />
             </div>
           </div>
+
+          {/* Activity Section - Full Width */}
+          <DashboardActivity 
+            posts={transformedPosts} 
+            loading={postsLoading} 
+          />
         </main>
       </div>
     </div>
