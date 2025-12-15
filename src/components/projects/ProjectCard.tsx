@@ -14,6 +14,7 @@ import {
 import { CarbonProject, ProjectStage, STAGE_CONFIG } from '@/types/project';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getCategoryBySubtypeId, getSubtypeLabel } from '@/constants/projectTypes';
 
 interface ProjectCardProps {
   project: CarbonProject;
@@ -28,6 +29,7 @@ interface ParsedDescription {
   descricao?: string;
   bioma?: string;
   status?: string;
+  project_types?: string[];
 }
 
 function parseProjectDescription(description: string | null): ParsedDescription {
@@ -49,6 +51,13 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
 
   const parsed = parseProjectDescription(project.description);
 
+  // Get project types - prefer parsed array, fallback to single type
+  const projectTypes = parsed.project_types && parsed.project_types.length > 0 
+    ? parsed.project_types 
+    : project.project_type 
+      ? [project.project_type] 
+      : [];
+
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
       <CardHeader className="pb-2">
@@ -66,12 +75,39 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {project.project_type && (
-                <Badge variant="outline">{project.project_type}</Badge>
+            
+            {/* Project Types Badges */}
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              {projectTypes.slice(0, 3).map((typeId) => {
+                const category = getCategoryBySubtypeId(typeId);
+                const label = getSubtypeLabel(typeId);
+                // If it's an old format string, show as-is
+                const isNewFormat = category !== undefined;
+                return (
+                  <Badge 
+                    key={typeId} 
+                    variant="outline" 
+                    className="text-xs gap-1"
+                    title={isNewFormat ? `${category?.label}: ${label}` : typeId}
+                  >
+                    {isNewFormat && <span>{category?.icon}</span>}
+                    <span className="max-w-[120px] truncate">
+                      {isNewFormat ? label : typeId}
+                    </span>
+                  </Badge>
+                );
+              })}
+              {projectTypes.length > 3 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{projectTypes.length - 3}
+                </Badge>
               )}
+            </div>
+
+            {/* Bioma & Status */}
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               {parsed.bioma && (
-                <Badge variant="secondary" className="gap-1">
+                <Badge variant="secondary" className="gap-1 text-xs">
                   <Leaf className="w-3 h-3" />
                   {parsed.bioma}
                 </Badge>
@@ -79,7 +115,7 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
               {parsed.status && (
                 <Badge 
                   variant={parsed.status === 'concluido' ? 'default' : 'outline'}
-                  className={parsed.status === 'concluido' ? 'bg-green-500/10 text-green-600 border-green-500/30' : ''}
+                  className={`text-xs ${parsed.status === 'concluido' ? 'bg-green-500/10 text-green-600 border-green-500/30' : ''}`}
                 >
                   {parsed.status === 'concluido' ? 'Concluído' : 'Em Andamento'}
                 </Badge>

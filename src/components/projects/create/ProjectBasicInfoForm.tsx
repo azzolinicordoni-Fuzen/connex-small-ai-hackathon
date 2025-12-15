@@ -8,17 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const PROJECT_TYPES = [
-  'REDD+',
-  'ARR (Reflorestamento)',
-  'IFM',
-  'Agricultura Regenerativa',
-  'Energia Renovável',
-  'Gestão de Resíduos',
-  'Conservação de Solo',
-  'Outro',
-];
+import { ProjectTypeSelector } from './ProjectTypeSelector';
 
 const BIOMAS = [
   'Amazônia',
@@ -41,7 +31,7 @@ interface ProjectBasicInfoFormProps {
     name: string;
     description: string;
     objetivo: string;
-    project_type: string;
+    project_types: string[];
     country: string;
     state: string;
     municipality: string;
@@ -67,26 +57,20 @@ export default function ProjectBasicInfoForm({ formData, onChange }: ProjectBasi
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Tipo de Projeto *</Label>
-          <Select
-            value={formData.project_type}
-            onValueChange={(value) => onChange({ project_type: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {PROJECT_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Project Types Multi-Select */}
+      <div className="space-y-2">
+        <Label>Tipos de Projeto *</Label>
+        <p className="text-xs text-muted-foreground mb-2">
+          Selecione um ou mais tipos que se aplicam ao seu projeto
+        </p>
+        <ProjectTypeSelector
+          selectedTypes={formData.project_types}
+          onChange={(types) => onChange({ project_types: types })}
+          maxHeight="300px"
+        />
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Bioma *</Label>
           <Select
@@ -102,6 +86,22 @@ export default function ProjectBasicInfoForm({ formData, onChange }: ProjectBasi
                   {bioma}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Status do Projeto</Label>
+          <Select
+            value={formData.status}
+            onValueChange={(value) => onChange({ status: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="em_andamento">Em Andamento</SelectItem>
+              <SelectItem value="concluido">Concluído</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -145,22 +145,6 @@ export default function ProjectBasicInfoForm({ formData, onChange }: ProjectBasi
             placeholder="Cidade"
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Status do Projeto</Label>
-        <Select
-          value={formData.status}
-          onValueChange={(value) => onChange({ status: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="em_andamento">Em Andamento</SelectItem>
-            <SelectItem value="concluido">Concluído</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="space-y-2">
