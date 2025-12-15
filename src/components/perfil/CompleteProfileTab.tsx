@@ -18,6 +18,9 @@ import { supabase } from "@/integrations/supabase/client";
 interface Profile {
   id: string;
   name: string;
+  nome_publico?: string | null;
+  tipo_perfil?: string | null;
+  cpf_cnpj?: string | null;
   bio: string | null;
   location: string | null;
   phone: string | null;
@@ -75,6 +78,9 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
     setFormData(prev => ({
       ...prev,
       name: profile.name || "",
+      nome_publico: profile.nome_publico || "",
+      tipo_perfil: profile.tipo_perfil || "pessoa_fisica",
+      cpf_cnpj: profile.cpf_cnpj || "",
       bio: profile.bio || "",
       phone: profile.phone || "",
       whatsapp: profile.whatsapp || "",
@@ -100,6 +106,9 @@ export default function CompleteProfileTab({ profile, onProfileUpdated, userEmai
         .from("profiles")
         .update({
           name: formData.name,
+          nome_publico: formData.nome_publico || null,
+          tipo_perfil: formData.tipo_perfil || 'pessoa_fisica',
+          cpf_cnpj: formData.cpf_cnpj || null,
           bio: formData.bio || null,
           location: location || null,
           phone: formData.phone || null,

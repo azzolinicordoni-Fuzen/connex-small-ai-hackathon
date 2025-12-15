@@ -39,6 +39,9 @@ const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; co
 interface Profile {
   id: string;
   name: string;
+  nome_publico?: string | null;
+  tipo_perfil?: string | null;
+  cpf_cnpj?: string | null;
   bio: string | null;
   location: string | null;
   phone: string | null;

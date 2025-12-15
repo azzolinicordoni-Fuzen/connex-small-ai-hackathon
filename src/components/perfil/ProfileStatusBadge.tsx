@@ -4,25 +4,13 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 interface ProfileStatusBadgeProps {
   profile: {
     name: string;
-    bio: string | null;
-    location: string | null;
-    phone: string | null;
-    whatsapp: string | null;
-    avatar_url: string | null;
+    tipo_perfil?: string | null;
+    cpf_cnpj?: string | null;
   };
 }
 
 export default function ProfileStatusBadge({ profile }: ProfileStatusBadgeProps) {
-  const fields = [
-    { key: "name", filled: !!profile.name },
-    { key: "bio", filled: !!profile.bio },
-    { key: "location", filled: !!profile.location },
-    { key: "phone", filled: !!profile.phone },
-    { key: "avatar_url", filled: !!profile.avatar_url },
-  ];
-
-  const filledCount = fields.filter(f => f.filled).length;
-  const isComplete = filledCount === fields.length;
+  const isComplete = !!profile.name && !!profile.tipo_perfil && !!profile.cpf_cnpj;
 
   if (isComplete) {
     return (
