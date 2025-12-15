@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { 
   FileText, 
   Search, 
@@ -341,34 +340,24 @@ function StageExpandedFields({
       </div>
       
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label className="text-xs">Responsável</Label>
-          <Input
-            className="h-8 text-xs"
-            value={data.responsavel}
-            onChange={(e) => onChange({ responsavel: e.target.value })}
-            placeholder="Nome do responsável"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs">Prazo</Label>
-          <Input
-            type="date"
-            className="h-8 text-xs"
-            value={data.deadline}
-            onChange={(e) => onChange({ deadline: e.target.value })}
-          />
-        </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Prazo</Label>
+        <Input
+          type="date"
+          className="h-8 text-xs"
+          value={data.deadline}
+          onChange={(e) => onChange({ deadline: e.target.value })}
+        />
       </div>
+    </div>
 
       <div className="space-y-2">
-        <Label className="text-xs">Progresso: {data.progress}%</Label>
-        <Slider
-          value={[data.progress]}
-          onValueChange={([v]) => onChange({ progress: v })}
-          max={100}
-          step={5}
-          className="w-full"
+        <Label className="text-xs">Responsável</Label>
+        <Input
+          className="h-8 text-xs"
+          value={data.responsavel}
+          onChange={(e) => onChange({ responsavel: e.target.value })}
+          placeholder="Nome do responsável"
         />
       </div>
 
