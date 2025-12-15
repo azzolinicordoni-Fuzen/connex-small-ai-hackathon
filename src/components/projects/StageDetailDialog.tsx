@@ -280,6 +280,18 @@ export default function StageDetailDialog({
                   onChange={(e) => setDeadline(e.target.value)}
                 />
               </div>
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label>Notas da Etapa</Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Adicione observações ou anotações sobre esta etapa..."
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="members" className="space-y-4 mt-4">
