@@ -303,8 +303,8 @@ export default function PerfilPublico() {
       
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Back Button */}
-        <div className="mb-4">
-          <BackButton showLabel />
+        <div className="mb-6">
+          <BackButton showLabel className="bg-muted hover:bg-muted/80" />
         </div>
 
         {/* Cover & Avatar */}
