@@ -168,7 +168,7 @@ export default function PerfilPublico() {
   };
 
   const handleMessage = () => {
-    navigate(`/mensagens?to=${id}`);
+    navigate(`/mensagens?profile=${id}`);
   };
 
   const connectionStatus = id ? getConnectionStatus(id) : 'none';
