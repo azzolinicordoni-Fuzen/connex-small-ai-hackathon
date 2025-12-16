@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +40,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { STAGE_CONFIG, ProjectStageType } from "@/types/project";
 import SubprofileCard from "@/components/conexoes/SubprofileCard";
+import AdvancedFilters, { FilterState, initialFilterState, applyFilters } from "@/components/conexoes/AdvancedFilters";
 
 const agentTypeIcons: Record<string, any> = {
   proprietario: TreePine,
@@ -64,18 +64,6 @@ const agentTypeLabels: Record<string, string> = {
   outro: "Outro",
 };
 
-const filters = [
-  { id: "todos", label: "Todos", icon: Users },
-  { id: "proprietario", label: "Proprietários Rurais", icon: TreePine },
-  { id: "desenvolvedor", label: "Desenvolvedores", icon: Briefcase },
-  { id: "auditor", label: "Auditores", icon: ClipboardCheck },
-  { id: "investidor", label: "Investidores / Compradores", icon: Landmark },
-  { id: "financeira", label: "Instituições Financeiras", icon: Banknote },
-  { id: "advogado", label: "Jurídico", icon: Scale },
-  { id: "projeto", label: "Projetos Existentes", icon: FolderOpen },
-  { id: "outro", label: "Outros", icon: Users },
-];
-
 interface ProjectStageData {
   id: string;
   stage: string;
@@ -88,13 +76,13 @@ export default function Conexoes() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("subperfis");
   const [projectStages, setProjectStages] = useState<Record<string, ProjectStageData[]>>({});
   const [loadingConnection, setLoadingConnection] = useState<string | null>(null);
   const [showSelectSubprofileDialog, setShowSelectSubprofileDialog] = useState(false);
   const [targetSubprofile, setTargetSubprofile] = useState<UnifiedSubprofile | null>(null);
+  const [filters, setFilters] = useState<FilterState>(initialFilterState);
 
   // Get current user's profile id
   useEffect(() => {
@@ -146,15 +134,25 @@ export default function Conexoes() {
     fetchProjectStages();
   }, [onlineProjects]);
 
-  const filteredSubprofiles = subprofiles.filter((sp) => {
-    const matchesFilter = activeFilter === "todos" || sp.subprofile_type === activeFilter;
-    const matchesSearch = 
-      sp.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (sp.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (sp.profile?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (sp.profile?.location || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  // Apply advanced filters and search
+  const filteredSubprofiles = useMemo(() => {
+    // First apply search
+    let results = subprofiles.filter((sp) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        sp.name?.toLowerCase().includes(query) ||
+        (sp.description || '').toLowerCase().includes(query) ||
+        (sp.profile?.name || '').toLowerCase().includes(query) ||
+        (sp.profile?.location || '').toLowerCase().includes(query)
+      );
+    });
+    
+    // Then apply advanced filters
+    results = applyFilters(results, filters, getSubprofileConnectionStatus);
+    
+    return results;
+  }, [subprofiles, searchQuery, filters, getSubprofileConnectionStatus]);
 
   const filteredProjects = onlineProjects.filter((project) => {
     const matchesSearch = 
@@ -166,17 +164,14 @@ export default function Conexoes() {
 
   const handleConnect = (targetSp: UnifiedSubprofile) => {
     if (mySubprofiles.length === 0) {
-      // No subprofiles to connect with
       setTargetSubprofile(null);
       setShowSelectSubprofileDialog(true);
       return;
     }
     
     if (mySubprofiles.length === 1) {
-      // Auto-select the only subprofile
       handleSendConnection(mySubprofiles[0], targetSp);
     } else {
-      // Show dialog to select which subprofile to connect with
       setTargetSubprofile(targetSp);
       setShowSelectSubprofileDialog(true);
     }
@@ -207,12 +202,6 @@ export default function Conexoes() {
     return Math.round(stages.reduce((sum, s) => sum + (s.progress_percentage || 0), 0) / stages.length);
   };
 
-  // Count subprofiles by type for filter badges
-  const subprofileCounts = subprofiles.reduce((acc, sp) => {
-    acc[sp.subprofile_type] = (acc[sp.subprofile_type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -241,7 +230,7 @@ export default function Conexoes() {
                 <Users className="w-4 h-4" />
                 Subperfis
                 <Badge variant="secondary" className="ml-1 bg-primary/10 text-primary">
-                  {subprofiles.length}
+                  {filteredSubprofiles.length}/{subprofiles.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="projetos" className="gap-2 data-[state=active]:bg-background">
@@ -255,86 +244,65 @@ export default function Conexoes() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Search and Filters */}
+            {/* Search Bar */}
             <div className="flex flex-col gap-4 mt-6 mb-6">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder={activeTab === "subperfis" 
-                      ? "Buscar por nome do subperfil, perfil ou localização..."
-                      : "Buscar projetos por nome, localização..."
-                    }
-                    className="pl-10 h-11"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder={activeTab === "subperfis" 
+                    ? "Buscar por nome do subperfil, perfil ou localização..."
+                    : "Buscar projetos por nome, localização..."
+                  }
+                  className="pl-10 h-11"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-
-              {/* Type Filters - Horizontal Scroll */}
-              {activeTab === "subperfis" && (
-                <ScrollArea className="w-full whitespace-nowrap">
-                  <div className="flex gap-2 pb-2">
-                    {filters.map((filter) => {
-                      const count = filter.id === 'todos' 
-                        ? subprofiles.length 
-                        : (subprofileCounts[filter.id] || 0);
-                      const FilterIcon = filter.icon;
-                      
-                      return (
-                        <Button
-                          key={filter.id}
-                          variant={activeFilter === filter.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setActiveFilter(filter.id)}
-                          className="shrink-0 gap-2"
-                        >
-                          <FilterIcon className="w-4 h-4" />
-                          {filter.label}
-                          <Badge 
-                            variant={activeFilter === filter.id ? "secondary" : "outline"}
-                            className="ml-0.5 text-xs"
-                          >
-                            {count}
-                          </Badge>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-              )}
             </div>
 
-            {/* Subprofiles Tab */}
+            {/* Subprofiles Tab with Advanced Filters */}
             <TabsContent value="subperfis">
-              {subprofilesLoading ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Sidebar Filters - Desktop */}
+                <div className="lg:w-72 shrink-0">
+                  <AdvancedFilters
+                    subprofiles={subprofiles}
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    connectionStatusGetter={getSubprofileConnectionStatus}
+                  />
                 </div>
-              ) : filteredSubprofiles.length === 0 ? (
-                <div className="text-center py-16">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-semibold text-lg mb-2">Nenhum subperfil encontrado</h3>
-                  <p className="text-muted-foreground">
-                    Tente ajustar seus filtros ou termos de busca
-                  </p>
+
+                {/* Results Grid */}
+                <div className="flex-1">
+                  {subprofilesLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : filteredSubprofiles.length === 0 ? (
+                    <div className="text-center py-16">
+                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="font-semibold text-lg mb-2">Nenhum subperfil encontrado</h3>
+                      <p className="text-muted-foreground">
+                        Tente ajustar seus filtros ou termos de busca
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {filteredSubprofiles.map((sp) => (
+                        <SubprofileCard
+                          key={sp.id}
+                          subprofile={sp}
+                          connectionStatus={getSubprofileConnectionStatus(sp.id)}
+                          onConnect={() => handleConnect(sp)}
+                          onMessage={() => navigate(`/mensagens?profile=${sp.profile_id}`)}
+                          isLoading={loadingConnection === sp.id}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredSubprofiles.map((sp) => (
-                    <SubprofileCard
-                      key={sp.id}
-                      subprofile={sp}
-                      connectionStatus={getSubprofileConnectionStatus(sp.id)}
-                      onConnect={() => handleConnect(sp)}
-                      onMessage={() => navigate(`/mensagens?profile=${sp.profile_id}`)}
-                      isLoading={loadingConnection === sp.id}
-                    />
-                  ))}
-                </div>
-              )}
+              </div>
             </TabsContent>
 
             {/* Projects Tab */}
