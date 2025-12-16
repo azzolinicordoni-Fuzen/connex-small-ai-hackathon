@@ -28,6 +28,7 @@ import {
 import {
   Filter,
   ChevronDown,
+  ChevronRight,
   X,
   MapPin,
   TreePine,
@@ -37,9 +38,13 @@ import {
   Layers,
   SlidersHorizontal,
   RotateCcw,
+  Check,
+  Leaf,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
+import { PROJECT_CATEGORIES, ProjectCategory } from "@/constants/projectTypes";
 
 // Filter option types
 export interface FilterState {
@@ -47,7 +52,7 @@ export interface FilterState {
   locations: string[];
   biomas: string[];
   buscaPlataforma: string[];
-  hasDocumentation: string | null; // 'yes' | 'no' | null (all)
+  hasDocumentation: string | null;
   projectTypes: string[];
   connectionStatus: string[];
 }
@@ -105,16 +110,13 @@ const CONNECTION_STATUS_OPTIONS = [
   { id: "accepted", label: "Conectado" },
 ];
 
-// Carbon project types
-const PROJECT_TYPES = [
-  "REDD+",
-  "ARR (Reflorestamento)",
-  "IFM (Manejo Florestal)",
-  "Agricultura Regenerativa",
-  "Energia Renovável",
-  "Metano",
-  "Carbono Azul",
-  "Eficiência Energética",
+// Property size ranges
+const PROPERTY_SIZES = [
+  { id: "small", label: "Até 100 ha", min: 0, max: 100 },
+  { id: "medium", label: "100 - 500 ha", min: 100, max: 500 },
+  { id: "large", label: "500 - 1.000 ha", min: 500, max: 1000 },
+  { id: "xlarge", label: "1.000 - 5.000 ha", min: 1000, max: 5000 },
+  { id: "xxlarge", label: "Acima de 5.000 ha", min: 5000, max: Infinity },
 ];
 
 export default function AdvancedFilters({
@@ -123,7 +125,8 @@ export default function AdvancedFilters({
   onFiltersChange,
   connectionStatusGetter,
 }: AdvancedFiltersProps) {
-  const [openSections, setOpenSections] = useState<string[]>(["agentTypes", "locations"]);
+  const [openSections, setOpenSections] = useState<string[]>(["agentTypes"]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Extract unique locations from subprofiles
@@ -131,13 +134,11 @@ export default function AdvancedFilters({
     const locations = new Set<string>();
     subprofiles.forEach((sp) => {
       if (sp.profile?.location) {
-        // Try to extract state/city from location
         const loc = sp.profile.location;
         locations.add(loc);
-        // Also try to extract state (e.g., "São Paulo, SP" -> "SP")
         const parts = loc.split(",").map((p) => p.trim());
         if (parts.length > 1) {
-          locations.add(parts[parts.length - 1]); // Add last part (likely state)
+          locations.add(parts[parts.length - 1]);
         }
       }
     });
@@ -150,7 +151,6 @@ export default function AdvancedFilters({
     subprofiles.forEach((sp) => {
       sp.busca_plataforma?.forEach((b) => options.add(b));
     });
-    // Combine with predefined options
     BUSCA_PLATAFORMA_OPTIONS.forEach((o) => options.add(o));
     return Array.from(options).sort();
   }, [subprofiles]);
@@ -172,6 +172,13 @@ export default function AdvancedFilters({
   const toggleSection = (section: string) => {
     setOpenSections((prev) =>
       prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
+    );
+  };
+
+  // Toggle category expansion for project types
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((c) => c !== categoryId) : [...prev, categoryId]
     );
   };
 
@@ -221,73 +228,17 @@ export default function AdvancedFilters({
         return value === "yes" ? "Com documentação" : "Sem documentação";
       case "connectionStatus":
         return CONNECTION_STATUS_OPTIONS.find((c) => c.id === value)?.label || value;
+      case "projectTypes":
+        // Find label from PROJECT_CATEGORIES
+        for (const cat of PROJECT_CATEGORIES) {
+          const subtype = cat.subtypes.find(s => s.id === value);
+          if (subtype) return subtype.label;
+        }
+        return value;
       default:
         return value;
     }
   };
-
-  // Filter section component
-  const FilterSection = ({
-    id,
-    title,
-    icon: Icon,
-    children,
-  }: {
-    id: string;
-    title: string;
-    icon: any;
-    children: React.ReactNode;
-  }) => (
-    <Collapsible open={openSections.includes(id)} onOpenChange={() => toggleSection(id)}>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full justify-between px-3 py-2 h-auto hover:bg-muted/50"
-        >
-          <span className="flex items-center gap-2 text-sm font-medium">
-            <Icon className="w-4 h-4 text-muted-foreground" />
-            {title}
-          </span>
-          <ChevronDown
-            className={cn(
-              "w-4 h-4 text-muted-foreground transition-transform",
-              openSections.includes(id) && "rotate-180"
-            )}
-          />
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="px-3 pb-3 space-y-2">{children}</CollapsibleContent>
-    </Collapsible>
-  );
-
-  // Checkbox filter item
-  const CheckboxItem = ({
-    id,
-    label,
-    checked,
-    onChange,
-    count,
-  }: {
-    id: string;
-    label: string;
-    checked: boolean;
-    onChange: () => void;
-    count?: number;
-  }) => (
-    <div className="flex items-center justify-between py-1">
-      <div className="flex items-center gap-2">
-        <Checkbox id={id} checked={checked} onCheckedChange={onChange} />
-        <Label htmlFor={id} className="text-sm cursor-pointer">
-          {label}
-        </Label>
-      </div>
-      {count !== undefined && (
-        <Badge variant="secondary" className="text-xs">
-          {count}
-        </Badge>
-      )}
-    </div>
-  );
 
   // Count subprofiles by filter value
   const getCount = (type: keyof FilterState, value: string): number => {
@@ -307,12 +258,166 @@ export default function AdvancedFilters({
     }
   };
 
+  // Count selected subtypes in a category
+  const getSelectedCountInCategory = (category: ProjectCategory): number => {
+    return category.subtypes.filter(s => filters.projectTypes.includes(s.id)).length;
+  };
+
+  // Filter section component with improved styling
+  const FilterSection = ({
+    id,
+    title,
+    icon: Icon,
+    children,
+    badge,
+  }: {
+    id: string;
+    title: string;
+    icon: any;
+    children: React.ReactNode;
+    badge?: number;
+  }) => (
+    <Collapsible open={openSections.includes(id)} onOpenChange={() => toggleSection(id)}>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="w-full justify-between px-3 py-3 h-auto hover:bg-primary/5 group"
+        >
+          <span className="flex items-center gap-2.5 text-sm font-semibold">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Icon className="w-4 h-4 text-primary" />
+            </div>
+            {title}
+            {badge !== undefined && badge > 0 && (
+              <Badge variant="default" className="ml-1 h-5 px-1.5 text-[10px]">
+                {badge}
+              </Badge>
+            )}
+          </span>
+          <ChevronDown
+            className={cn(
+              "w-4 h-4 text-muted-foreground transition-transform duration-200",
+              openSections.includes(id) && "rotate-180"
+            )}
+          />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-4">
+        <div className="ml-2 pl-4 border-l-2 border-primary/20">
+          {children}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+
+  // Checkbox filter item with improved styling
+  const CheckboxItem = ({
+    id,
+    label,
+    checked,
+    onChange,
+    count,
+    indented = false,
+  }: {
+    id: string;
+    label: string;
+    checked: boolean;
+    onChange: () => void;
+    count?: number;
+    indented?: boolean;
+  }) => (
+    <div className={cn(
+      "flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer group",
+      checked && "bg-primary/5",
+      indented && "ml-4"
+    )}
+    onClick={onChange}
+    >
+      <div className="flex items-center gap-2.5">
+        <Checkbox 
+          id={id} 
+          checked={checked} 
+          onCheckedChange={onChange}
+          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+        />
+        <Label htmlFor={id} className={cn(
+          "text-sm cursor-pointer transition-colors",
+          checked ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
+        )}>
+          {label}
+        </Label>
+      </div>
+      {count !== undefined && count > 0 && (
+        <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-muted/50">
+          {count}
+        </Badge>
+      )}
+    </div>
+  );
+
+  // Project type category with expandable subtypes
+  const ProjectTypeCategory = ({ category }: { category: ProjectCategory }) => {
+    const isExpanded = expandedCategories.includes(category.id);
+    const selectedCount = getSelectedCountInCategory(category);
+
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => toggleCategory(category.id)}
+          className={cn(
+            "w-full flex items-center justify-between py-2 px-2 rounded-md hover:bg-muted/50 transition-colors text-left",
+            selectedCount > 0 && "bg-primary/5"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base">{category.icon}</span>
+            <span className={cn(
+              "text-sm",
+              selectedCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+            )}>
+              {category.label}
+            </span>
+            {selectedCount > 0 && (
+              <Badge variant="default" className="h-5 px-1.5 text-[10px]">
+                {selectedCount}
+              </Badge>
+            )}
+          </div>
+          {isExpanded ? (
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          )}
+        </button>
+        {isExpanded && (
+          <div className="ml-6 space-y-0.5 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
+            {category.subtypes.map((subtype) => (
+              <CheckboxItem
+                key={subtype.id}
+                id={`proj-${subtype.id}`}
+                label={subtype.label}
+                checked={filters.projectTypes.includes(subtype.id)}
+                onChange={() => toggleArrayFilter("projectTypes", subtype.id)}
+                indented
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Filter content (shared between desktop and mobile)
   const FilterContent = () => (
     <div className="space-y-1">
       {/* Agent Types */}
-      <FilterSection id="agentTypes" title="Tipo de Agente" icon={Briefcase}>
-        <ScrollArea className="max-h-48">
+      <FilterSection 
+        id="agentTypes" 
+        title="Tipo de Agente" 
+        icon={Briefcase}
+        badge={filters.agentTypes.length}
+      >
+        <div className="max-h-52 overflow-y-auto pr-1 space-y-0.5 scrollbar-thin">
           {AGENT_TYPES.map((agent) => (
             <CheckboxItem
               key={agent.id}
@@ -323,16 +428,21 @@ export default function AdvancedFilters({
               count={getCount("agentTypes", agent.id)}
             />
           ))}
-        </ScrollArea>
+        </div>
       </FilterSection>
 
-      <Separator />
+      <Separator className="my-2" />
 
       {/* Locations */}
-      <FilterSection id="locations" title="Localização" icon={MapPin}>
-        <ScrollArea className="max-h-48">
+      <FilterSection 
+        id="locations" 
+        title="Localização" 
+        icon={MapPin}
+        badge={filters.locations.length}
+      >
+        <div className="max-h-52 overflow-y-auto pr-1 space-y-0.5 scrollbar-thin">
           {uniqueLocations.length > 0 ? (
-            uniqueLocations.slice(0, 20).map((loc) => (
+            uniqueLocations.slice(0, 30).map((loc) => (
               <CheckboxItem
                 key={loc}
                 id={`loc-${loc}`}
@@ -343,32 +453,62 @@ export default function AdvancedFilters({
               />
             ))
           ) : (
-            <p className="text-sm text-muted-foreground py-2">Nenhuma localização disponível</p>
+            <p className="text-sm text-muted-foreground py-2 px-2">
+              Nenhuma localização disponível
+            </p>
           )}
-        </ScrollArea>
+        </div>
       </FilterSection>
 
-      <Separator />
+      <Separator className="my-2" />
 
       {/* Biomas */}
-      <FilterSection id="biomas" title="Bioma" icon={TreePine}>
-        {BIOMAS.map((bioma) => (
-          <CheckboxItem
-            key={bioma}
-            id={`bioma-${bioma}`}
-            label={bioma}
-            checked={filters.biomas.includes(bioma)}
-            onChange={() => toggleArrayFilter("biomas", bioma)}
-            count={getCount("biomas", bioma)}
-          />
-        ))}
+      <FilterSection 
+        id="biomas" 
+        title="Bioma" 
+        icon={Leaf}
+        badge={filters.biomas.length}
+      >
+        <div className="max-h-52 overflow-y-auto pr-1 space-y-0.5 scrollbar-thin">
+          {BIOMAS.map((bioma) => (
+            <CheckboxItem
+              key={bioma}
+              id={`bioma-${bioma}`}
+              label={bioma}
+              checked={filters.biomas.includes(bioma)}
+              onChange={() => toggleArrayFilter("biomas", bioma)}
+              count={getCount("biomas", bioma)}
+            />
+          ))}
+        </div>
       </FilterSection>
 
-      <Separator />
+      <Separator className="my-2" />
+
+      {/* Project Types - Dynamic from PROJECT_CATEGORIES */}
+      <FilterSection 
+        id="projectTypes" 
+        title="Tipo de Projeto" 
+        icon={Layers}
+        badge={filters.projectTypes.length}
+      >
+        <div className="max-h-72 overflow-y-auto pr-1 space-y-1 scrollbar-thin">
+          {PROJECT_CATEGORIES.map((category) => (
+            <ProjectTypeCategory key={category.id} category={category} />
+          ))}
+        </div>
+      </FilterSection>
+
+      <Separator className="my-2" />
 
       {/* What they're looking for */}
-      <FilterSection id="buscaPlataforma" title="O que busca" icon={Target}>
-        <ScrollArea className="max-h-48">
+      <FilterSection 
+        id="buscaPlataforma" 
+        title="Objetivo na Plataforma" 
+        icon={Target}
+        badge={filters.buscaPlataforma.length}
+      >
+        <div className="max-h-52 overflow-y-auto pr-1 space-y-0.5 scrollbar-thin">
           {uniqueBuscaPlataforma.map((busca) => (
             <CheckboxItem
               key={busca}
@@ -379,64 +519,61 @@ export default function AdvancedFilters({
               count={getCount("buscaPlataforma", busca)}
             />
           ))}
-        </ScrollArea>
+        </div>
       </FilterSection>
 
-      <Separator />
-
-      {/* Project Types */}
-      <FilterSection id="projectTypes" title="Tipo de Projeto" icon={Layers}>
-        <ScrollArea className="max-h-48">
-          {PROJECT_TYPES.map((type) => (
-            <CheckboxItem
-              key={type}
-              id={`proj-${type}`}
-              label={type}
-              checked={filters.projectTypes.includes(type)}
-              onChange={() => toggleArrayFilter("projectTypes", type)}
-            />
-          ))}
-        </ScrollArea>
-      </FilterSection>
-
-      <Separator />
+      <Separator className="my-2" />
 
       {/* Documentation */}
-      <FilterSection id="documentation" title="Documentação" icon={FileCheck}>
-        <Select
-          value={filters.hasDocumentation || "all"}
-          onValueChange={(v) => updateFilter("hasDocumentation", v === "all" ? null : v)}
-        >
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Todos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="yes">Com documentação</SelectItem>
-            <SelectItem value="no">Sem documentação</SelectItem>
-          </SelectContent>
-        </Select>
+      <FilterSection 
+        id="documentation" 
+        title="Documentação" 
+        icon={FileCheck}
+        badge={filters.hasDocumentation ? 1 : 0}
+      >
+        <div className="space-y-2">
+          <Select
+            value={filters.hasDocumentation || "all"}
+            onValueChange={(v) => updateFilter("hasDocumentation", v === "all" ? null : v)}
+          >
+            <SelectTrigger className="h-9 bg-background">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="yes">Com documentação</SelectItem>
+              <SelectItem value="no">Sem documentação</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </FilterSection>
 
-      <Separator />
+      <Separator className="my-2" />
 
       {/* Connection Status */}
-      <FilterSection id="connectionStatus" title="Status de Conexão" icon={Filter}>
-        {CONNECTION_STATUS_OPTIONS.map((status) => (
-          <CheckboxItem
-            key={status.id}
-            id={`status-${status.id}`}
-            label={status.label}
-            checked={filters.connectionStatus.includes(status.id)}
-            onChange={() => toggleArrayFilter("connectionStatus", status.id)}
-            count={getCount("connectionStatus", status.id)}
-          />
-        ))}
+      <FilterSection 
+        id="connectionStatus" 
+        title="Status de Conexão" 
+        icon={Filter}
+        badge={filters.connectionStatus.length}
+      >
+        <div className="max-h-52 overflow-y-auto pr-1 space-y-0.5 scrollbar-thin">
+          {CONNECTION_STATUS_OPTIONS.map((status) => (
+            <CheckboxItem
+              key={status.id}
+              id={`status-${status.id}`}
+              label={status.label}
+              checked={filters.connectionStatus.includes(status.id)}
+              onChange={() => toggleArrayFilter("connectionStatus", status.id)}
+              count={getCount("connectionStatus", status.id)}
+            />
+          ))}
+        </div>
       </FilterSection>
     </div>
   );
 
-  // Active filter tags
+  // Active filter tags with improved styling
   const ActiveFilterTags = () => {
     const allFilters: { type: keyof FilterState; value: string }[] = [];
 
@@ -453,31 +590,44 @@ export default function AdvancedFilters({
     if (allFilters.length === 0) return null;
 
     return (
-      <div className="flex flex-wrap gap-2 mb-4">
-        {allFilters.map(({ type, value }) => (
-          <Badge
-            key={`${type}-${value}`}
-            variant="secondary"
-            className="gap-1.5 pr-1 bg-primary/10 text-primary hover:bg-primary/20"
+      <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+            <Check className="w-3.5 h-3.5" />
+            {allFilters.length} filtro{allFilters.length > 1 ? 's' : ''} ativo{allFilters.length > 1 ? 's' : ''}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAllFilters}
+            className="h-6 text-xs text-muted-foreground hover:text-destructive px-2"
           >
-            {getFilterLabel(type, value)}
-            <button
-              onClick={() => removeFilter(type, value)}
-              className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
+            <RotateCcw className="w-3 h-3 mr-1" />
+            Limpar todos
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {allFilters.slice(0, 10).map(({ type, value }) => (
+            <Badge
+              key={`${type}-${value}`}
+              variant="secondary"
+              className="gap-1 pr-1 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors text-xs"
             >
-              <X className="w-3 h-3" />
-            </button>
-          </Badge>
-        ))}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearAllFilters}
-          className="h-6 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <RotateCcw className="w-3 h-3 mr-1" />
-          Limpar todos
-        </Button>
+              <span className="max-w-32 truncate">{getFilterLabel(type, value)}</span>
+              <button
+                onClick={() => removeFilter(type, value)}
+                className="ml-0.5 hover:bg-primary/30 rounded-full p-0.5 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          ))}
+          {allFilters.length > 10 && (
+            <Badge variant="outline" className="text-xs">
+              +{allFilters.length - 10} mais
+            </Badge>
+          )}
+        </div>
       </div>
     );
   };
@@ -486,31 +636,43 @@ export default function AdvancedFilters({
     <div className="space-y-4">
       {/* Desktop: Sidebar filters */}
       <div className="hidden lg:block">
-        <div className="bg-card border rounded-lg overflow-hidden">
-          <div className="p-3 border-b bg-muted/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-sm">Filtros Avançados</span>
+        <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-transparent flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <SlidersHorizontal className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <span className="font-semibold text-sm block">Filtros Avançados</span>
+                <span className="text-xs text-muted-foreground">Refine sua busca</span>
+              </div>
             </div>
             {activeFilterCount > 0 && (
-              <Badge variant="default" className="text-xs">
+              <Badge variant="default" className="h-6 px-2.5">
                 {activeFilterCount}
               </Badge>
             )}
           </div>
-          <ScrollArea className="h-[calc(100vh-320px)]">
-            <FilterContent />
+
+          {/* Filter content with scroll */}
+          <ScrollArea className="h-[calc(100vh-340px)] min-h-[400px]">
+            <div className="p-2">
+              <FilterContent />
+            </div>
           </ScrollArea>
+
+          {/* Footer with clear button */}
           {activeFilterCount > 0 && (
-            <div className="p-3 border-t">
+            <div className="p-3 border-t bg-muted/20">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={clearAllFilters}
-                className="w-full"
+                className="w-full gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-colors"
               >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Limpar filtros
+                <RotateCcw className="w-4 h-4" />
+                Limpar todos os filtros
               </Button>
             </div>
           )}
@@ -522,38 +684,44 @@ export default function AdvancedFilters({
         <div className="flex items-center gap-2">
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 h-10 px-4 rounded-xl">
                 <SlidersHorizontal className="w-4 h-4" />
                 Filtros
                 {activeFilterCount > 0 && (
-                  <Badge variant="default" className="ml-1">
+                  <Badge variant="default" className="ml-1 h-5 px-1.5">
                     {activeFilterCount}
                   </Badge>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[320px] p-0">
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5 text-primary" />
-                  Filtros Avançados
+            <SheetContent side="left" className="w-[340px] p-0">
+              <SheetHeader className="p-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+                <SheetTitle className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <SlidersHorizontal className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <span className="block">Filtros Avançados</span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      Refine sua busca
+                    </span>
+                  </div>
                 </SheetTitle>
-                <SheetDescription>
-                  Filtre subperfis por múltiplos critérios
-                </SheetDescription>
               </SheetHeader>
-              <ScrollArea className="h-[calc(100vh-180px)]">
-                <FilterContent />
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="p-2">
+                  <FilterContent />
+                </div>
               </ScrollArea>
               {activeFilterCount > 0 && (
-                <div className="p-4 border-t">
+                <div className="p-4 border-t bg-muted/20">
                   <Button
                     variant="outline"
                     onClick={clearAllFilters}
-                    className="w-full"
+                    className="w-full gap-2 hover:bg-destructive/10 hover:text-destructive"
                   >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Limpar filtros
+                    <RotateCcw className="w-4 h-4" />
+                    Limpar todos os filtros
                   </Button>
                 </div>
               )}
@@ -617,21 +785,30 @@ export function applyFilters(
       if (!hasMatchingBusca) return false;
     }
 
-    // Project type filter (check in detail_3, description, or name)
+    // Project type filter - check against PROJECT_CATEGORIES subtypes
     if (filters.projectTypes.length > 0) {
-      const hasMatchingProjectType = filters.projectTypes.some(
-        (type) =>
-          sp.detail_3?.toLowerCase().includes(type.toLowerCase()) ||
-          sp.description?.toLowerCase().includes(type.toLowerCase()) ||
-          sp.name?.toLowerCase().includes(type.toLowerCase())
-      );
+      const hasMatchingProjectType = filters.projectTypes.some((typeId) => {
+        // Find the label for this type
+        let typeLabel = typeId;
+        for (const cat of PROJECT_CATEGORIES) {
+          const subtype = cat.subtypes.find(s => s.id === typeId);
+          if (subtype) {
+            typeLabel = subtype.label;
+            break;
+          }
+        }
+        return (
+          sp.detail_3?.toLowerCase().includes(typeLabel.toLowerCase()) ||
+          sp.detail_3?.toLowerCase().includes(typeId.toLowerCase()) ||
+          sp.description?.toLowerCase().includes(typeLabel.toLowerCase()) ||
+          sp.name?.toLowerCase().includes(typeLabel.toLowerCase())
+        );
+      });
       if (!hasMatchingProjectType) return false;
     }
 
-    // Documentation filter (check for documentacao_fundiaria in proprietario types)
+    // Documentation filter
     if (filters.hasDocumentation !== null) {
-      // This would require more specific data from subprofile tables
-      // For now, we check if detail_1 or detail_2 mentions documentation
       const hasDoc =
         sp.detail_1?.toLowerCase().includes("doc") ||
         sp.detail_2?.toLowerCase().includes("doc") ||
