@@ -21,13 +21,54 @@ const iconSizes = {
   xl: 36,
 };
 
-// Circular "O" icon with dots pattern inspired by the brand
+// Circular "O" with concentric arcs and dots - matching brand reference
 function CircularO({ size = 24, className }: { size?: number; className?: string }) {
-  const dotCount = 24;
-  const radius = size * 0.38;
-  const dotRadius = size * 0.04;
   const center = size / 2;
+  const strokeWidth = size * 0.06;
   
+  // Ring configurations: [radius, segments array with [startAngle, endAngle, hasDot]]
+  const rings = [
+    { 
+      radius: size * 0.42, 
+      segments: [
+        { start: -30, end: 80, dot: true },
+        { start: 100, end: 180, dot: false },
+        { start: 200, end: 320, dot: true },
+      ]
+    },
+    { 
+      radius: size * 0.32, 
+      segments: [
+        { start: 20, end: 120, dot: true },
+        { start: 150, end: 230, dot: false },
+        { start: 260, end: 350, dot: true },
+      ]
+    },
+    { 
+      radius: size * 0.22, 
+      segments: [
+        { start: -60, end: 60, dot: false },
+        { start: 120, end: 240, dot: true },
+        { start: 280, end: 340, dot: false },
+      ]
+    },
+  ];
+
+  const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) => {
+    const angleRad = (angleDeg - 90) * Math.PI / 180;
+    return {
+      x: cx + r * Math.cos(angleRad),
+      y: cy + r * Math.sin(angleRad),
+    };
+  };
+
+  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
+    const start = polarToCartesian(cx, cy, r, endAngle);
+    const end = polarToCartesian(cx, cy, r, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+  };
+
   return (
     <svg 
       width={size} 
@@ -35,22 +76,49 @@ function CircularO({ size = 24, className }: { size?: number; className?: string
       viewBox={`0 0 ${size} ${size}`}
       className={className}
     >
-      {Array.from({ length: dotCount }).map((_, i) => {
-        const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
-        const x = center + radius * Math.cos(angle);
-        const y = center + radius * Math.sin(angle);
-        // Vary dot size slightly for organic feel
-        const r = dotRadius * (0.8 + Math.random() * 0.4);
-        return (
-          <circle
-            key={i}
-            cx={x}
-            cy={y}
-            r={r}
-            fill="#9eff1f"
-          />
-        );
-      })}
+      {/* Arcs */}
+      {rings.map((ring, ringIndex) => (
+        ring.segments.map((segment, segIndex) => {
+          const arcPath = describeArc(center, center, ring.radius, segment.start, segment.end);
+          const midAngle = (segment.start + segment.end) / 2;
+          const dotPos = polarToCartesian(center, center, ring.radius, segment.dot ? segment.end + 8 : midAngle);
+          
+          return (
+            <g key={`${ringIndex}-${segIndex}`}>
+              <path
+                d={arcPath}
+                fill="none"
+                stroke="#9eff1f"
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+              />
+              {segment.dot && (
+                <circle
+                  cx={dotPos.x}
+                  cy={dotPos.y}
+                  r={size * 0.025}
+                  fill="#9eff1f"
+                />
+              )}
+            </g>
+          );
+        })
+      ))}
+      
+      {/* Center circle */}
+      <circle
+        cx={center}
+        cy={center}
+        r={size * 0.1}
+        fill="none"
+        stroke="#9eff1f"
+        strokeWidth={strokeWidth * 0.8}
+      />
+      
+      {/* Extra floating dots */}
+      <circle cx={center + size * 0.35} cy={center - size * 0.25} r={size * 0.02} fill="#9eff1f" opacity={0.8} />
+      <circle cx={center - size * 0.38} cy={center + size * 0.18} r={size * 0.018} fill="#9eff1f" opacity={0.6} />
+      <circle cx={center + size * 0.15} cy={center + size * 0.4} r={size * 0.015} fill="#9eff1f" opacity={0.7} />
     </svg>
   );
 }
