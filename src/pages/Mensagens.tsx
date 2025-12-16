@@ -63,7 +63,7 @@ export default function Mensagens() {
           setSearchParams({ conversation: id });
         }
       });
-    } else if (profileTarget && profileId && conversations.length > 0) {
+    } else if (profileTarget && profileId) {
       // Check if we already have a conversation with this profile
       const existingConv = conversations.find(c => 
         c.participant_1_id === profileTarget || c.participant_2_id === profileTarget
@@ -72,8 +72,8 @@ export default function Mensagens() {
       if (existingConv) {
         setSelectedConversationId(existingConv.id);
         setSearchParams({ conversation: existingConv.id });
-      } else {
-        // Create new conversation
+      } else if (!loading) {
+        // Create new conversation only after conversations have loaded
         createConversation(profileTarget, context, projectId || undefined).then((id) => {
           if (id) {
             setSelectedConversationId(id);
@@ -82,7 +82,7 @@ export default function Mensagens() {
         });
       }
     }
-  }, [searchParams, profileId, createConversation, conversations]);
+  }, [searchParams, profileId, createConversation, conversations, loading]);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
