@@ -20,6 +20,10 @@ interface Connection {
   created_at: string;
 }
 
+/**
+ * @deprecated Use useConnectionsContext from ConnectionsContext instead for centralized state
+ * This hook is kept for backward compatibility
+ */
 export function useConnections(currentProfileId: string | undefined) {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +71,34 @@ export function useConnections(currentProfileId: string | undefined) {
   useEffect(() => {
     fetchConnections();
   }, [fetchConnections]);
+
+  // Set up realtime subscription
+  useEffect(() => {
+    if (!currentProfileId) return;
+
+    const channel = supabase
+      .channel(`connections-${currentProfileId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'connections',
+        },
+        (payload) => {
+          // Check if this change affects the current user
+          const record = payload.new as any || payload.old as any;
+          if (record?.requester_id === currentProfileId || record?.addressee_id === currentProfileId) {
+            fetchConnections();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentProfileId, fetchConnections]);
 
   const sendConnectionRequest = async (targetProfileId: string) => {
     if (!currentProfileId) return false;

@@ -5,16 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Search, UserCheck, Clock, Users, Filter,
+  Search, UserCheck, Clock, Users, 
   TreePine, Briefcase, Award, Landmark, Building2,
-  ClipboardCheck, MessageSquare
+  ClipboardCheck
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useConnectionsContext } from "@/contexts/ConnectionsContext";
 import { Header } from "@/components/layout/Header";
 import { BackButton } from "@/components/layout/BackButton";
 import ConnectionCard from "@/components/conexoes/ConnectionCard";
-import { useConnections } from "@/hooks/useConnections";
 
 const AGENT_FILTERS = [
   { id: "todos", label: "Todos", icon: Users },
@@ -29,46 +28,25 @@ const AGENT_FILTERS = [
 export default function MinhasConexoes() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [connectionFilter, setConnectionFilter] = useState("todos");
   const [connectionSearch, setConnectionSearch] = useState("");
   const [connectionTab, setConnectionTab] = useState<"all" | "pending">("all");
 
   const { 
-    connections, 
-    loading: connectionsLoading, 
-    acceptConnection, 
-    rejectConnection, 
-    removeConnection 
-  } = useConnections(profileId);
+    profileConnections: connections, 
+    profileConnectionsLoading: connectionsLoading, 
+    acceptProfileConnection: acceptConnection, 
+    rejectProfileConnection: rejectConnection, 
+    removeProfileConnection: removeConnection,
+    acceptedProfileCount,
+    pendingProfileCount,
+  } = useConnectionsContext();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/login");
     }
   }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    async function fetchProfile() {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (data) {
-        setProfileId(data.id);
-      }
-      setLoading(false);
-    }
-    
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
 
   // Filter connections
   const filteredConnections = connections.filter(conn => {
@@ -87,10 +65,12 @@ export default function MinhasConexoes() {
     return true;
   });
 
-  const pendingCount = connections.filter(c => c.status === 'pending' && !c.isRequester).length;
-  const acceptedCount = connections.filter(c => c.status === 'accepted').length;
+  // For pending tab, only show requests received (not sent)
+  const pendingToShow = connectionTab === "pending" 
+    ? filteredConnections.filter(c => !c.isRequester)
+    : filteredConnections;
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -122,7 +102,7 @@ export default function MinhasConexoes() {
                 <UserCheck className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{acceptedCount}</p>
+                <p className="text-2xl font-bold">{acceptedProfileCount}</p>
                 <p className="text-sm text-muted-foreground">Conectados</p>
               </div>
             </CardContent>
@@ -133,7 +113,7 @@ export default function MinhasConexoes() {
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{pendingCount}</p>
+                <p className="text-2xl font-bold">{pendingProfileCount}</p>
                 <p className="text-sm text-muted-foreground">Pendentes</p>
               </div>
             </CardContent>
@@ -149,7 +129,7 @@ export default function MinhasConexoes() {
           >
             <UserCheck className="w-4 h-4" />
             Conectados
-            <Badge variant="secondary">{acceptedCount}</Badge>
+            <Badge variant="secondary">{acceptedProfileCount}</Badge>
           </Button>
           <Button
             variant={connectionTab === "pending" ? "default" : "outline"}
@@ -158,8 +138,8 @@ export default function MinhasConexoes() {
           >
             <Clock className="w-4 h-4" />
             Pendentes
-            {pendingCount > 0 && (
-              <Badge variant="destructive">{pendingCount}</Badge>
+            {pendingProfileCount > 0 && (
+              <Badge variant="destructive">{pendingProfileCount}</Badge>
             )}
           </Button>
         </div>
@@ -199,7 +179,7 @@ export default function MinhasConexoes() {
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
-        ) : filteredConnections.length === 0 ? (
+        ) : pendingToShow.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Users className="w-12 h-12 text-muted-foreground mb-4" />
@@ -220,14 +200,14 @@ export default function MinhasConexoes() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredConnections.map((connection) => (
+            {pendingToShow.map((connection) => (
               <ConnectionCard
                 key={connection.id}
                 connection={connection}
                 onAccept={acceptConnection}
                 onReject={rejectConnection}
                 onRemove={removeConnection}
-                onMessage={(id) => console.log("Message", id)}
+                onMessage={(profileId) => navigate(`/mensagens?profile=${profileId}`)}
               />
             ))}
           </div>
