@@ -189,7 +189,7 @@ export default function StageDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] w-[95vw] md:w-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] md:w-auto flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>{config.label}</span>
@@ -228,7 +228,7 @@ export default function StageDetailDialog({
           </div>
         )}
 
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details" className="gap-1">
               <Settings className="w-4 h-4" />
@@ -244,7 +244,7 @@ export default function StageDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="h-[450px] overflow-y-auto pr-3 space-y-4 mt-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+          <TabsContent value="details" className="flex-1 overflow-y-auto pr-3 space-y-4 mt-4 min-h-0 max-h-[400px]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
               {/* Status */}
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -293,7 +293,7 @@ export default function StageDetailDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="members" className="h-[450px] overflow-y-auto pr-3 space-y-4 mt-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+            <TabsContent value="members" className="flex-1 overflow-y-auto pr-3 space-y-4 mt-4 min-h-0 max-h-[400px]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
               {/* Current Members */}
               <div className="space-y-2">
                 <Label>Membros da Etapa ({members.length})</Label>
@@ -428,7 +428,7 @@ export default function StageDetailDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="comments" className="h-[450px] overflow-y-auto pr-3 space-y-4 mt-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
+            <TabsContent value="comments" className="flex-1 overflow-y-auto pr-3 space-y-4 mt-4 min-h-0 max-h-[400px]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
               {/* Comments Info */}
               <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
                 <p className="text-xs text-blue-700 dark:text-blue-300">
@@ -494,7 +494,7 @@ export default function StageDetailDialog({
             </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        <div className="flex justify-end gap-2 pt-4 border-t shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
