@@ -276,152 +276,163 @@ export default function PerfilPublico() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Back Button */}
-        <div className="mb-6">
+        <div className="mb-4">
           <BackButton showLabel />
         </div>
 
         {/* Cover & Avatar */}
-        <div className="relative mb-20">
-          <div 
-            className="h-48 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/5"
-            style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})`, backgroundSize: 'cover' } : {}}
-          />
-          <div className="absolute -bottom-16 left-8 flex items-end gap-6">
-            <Avatar className="w-32 h-32 border-4 border-background shadow-lg">
-              <AvatarImage src={profile.avatar_url || undefined} />
-              <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
-                {profile.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-
-        {/* Profile Info */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="text-3xl font-bold">{profile.name}</h1>
-                {profile.is_premium && (
-                  <Badge variant="emerald" className="gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    Premium
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <Badge variant="outline" className="gap-1">
-                  <IconComponent className="w-3 h-3" />
-                  {config.label}
-                </Badge>
-                <Badge variant="secondary">
-                  {subprofiles.length} subperfil{subprofiles.length !== 1 ? 's' : ''}
-                </Badge>
-              </div>
-              {profile.bio && (
-                <p className="text-muted-foreground max-w-2xl mb-4">{profile.bio}</p>
-              )}
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {profile.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    {profile.location}
-                  </span>
-                )}
-                {connectionStatus === 'accepted' && profile.phone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-4 h-4" />
-                    {profile.phone}
-                  </span>
-                )}
-                {connectionStatus === 'accepted' && profile.whatsapp && (
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4" />
-                    {profile.whatsapp}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Connection Actions */}
-            <div className="flex-shrink-0">
-              {renderConnectionButton()}
+        <Card className="overflow-hidden mb-6">
+          <div className="relative">
+            <div 
+              className="h-40 md:h-56 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/10"
+              style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+            />
+            <div className="absolute -bottom-12 md:-bottom-16 left-6 md:left-8">
+              <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-xl ring-4 ring-primary/20">
+                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarFallback className="text-3xl md:text-4xl bg-primary text-primary-foreground font-bold">
+                  {profile.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
-        </div>
+
+          {/* Profile Info */}
+          <CardContent className="pt-16 md:pt-20 pb-6">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              <div className="flex-1 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-2xl md:text-3xl font-bold">{profile.name}</h1>
+                    {profile.is_premium && (
+                      <Badge variant="emerald" className="gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        Premium
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="gap-1.5">
+                      <IconComponent className="w-3.5 h-3.5" />
+                      {config.label}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {subprofiles.length} subperfil{subprofiles.length !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                </div>
+                
+                {profile.bio && (
+                  <p className="text-muted-foreground leading-relaxed max-w-3xl">{profile.bio}</p>
+                )}
+                
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  {profile.location && (
+                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
+                      <MapPin className="w-4 h-4 text-primary/70" />
+                      {profile.location}
+                    </span>
+                  )}
+                  {connectionStatus === 'accepted' && profile.phone && (
+                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
+                      <Phone className="w-4 h-4 text-primary/70" />
+                      {profile.phone}
+                    </span>
+                  )}
+                  {connectionStatus === 'accepted' && profile.whatsapp && (
+                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
+                      <MessageCircle className="w-4 h-4 text-primary/70" />
+                      {profile.whatsapp}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Connection Actions */}
+              <div className="flex-shrink-0">
+                {renderConnectionButton()}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Subprofiles Section */}
         {subprofiles.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              Subperfis de {profile.name}
-              <Badge variant="secondary">{subprofiles.length}</Badge>
-            </h2>
-            
-            {/* Sort to show highlighted subprofile first */}
-            <div className="grid gap-4 md:grid-cols-2">
-              {[...subprofiles]
-                .sort((a, b) => {
-                  if (a.id === highlightedSubprofileId) return -1;
-                  if (b.id === highlightedSubprofileId) return 1;
-                  return 0;
-                })
-                .map((sp) => {
-                  const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
-                  const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
-                  const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
-                  const isHighlighted = sp.id === highlightedSubprofileId;
-                  const lookingFor = sp.busca_plataforma?.slice(0, 3) || [];
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                Subperfis de {profile.name}
+                <Badge variant="secondary">{subprofiles.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Sort to show highlighted subprofile first */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[...subprofiles]
+                  .sort((a, b) => {
+                    if (a.id === highlightedSubprofileId) return -1;
+                    if (b.id === highlightedSubprofileId) return 1;
+                    return 0;
+                  })
+                  .map((sp) => {
+                    const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
+                    const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
+                    const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
+                    const isHighlighted = sp.id === highlightedSubprofileId;
+                    const lookingFor = sp.busca_plataforma?.slice(0, 2) || [];
 
-                  return (
-                    <Card 
-                      key={sp.id} 
-                      ref={isHighlighted ? highlightedRef : undefined}
-                      className={cn(
-                        "transition-all duration-300",
-                        isHighlighted 
-                          ? "ring-2 ring-primary shadow-lg border-primary/50 bg-primary/5" 
-                          : "hover:shadow-md"
-                      )}
-                    >
-                      {/* Highlighted indicator */}
-                      {isHighlighted && (
-                        <div className="px-4 py-2 border-b bg-primary/10 flex items-center gap-2">
-                          <Link2 className="w-4 h-4 text-primary" />
-                          <span className="text-sm font-medium text-primary">
-                            Conexão através deste subperfil
-                          </span>
-                        </div>
-                      )}
-                      
-                      <CardContent className="p-4">
+                    return (
+                      <div 
+                        key={sp.id} 
+                        ref={isHighlighted ? highlightedRef : undefined}
+                        className={cn(
+                          "rounded-xl border p-4 transition-all duration-300",
+                          isHighlighted 
+                            ? "ring-2 ring-primary shadow-lg border-primary/50 bg-primary/5" 
+                            : "bg-muted/30 hover:bg-muted/50 hover:shadow-md"
+                        )}
+                      >
+                        {/* Highlighted indicator */}
+                        {isHighlighted && (
+                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-primary/20">
+                            <Link2 className="w-4 h-4 text-primary" />
+                            <span className="text-xs font-medium text-primary">
+                              Conexão através deste subperfil
+                            </span>
+                          </div>
+                        )}
+                        
                         <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${typeColor}`}>
+                          <div className={`p-2.5 rounded-xl ${typeColor} shrink-0`}>
                             <TypeIcon className="w-5 h-5" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className={cn(
-                              "font-medium truncate",
-                              isHighlighted && "text-primary"
-                            )}>
-                              {sp.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">{typeLabel}</p>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div>
+                              <h3 className={cn(
+                                "font-semibold truncate text-sm",
+                                isHighlighted && "text-primary"
+                              )}>
+                                {sp.name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">{typeLabel}</p>
+                            </div>
+                            
                             {sp.description && (
-                              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              <p className="text-xs text-muted-foreground line-clamp-2">
                                 {sp.description}
                               </p>
                             )}
-                            <div className="flex flex-wrap gap-1 mt-2">
+                            
+                            <div className="flex flex-wrap gap-1">
                               {sp.detail_1 && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                                   {sp.detail_1}
                                 </Badge>
                               )}
                               {sp.detail_2 && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                                   {sp.detail_2}
                                 </Badge>
                               )}
@@ -429,18 +440,18 @@ export default function PerfilPublico() {
                             
                             {/* What they're looking for */}
                             {lookingFor.length > 0 && (
-                              <div className="mt-3 space-y-1">
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Target className="w-3 h-3" />
-                                  <span className="font-medium">Busca na plataforma:</span>
+                              <div className="space-y-1 pt-1">
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                  <Target className="w-2.5 h-2.5" />
+                                  <span className="font-medium">Busca:</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1">
                                   {lookingFor.map((item, idx) => (
                                     <span 
                                       key={idx}
-                                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10"
+                                      className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10"
                                     >
-                                      <Sparkles className="w-2.5 h-2.5" />
+                                      <Sparkles className="w-2 h-2" />
                                       {item}
                                     </span>
                                   ))}
@@ -449,12 +460,12 @@ export default function PerfilPublico() {
                             )}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-            </div>
-          </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Empty state for no subprofiles */}
