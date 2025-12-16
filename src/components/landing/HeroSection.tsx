@@ -57,9 +57,9 @@ export function HeroSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Animated Logo Icon */}
-          <div className="mb-12 animate-fade-up">
-            <div className="inline-flex relative">
-              <LogoIcon size="xl" className="scale-[2.5] opacity-90" />
+          <div className="mb-10 animate-fade-up">
+            <div className="inline-flex relative p-4">
+              <LogoIcon size="xl" className="scale-150 sm:scale-[1.8] opacity-90" />
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: "4s" }} />
             </div>
           </div>

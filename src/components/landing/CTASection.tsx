@@ -18,12 +18,28 @@ export function CTASection() {
         {/* Animated gradients */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-primary/15 to-transparent rounded-full blur-[150px] animate-pulse" style={{ animationDuration: "6s" }} />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-emerald-500/10 to-transparent rounded-full blur-[120px] animate-pulse" style={{ animationDuration: "8s", animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[200px] animate-pulse" style={{ animationDuration: "10s" }} />
         
         {/* Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(158,255,31,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(158,255,31,0.02)_1px,transparent_1px)] bg-[size:80px_80px]" />
         
-        {/* Moving light beam */}
-        <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
+        {/* Floating particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/40 rounded-full animate-float"
+            style={{
+              left: `${5 + Math.random() * 90}%`,
+              top: `${5 + Math.random() * 90}%`,
+              animationDuration: `${4 + Math.random() * 6}s`,
+              animationDelay: `${Math.random() * 4}s`,
+            }}
+          />
+        ))}
+        
+        {/* Moving light beams */}
+        <div className="absolute top-1/3 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
+        <div className="absolute top-2/3 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-shimmer" style={{ animationDelay: "4s" }} />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -57,7 +73,7 @@ export function CTASection() {
               {highlights.map((item, index) => (
                 <div 
                   key={index}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-white/70 text-sm"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-white/70 text-sm hover:border-primary/30 hover:bg-primary/5 transition-all duration-300"
                 >
                   <item.icon className="w-4 h-4 text-primary" />
                   {item.text}

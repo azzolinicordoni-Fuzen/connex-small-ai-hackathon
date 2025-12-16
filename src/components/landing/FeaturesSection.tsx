@@ -20,17 +20,31 @@ const features = [
 export function FeaturesSection() {
   return (
     <section className="py-32 relative overflow-hidden bg-secondary/10">
-      {/* Dynamic background */}
+      {/* Dynamic animated background */}
       <div className="absolute inset-0">
-        {/* Animated gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-emerald-500/5 animate-pulse" style={{ animationDuration: "8s" }} />
+        {/* Animated gradient orbs */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-full blur-[150px] animate-pulse" style={{ animationDuration: "8s" }} />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-tl from-emerald-500/10 via-primary/5 to-transparent rounded-full blur-[120px] animate-pulse" style={{ animationDuration: "6s", animationDelay: "2s" }} />
         
         {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.2)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.2)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.15)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.15)_1px,transparent_1px)] bg-[size:60px_60px]" />
         
-        {/* Glow orbs */}
-        <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[120px]" />
+        {/* Floating particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full animate-float"
+            style={{
+              left: `${5 + Math.random() * 90}%`,
+              top: `${5 + Math.random() * 90}%`,
+              animationDuration: `${4 + Math.random() * 6}s`,
+              animationDelay: `${Math.random() * 4}s`,
+            }}
+          />
+        ))}
+        
+        {/* Moving light beam */}
+        <div className="absolute top-1/3 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
       </div>
 
       <div className="container mx-auto px-4 relative">
@@ -61,7 +75,7 @@ export function FeaturesSection() {
               {features.map((feature, index) => (
                 <ScrollReveal key={index} delay={300 + index * 80}>
                   <div 
-                    className="flex items-center gap-3 p-4 rounded-xl bg-card/70 backdrop-blur-sm border border-border/50 hover:border-primary/20 hover:bg-card transition-all duration-300 group"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-card/70 backdrop-blur-sm border border-border/50 hover:border-primary/20 hover:bg-card transition-all duration-300 group hover:scale-[1.02]"
                   >
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
                       <feature.icon className="w-5 h-5 text-primary" />
