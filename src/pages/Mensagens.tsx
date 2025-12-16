@@ -52,6 +52,7 @@ export default function Mensagens() {
   // Handle new conversation from URL params
   useEffect(() => {
     const newConvWith = searchParams.get('new');
+    const profileTarget = searchParams.get('profile');
     const context = searchParams.get('context') || 'geral';
     const projectId = searchParams.get('project');
     
@@ -59,10 +60,29 @@ export default function Mensagens() {
       createConversation(newConvWith, context, projectId || undefined).then((id) => {
         if (id) {
           setSelectedConversationId(id);
+          setSearchParams({ conversation: id });
         }
       });
+    } else if (profileTarget && profileId && conversations.length > 0) {
+      // Check if we already have a conversation with this profile
+      const existingConv = conversations.find(c => 
+        c.participant_1_id === profileTarget || c.participant_2_id === profileTarget
+      );
+      
+      if (existingConv) {
+        setSelectedConversationId(existingConv.id);
+        setSearchParams({ conversation: existingConv.id });
+      } else {
+        // Create new conversation
+        createConversation(profileTarget, context, projectId || undefined).then((id) => {
+          if (id) {
+            setSelectedConversationId(id);
+            setSearchParams({ conversation: id });
+          }
+        });
+      }
     }
-  }, [searchParams, profileId, createConversation]);
+  }, [searchParams, profileId, createConversation, conversations]);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 

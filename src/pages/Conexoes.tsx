@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BackButton } from "@/components/layout/BackButton";
@@ -83,6 +84,7 @@ interface ProjectStageData {
 }
 
 export default function Conexoes() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("todos");
@@ -326,6 +328,7 @@ export default function Conexoes() {
                       subprofile={sp}
                       connectionStatus={getConnectionStatus(sp.id)}
                       onConnect={() => handleConnect(sp)}
+                      onMessage={() => navigate(`/mensagens?profile=${sp.profile_id}`)}
                       isLoading={loadingConnection === sp.id}
                     />
                   ))}
