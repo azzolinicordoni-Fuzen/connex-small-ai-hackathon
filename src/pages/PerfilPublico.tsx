@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
   MapPin, Phone, Mail, MessageCircle, UserPlus, UserCheck, Clock,
   Building2, Users, HardHat, Briefcase, Scale, Banknote, ClipboardCheck,
-  CheckCircle, Loader2, ArrowLeft, Link2, Target, Sparkles
+  CheckCircle, Loader2, ArrowLeft, FileText, Target, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,41 +18,31 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BackButton } from "@/components/layout/BackButton";
 import { useConnections } from "@/hooks/useConnections";
-import { UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
+import SubperfilPublicCard from "@/components/perfil/SubperfilPublicCard";
 import { cn } from "@/lib/utils";
 
-const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string }> = {
-  proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald" },
-  desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan" },
-  certificadora: { icon: Award, label: "Certificadora", color: "amber" },
-  auditor: { icon: ClipboardCheck, label: "Auditor / VVB", color: "orange" },
-  investidor: { icon: Landmark, label: "Fundo / Banco", color: "blue" },
-  financeira: { icon: Banknote, label: "Instituição Financeira", color: "indigo" },
-  advogado: { icon: Scale, label: "Advogado / Jurídico", color: "slate" },
-  comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "red" },
-  projeto: { icon: FolderOpen, label: "Projeto", color: "purple" },
-  engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal" },
-  outro: { icon: Users, label: "Outro Agente", color: "gray" },
-};
-
-const AGENT_COLORS: Record<string, string> = {
-  proprietario: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  desenvolvedor: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
-  certificadora: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  auditor: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  investidor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  financeira: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  advogado: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-400",
-  comprador: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
-  projeto: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  engenheiro: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
-  outro: "bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400",
+const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string; subperfilLabel: string }> = {
+  proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald", subperfilLabel: "Áreas" },
+  desenvolvedor: { icon: Building2, label: "Desenvolvedor de Projetos", color: "cyan", subperfilLabel: "Projetos" },
+  certificadora: { icon: Award, label: "Certificadora", color: "amber", subperfilLabel: "Serviços" },
+  auditor: { icon: ClipboardCheck, label: "Auditor / VVB", color: "orange", subperfilLabel: "Serviços" },
+  investidor: { icon: Landmark, label: "Investidor / Comprador", color: "blue", subperfilLabel: "Requisições" },
+  financeira: { icon: Banknote, label: "Instituição Financeira", color: "indigo", subperfilLabel: "Produtos" },
+  advogado: { icon: Scale, label: "Advogado / Jurídico", color: "slate", subperfilLabel: "Serviços" },
+  comprador: { icon: ShoppingCart, label: "Empresa Compradora", color: "rose", subperfilLabel: "Demandas" },
+  projeto: { icon: FolderOpen, label: "Projeto", color: "purple", subperfilLabel: "Projetos" },
+  engenheiro: { icon: HardHat, label: "Engenheiro", color: "teal", subperfilLabel: "Serviços" },
+  outro: { icon: Users, label: "Outro Agente", color: "gray", subperfilLabel: "Subperfis" },
 };
 
 interface PublicProfile {
   id: string;
   name: string;
+  nome_publico?: string | null;
+  tipo_perfil?: string | null;
   bio: string | null;
+  areas_atuacao?: string | null;
+  objetivo_plataforma?: string | null;
   location: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -68,7 +59,7 @@ export default function PerfilPublico() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [subprofiles, setSubprofiles] = useState<UnifiedSubprofile[]>([]);
+  const [subprofiles, setSubprofiles] = useState<any[]>([]);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingConnection, setLoadingConnection] = useState(false);
@@ -76,6 +67,7 @@ export default function PerfilPublico() {
   const highlightedRef = useRef<HTMLDivElement>(null);
 
   const { getConnectionStatus, sendConnectionRequest, acceptConnection, connections } = useConnections(currentProfileId || undefined);
+  const acceptedCount = connections.filter(c => c.status === 'accepted').length;
 
   // Fetch current user's profile id
   useEffect(() => {
@@ -102,26 +94,18 @@ export default function PerfilPublico() {
       if (!id) return;
       
       try {
-        // Fetch profile
+        // Fetch full profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, name, bio, location, phone, whatsapp, avatar_url, cover_url, agent_type, is_premium")
+          .select("*")
           .eq("id", id)
           .single();
 
         if (profileError) throw profileError;
         setProfile(profileData);
 
-        // Fetch subprofiles from the unified view
-        const { data: subprofilesData, error: subprofilesError } = await supabase
-          .from('unified_subprofiles' as any)
-          .select('*')
-          .eq('profile_id', id)
-          .order('created_at', { ascending: false });
-
-        if (!subprofilesError && subprofilesData) {
-          setSubprofiles(subprofilesData as unknown as UnifiedSubprofile[]);
-        }
+        // Fetch subprofiles from the specific table based on agent type
+        await fetchSubprofiles(id, profileData.agent_type);
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Perfil não encontrado");
@@ -133,6 +117,40 @@ export default function PerfilPublico() {
     fetchProfile();
   }, [id]);
 
+  const fetchSubprofiles = async (profileId: string, agentType: string) => {
+    const tableMap: Record<string, string> = {
+      proprietario: "proprietario_subperfis",
+      desenvolvedor: "desenvolvedor_subperfis",
+      certificadora: "certificadora_subperfis",
+      auditor: "auditor_subperfis",
+      investidor: "investidor_subperfis",
+      financeira: "financeira_subperfis",
+      advogado: "advogado_subperfis",
+      comprador: "comprador_subperfis",
+      projeto: "projeto_subperfis",
+    };
+
+    const tableName = tableMap[agentType];
+    if (!tableName) {
+      setSubprofiles([]);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from(tableName as any)
+        .select("*")
+        .eq("profile_id", profileId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSubprofiles(data || []);
+    } catch (error) {
+      console.error("Error fetching subprofiles:", error);
+      setSubprofiles([]);
+    }
+  };
+
   // Scroll to highlighted subprofile
   useEffect(() => {
     if (!loading && highlightedSubprofileId && highlightedRef.current) {
@@ -140,7 +158,7 @@ export default function PerfilPublico() {
         highlightedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 300);
     }
-  }, [loading, highlightedSubprofileId]);
+  }, [loading, highlightedSubprofileId, subprofiles]);
 
   const handleConnect = async () => {
     if (!id) return;
@@ -272,214 +290,160 @@ export default function PerfilPublico() {
     }
   };
 
+  // Sort subprofiles to show highlighted first
+  const sortedSubprofiles = [...subprofiles].sort((a, b) => {
+    if (a.id === highlightedSubprofileId) return -1;
+    if (b.id === highlightedSubprofileId) return 1;
+    return 0;
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-6 max-w-6xl">
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Back Button */}
         <div className="mb-4">
           <BackButton showLabel />
         </div>
 
         {/* Cover & Avatar */}
-        <Card className="overflow-hidden mb-6">
-          <div className="relative">
-            <div 
-              className="h-40 md:h-56 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/10"
-              style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
-            />
-            <div className="absolute -bottom-12 md:-bottom-16 left-6 md:left-8">
-              <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-xl ring-4 ring-primary/20">
-                <AvatarImage src={profile.avatar_url || undefined} />
-                <AvatarFallback className="text-3xl md:text-4xl bg-primary text-primary-foreground font-bold">
-                  {profile.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+        <div className="relative mb-20">
+          <div 
+            className="h-48 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/5"
+            style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+          />
+          <div className="absolute -bottom-16 left-8 flex items-end gap-6">
+            <Avatar className="w-32 h-32 border-4 border-background shadow-lg">
+              <AvatarImage src={profile.avatar_url || undefined} />
+              <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
+                {profile.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+
+        {/* Profile Info */}
+        <div className="mb-8 space-y-6">
+          {/* Header: Name, Badges, Connection Button */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <h1 className="text-3xl font-bold">{profile.name}</h1>
+                {profile.is_premium && (
+                  <Badge variant="emerald" className="gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Premium
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="gap-1">
+                  <IconComponent className="w-3 h-3" />
+                  {config.label}
+                </Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <UserCheck className="w-3 h-3" />
+                  {acceptedCount} conexões
+                </Badge>
+                <Badge variant="secondary">
+                  {subprofiles.length} {config.subperfilLabel.toLowerCase()}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              {renderConnectionButton()}
             </div>
           </div>
 
-          {/* Profile Info */}
-          <CardContent className="pt-16 md:pt-20 pb-6">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-              <div className="flex-1 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-2xl md:text-3xl font-bold">{profile.name}</h1>
-                    {profile.is_premium && (
-                      <Badge variant="emerald" className="gap-1">
-                        <CheckCircle className="w-3 h-3" />
-                        Premium
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="gap-1.5">
-                      <IconComponent className="w-3.5 h-3.5" />
-                      {config.label}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {subprofiles.length} subperfil{subprofiles.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
-                </div>
-                
-                {profile.bio && (
-                  <p className="text-muted-foreground leading-relaxed max-w-3xl">{profile.bio}</p>
-                )}
-                
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  {profile.location && (
-                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
-                      <MapPin className="w-4 h-4 text-primary/70" />
-                      {profile.location}
-                    </span>
-                  )}
-                  {connectionStatus === 'accepted' && profile.phone && (
-                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
-                      <Phone className="w-4 h-4 text-primary/70" />
-                      {profile.phone}
-                    </span>
-                  )}
-                  {connectionStatus === 'accepted' && profile.whatsapp && (
-                    <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
-                      <MessageCircle className="w-4 h-4 text-primary/70" />
-                      {profile.whatsapp}
-                    </span>
-                  )}
-                </div>
-              </div>
+          {/* Contact Info Row */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground border-y border-border/50 py-4">
+            {profile.location && (
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary/70" />
+                {profile.location}
+              </span>
+            )}
+            {connectionStatus === 'accepted' && profile.phone && (
+              <span className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary/70" />
+                {profile.phone}
+              </span>
+            )}
+            {connectionStatus === 'accepted' && profile.whatsapp && (
+              <span className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-primary/70" />
+                {profile.whatsapp}
+              </span>
+            )}
+          </div>
 
-              {/* Connection Actions */}
-              <div className="flex-shrink-0">
-                {renderConnectionButton()}
-              </div>
+          {/* Description Cards */}
+          {(profile.bio || profile.areas_atuacao || profile.objetivo_plataforma) && (
+            <div className="space-y-3">
+              {profile.bio && (
+                <Card className="p-4 border-l-4 border-l-primary/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <h4 className="text-sm font-semibold">Sobre o Perfil</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.bio}</p>
+                </Card>
+              )}
+              {profile.areas_atuacao && (
+                <Card className="p-4 border-l-4 border-l-emerald-500/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Briefcase className="w-4 h-4 text-emerald-500" />
+                    <h4 className="text-sm font-semibold">Áreas de Atuação</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.areas_atuacao}</p>
+                </Card>
+              )}
+              {profile.objetivo_plataforma && (
+                <Card className="p-4 border-l-4 border-l-blue-500/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-4 h-4 text-blue-500" />
+                    <h4 className="text-sm font-semibold">Objetivo na Plataforma</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.objetivo_plataforma}</p>
+                </Card>
+              )}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
 
         {/* Subprofiles Section */}
-        {subprofiles.length > 0 && (
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                Subperfis de {profile.name}
-                <Badge variant="secondary">{subprofiles.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Sort to show highlighted subprofile first */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[...subprofiles]
-                  .sort((a, b) => {
-                    if (a.id === highlightedSubprofileId) return -1;
-                    if (b.id === highlightedSubprofileId) return 1;
-                    return 0;
-                  })
-                  .map((sp) => {
-                    const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
-                    const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
-                    const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
-                    const isHighlighted = sp.id === highlightedSubprofileId;
-                    const lookingFor = sp.busca_plataforma?.slice(0, 2) || [];
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Layers className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-semibold">{config.subperfilLabel} de {profile.name}</h2>
+            <Badge variant="secondary">{subprofiles.length}</Badge>
+          </div>
 
-                    return (
-                      <div 
-                        key={sp.id} 
-                        ref={isHighlighted ? highlightedRef : undefined}
-                        className={cn(
-                          "rounded-xl border p-4 transition-all duration-300",
-                          isHighlighted 
-                            ? "ring-2 ring-primary shadow-lg border-primary/50 bg-primary/5" 
-                            : "bg-muted/30 hover:bg-muted/50 hover:shadow-md"
-                        )}
-                      >
-                        {/* Highlighted indicator */}
-                        {isHighlighted && (
-                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-primary/20">
-                            <Link2 className="w-4 h-4 text-primary" />
-                            <span className="text-xs font-medium text-primary">
-                              Conexão através deste subperfil
-                            </span>
-                          </div>
-                        )}
-                        
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2.5 rounded-xl ${typeColor} shrink-0`}>
-                            <TypeIcon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div>
-                              <h3 className={cn(
-                                "font-semibold truncate text-sm",
-                                isHighlighted && "text-primary"
-                              )}>
-                                {sp.name}
-                              </h3>
-                              <p className="text-xs text-muted-foreground">{typeLabel}</p>
-                            </div>
-                            
-                            {sp.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {sp.description}
-                              </p>
-                            )}
-                            
-                            <div className="flex flex-wrap gap-1">
-                              {sp.detail_1 && (
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                  {sp.detail_1}
-                                </Badge>
-                              )}
-                              {sp.detail_2 && (
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                  {sp.detail_2}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            {/* What they're looking for */}
-                            {lookingFor.length > 0 && (
-                              <div className="space-y-1 pt-1">
-                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                                  <Target className="w-2.5 h-2.5" />
-                                  <span className="font-medium">Busca:</span>
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {lookingFor.map((item, idx) => (
-                                    <span 
-                                      key={idx}
-                                      className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10"
-                                    >
-                                      <Sparkles className="w-2 h-2" />
-                                      {item}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Empty state for no subprofiles */}
-        {subprofiles.length === 0 && (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Users className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Nenhum subperfil cadastrado</h3>
-              <p className="text-muted-foreground text-center max-w-md">
-                Este perfil ainda não possui subperfis cadastrados.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+          {subprofiles.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <IconComponent className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-2">Nenhum subperfil cadastrado</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Este perfil ainda não possui {config.subperfilLabel.toLowerCase()} cadastrados.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {sortedSubprofiles.map((subperfil) => (
+                <SubperfilPublicCard
+                  key={subperfil.id}
+                  subperfil={subperfil}
+                  agentType={profile.agent_type}
+                  isHighlighted={subperfil.id === highlightedSubprofileId}
+                  highlightRef={subperfil.id === highlightedSubprofileId ? highlightedRef : undefined}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       <Footer />
