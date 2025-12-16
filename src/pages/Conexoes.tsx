@@ -76,6 +76,7 @@ const agentTypeLabels: Record<string, string> = {
 const filters = [
   { id: "todos", label: "Todos", icon: Users },
   { id: "proprietario", label: "Proprietários", icon: TreePine },
+  { id: "engenheiro", label: "Engenheiros", icon: HardHat },
   { id: "desenvolvedor", label: "Desenvolvedores", icon: Briefcase },
   { id: "certificadora", label: "Certificadoras", icon: Award },
   { id: "auditor", label: "Auditores", icon: ClipboardCheck },
@@ -84,6 +85,7 @@ const filters = [
   { id: "financeira", label: "Financeiras", icon: Banknote },
   { id: "advogado", label: "Advogados", icon: Scale },
   { id: "projeto", label: "Projetos", icon: FolderOpen },
+  { id: "outro", label: "Outros", icon: Users },
 ];
 
 interface ProjectStageData {
