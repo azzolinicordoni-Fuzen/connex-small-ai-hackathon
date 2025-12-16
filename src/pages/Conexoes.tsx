@@ -228,7 +228,7 @@ export default function Conexoes() {
             <TabsList className="bg-muted/50">
               <TabsTrigger value="subperfis" className="gap-2 data-[state=active]:bg-background">
                 <Users className="w-4 h-4" />
-                Subperfis
+                Agentes
                 <Badge variant="secondary" className="ml-1 bg-primary/10 text-primary">
                   {filteredSubprofiles.length}/{subprofiles.length}
                 </Badge>

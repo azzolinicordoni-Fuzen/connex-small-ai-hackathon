@@ -153,17 +153,6 @@ export default function SubprofileCard({
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400" />
       )}
 
-      {/* Connection Status Indicator */}
-      {connectionStatus !== 'none' && (
-        <div className={cn(
-          "absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border",
-          statusConfig.className
-        )}>
-          <StatusIcon className="w-3 h-3" />
-          <span>{statusConfig.label}</span>
-        </div>
-      )}
-
       <CardContent className="p-0">
         {/* Header Section - Agent Type Bar */}
         <div className={cn(
