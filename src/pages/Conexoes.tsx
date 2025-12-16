@@ -35,7 +35,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useOnlineProjects } from "@/hooks/useProjects";
-import { useSubprofileConnections, useDiscoverSubprofiles, useMySubprofiles, UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
+import { useDiscoverSubprofiles, useMySubprofiles, UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
+import { useConnectionsContext } from "@/contexts/ConnectionsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { STAGE_CONFIG, ProjectStageType } from "@/types/project";
@@ -111,7 +112,7 @@ export default function Conexoes() {
 
   const { subprofiles, loading: subprofilesLoading } = useDiscoverSubprofiles(currentProfileId || undefined);
   const { subprofiles: mySubprofiles, loading: mySubprofilesLoading } = useMySubprofiles(currentProfileId || undefined);
-  const { getConnectionStatus, sendConnectionRequest } = useSubprofileConnections(currentProfileId || undefined);
+  const { getSubprofileConnectionStatus, sendSubprofileConnectionRequest } = useConnectionsContext();
   const { projects: onlineProjects, loading: projectsLoading } = useOnlineProjects();
 
   // Fetch stages for online projects
@@ -183,7 +184,7 @@ export default function Conexoes() {
 
   const handleSendConnection = async (mySp: UnifiedSubprofile, targetSp: UnifiedSubprofile) => {
     setLoadingConnection(targetSp.id);
-    await sendConnectionRequest(
+    await sendSubprofileConnectionRequest(
       mySp.id,
       mySp.subprofile_type,
       targetSp.id,
@@ -326,7 +327,7 @@ export default function Conexoes() {
                     <SubprofileCard
                       key={sp.id}
                       subprofile={sp}
-                      connectionStatus={getConnectionStatus(sp.id)}
+                      connectionStatus={getSubprofileConnectionStatus(sp.id)}
                       onConnect={() => handleConnect(sp)}
                       onMessage={() => navigate(`/mensagens?profile=${sp.profile_id}`)}
                       isLoading={loadingConnection === sp.id}
