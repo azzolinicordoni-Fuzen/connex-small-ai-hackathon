@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import {
   TreePine, Award, Landmark, ShoppingCart, FolderOpen, 
   MapPin, Phone, Mail, MessageCircle, UserPlus, UserCheck, Clock,
   Building2, Users, HardHat, Briefcase, Scale, Banknote, ClipboardCheck,
-  CheckCircle, Loader2, ArrowLeft
+  CheckCircle, Loader2, ArrowLeft, Link2, Target, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,7 @@ import { Footer } from "@/components/layout/Footer";
 import { BackButton } from "@/components/layout/BackButton";
 import { useConnections } from "@/hooks/useConnections";
 import { UnifiedSubprofile } from "@/hooks/useSubprofileConnections";
+import { cn } from "@/lib/utils";
 
 const agentTypeConfig: Record<string, { icon: typeof TreePine; label: string; color: string }> = {
   proprietario: { icon: TreePine, label: "Proprietário Rural", color: "emerald" },
@@ -62,6 +63,8 @@ interface PublicProfile {
 
 export default function PerfilPublico() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightedSubprofileId = searchParams.get('subperfil');
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
@@ -70,6 +73,7 @@ export default function PerfilPublico() {
   const [loading, setLoading] = useState(true);
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const highlightedRef = useRef<HTMLDivElement>(null);
 
   const { getConnectionStatus, sendConnectionRequest, acceptConnection, connections } = useConnections(currentProfileId || undefined);
 
@@ -128,6 +132,15 @@ export default function PerfilPublico() {
 
     fetchProfile();
   }, [id]);
+
+  // Scroll to highlighted subprofile
+  useEffect(() => {
+    if (!loading && highlightedSubprofileId && highlightedRef.current) {
+      setTimeout(() => {
+        highlightedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [loading, highlightedSubprofileId]);
 
   const handleConnect = async () => {
     if (!id) return;
@@ -342,48 +355,104 @@ export default function PerfilPublico() {
         {/* Subprofiles Section */}
         {subprofiles.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               Subperfis de {profile.name}
+              <Badge variant="secondary">{subprofiles.length}</Badge>
             </h2>
+            
+            {/* Sort to show highlighted subprofile first */}
             <div className="grid gap-4 md:grid-cols-2">
-              {subprofiles.map((sp) => {
-                const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
-                const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
-                const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
+              {[...subprofiles]
+                .sort((a, b) => {
+                  if (a.id === highlightedSubprofileId) return -1;
+                  if (b.id === highlightedSubprofileId) return 1;
+                  return 0;
+                })
+                .map((sp) => {
+                  const TypeIcon = agentTypeConfig[sp.subprofile_type]?.icon || Users;
+                  const typeLabel = agentTypeConfig[sp.subprofile_type]?.label || sp.subprofile_type;
+                  const typeColor = AGENT_COLORS[sp.subprofile_type] || AGENT_COLORS.outro;
+                  const isHighlighted = sp.id === highlightedSubprofileId;
+                  const lookingFor = sp.busca_plataforma?.slice(0, 3) || [];
 
-                return (
-                  <Card key={sp.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg ${typeColor}`}>
-                          <TypeIcon className="w-5 h-5" />
+                  return (
+                    <Card 
+                      key={sp.id} 
+                      ref={isHighlighted ? highlightedRef : undefined}
+                      className={cn(
+                        "transition-all duration-300",
+                        isHighlighted 
+                          ? "ring-2 ring-primary shadow-lg border-primary/50 bg-primary/5" 
+                          : "hover:shadow-md"
+                      )}
+                    >
+                      {/* Highlighted indicator */}
+                      {isHighlighted && (
+                        <div className="px-4 py-2 border-b bg-primary/10 flex items-center gap-2">
+                          <Link2 className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">
+                            Conexão através deste subperfil
+                          </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate">{sp.name}</h3>
-                          <p className="text-sm text-muted-foreground">{typeLabel}</p>
-                          {sp.description && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                              {sp.description}
-                            </p>
-                          )}
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {sp.detail_1 && (
-                              <Badge variant="secondary" className="text-xs">
-                                {sp.detail_1}
-                              </Badge>
+                      )}
+                      
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${typeColor}`}>
+                            <TypeIcon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={cn(
+                              "font-medium truncate",
+                              isHighlighted && "text-primary"
+                            )}>
+                              {sp.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">{typeLabel}</p>
+                            {sp.description && (
+                              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                {sp.description}
+                              </p>
                             )}
-                            {sp.detail_2 && (
-                              <Badge variant="outline" className="text-xs">
-                                {sp.detail_2}
-                              </Badge>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {sp.detail_1 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {sp.detail_1}
+                                </Badge>
+                              )}
+                              {sp.detail_2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  {sp.detail_2}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* What they're looking for */}
+                            {lookingFor.length > 0 && (
+                              <div className="mt-3 space-y-1">
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Target className="w-3 h-3" />
+                                  <span className="font-medium">Busca na plataforma:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {lookingFor.map((item, idx) => (
+                                    <span 
+                                      key={idx}
+                                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10"
+                                    >
+                                      <Sparkles className="w-2.5 h-2.5" />
+                                      {item}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
             </div>
           </div>
         )}

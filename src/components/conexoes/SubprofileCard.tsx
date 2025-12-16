@@ -126,7 +126,8 @@ export default function SubprofileCard({
 
   const handleProfileClick = () => {
     if (subprofile.profile_id) {
-      navigate(`/perfil/${subprofile.profile_id}`);
+      // Navigate to central profile with subprofile highlighted
+      navigate(`/perfil/${subprofile.profile_id}?subperfil=${subprofile.id}`);
     }
   };
 
