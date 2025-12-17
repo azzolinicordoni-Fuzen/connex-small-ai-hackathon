@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  MapPin, Calendar, MoreVertical, Trash2, Eye, Settings, Globe, Lock, Target, FileText, Leaf
+  MapPin, Calendar, MoreVertical, Trash2, Eye, Settings, Globe, Lock, Target, FileText, Leaf, Users, Share2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,13 +16,22 @@ import { CarbonProject, ProjectStage, STAGE_CONFIG } from '@/types/project';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getCategoryBySubtypeId, getSubtypeLabel } from '@/constants/projectTypes';
+import { ExtendedProject } from '@/hooks/useProjects';
 
 interface ProjectCardProps {
-  project: CarbonProject;
+  project: CarbonProject | ExtendedProject;
   stages: ProjectStage[];
   onSelect: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
   onEditVisibility?: () => void;
+  isShared?: boolean;
+  owner?: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+    agent_type: string;
+  };
+  memberStageIds?: string[];
 }
 
 interface ParsedDescription {
@@ -43,7 +53,7 @@ function parseProjectDescription(description: string | null): ParsedDescription 
   }
 }
 
-export default function ProjectCard({ project, stages, onSelect, onDelete, onEditVisibility }: ProjectCardProps) {
+export default function ProjectCard({ project, stages, onSelect, onDelete, onEditVisibility, isShared, owner, memberStageIds }: ProjectCardProps) {
   const completedStages = stages.filter(s => s.status === 'concluida').length;
   const currentStage = stages.find(s => s.status === 'em_andamento') 
     || stages.find(s => s.status === 'pendente');
@@ -58,11 +68,31 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
       ? [project.project_type] 
       : [];
 
+  // Count member stages
+  const memberStagesCount = memberStageIds?.length || 0;
+  const totalStages = stages.length;
+  const hasFullAccess = !isShared || memberStagesCount === totalStages;
+
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
+    <Card className={`hover:shadow-lg transition-shadow cursor-pointer group ${isShared ? 'border-primary/30 bg-primary/5' : ''}`}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1" onClick={onSelect}>
+            {/* Shared Badge */}
+            {isShared && (
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="gap-1 text-xs bg-primary/10 text-primary border-primary/30">
+                  <Share2 className="w-3 h-3" />
+                  Projeto Compartilhado
+                </Badge>
+                {!hasFullAccess && (
+                  <Badge variant="secondary" className="text-xs">
+                    {memberStagesCount}/{totalStages} etapas
+                  </Badge>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg line-clamp-1">{project.name}</CardTitle>
               {project.is_online ? (
@@ -75,6 +105,22 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
                 </span>
               )}
             </div>
+
+            {/* Owner Info for Shared Projects */}
+            {isShared && owner && (
+              <div className="flex items-center gap-2 mt-2 p-2 rounded-md bg-muted/50">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={owner.avatar_url || undefined} />
+                  <AvatarFallback className="text-xs">
+                    {owner.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium">{owner.name}</span>
+                  <span className="text-[10px] text-muted-foreground">Criador do projeto</span>
+                </div>
+              </div>
+            )}
             
             {/* Project Types Badges */}
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
@@ -133,17 +179,21 @@ export default function ProjectCard({ project, stages, onSelect, onDelete, onEdi
                 <Eye className="w-4 h-4 mr-2" />
                 Ver Detalhes
               </DropdownMenuItem>
-              {onEditVisibility && (
+              {!isShared && onEditVisibility && (
                 <DropdownMenuItem onClick={onEditVisibility}>
                   <Settings className="w-4 h-4 mr-2" />
                   Editar Processo
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Excluir
-              </DropdownMenuItem>
+              {!isShared && onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

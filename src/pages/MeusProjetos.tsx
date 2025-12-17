@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings, ArrowLeft, Edit } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, MessageSquare, Settings, ArrowLeft, Edit, Users, FolderOpen, Share2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/layout/Header';
@@ -16,9 +16,11 @@ import ProjectChat from '@/components/projects/ProjectChat';
 import ProjectDetailHeader from '@/components/projects/ProjectDetailHeader';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import EditVisibilityDialog from '@/components/projects/EditVisibilityDialog';
-import { useProjects, useProjectStages, useProjectMessages } from '@/hooks/useProjects';
-import { VisibilityMode } from '@/types/project';
+import { useProjects, useProjectStages, useProjectMessages, useSharedProjects, useProjectRole, ExtendedProject } from '@/hooks/useProjects';
+import { VisibilityMode, CarbonProject } from '@/types/project';
 import { toast } from 'sonner';
+
+type ViewMode = 'owned' | 'shared' | 'all';
 
 export default function MeusProjetos() {
   const { user, loading: authLoading } = useAuth();
@@ -28,13 +30,41 @@ export default function MeusProjetos() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showVisibilityDialog, setShowVisibilityDialog] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('all');
 
-  const { projects, loading, createProject, updateProject, deleteProject, refetch: refetchProjects } = useProjects(profile?.id);
+  const { projects: ownedProjects, loading: loadingOwned, createProject, updateProject, deleteProject, refetch: refetchProjects } = useProjects(profile?.id);
+  const { projects: sharedProjects, loading: loadingShared, refetch: refetchShared } = useSharedProjects(profile?.id);
   const { stages, updateStage, refetch: refetchStages } = useProjectStages(selectedProjectId || editingProjectId || undefined);
   const { messages, sendMessage } = useProjectMessages(selectedProjectId || undefined);
 
-  const selectedProject = projects.find(p => p.id === selectedProjectId);
-  const editingProject = projects.find(p => p.id === editingProjectId);
+  // Determine if selected project is shared or owned
+  const selectedOwnedProject = ownedProjects.find(p => p.id === selectedProjectId);
+  const selectedSharedProject = sharedProjects.find(p => p.id === selectedProjectId);
+  const selectedProject = selectedOwnedProject || selectedSharedProject;
+  const isSelectedProjectShared = !!selectedSharedProject;
+  
+  const editingProject = ownedProjects.find(p => p.id === editingProjectId);
+
+  // Project role for selected project
+  const { isOwner, memberStageIds } = useProjectRole(selectedProjectId || undefined, profile?.id);
+
+  // Combined and filtered projects
+  const allProjects = useMemo(() => {
+    const owned: ExtendedProject[] = ownedProjects.map(p => ({ ...p, isShared: false }));
+    const shared: ExtendedProject[] = sharedProjects;
+    
+    switch (viewMode) {
+      case 'owned':
+        return owned;
+      case 'shared':
+        return shared;
+      case 'all':
+      default:
+        return [...owned, ...shared];
+    }
+  }, [ownedProjects, sharedProjects, viewMode]);
+
+  const loading = loadingOwned || loadingShared;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -101,6 +131,34 @@ export default function MeusProjetos() {
     }
   };
 
+  // Get stages for a project card (fetched separately for grid view)
+  const [projectStagesMap, setProjectStagesMap] = useState<Record<string, any[]>>({});
+  
+  useEffect(() => {
+    const fetchAllProjectStages = async () => {
+      const projectIds = allProjects.map(p => p.id);
+      if (projectIds.length === 0) return;
+
+      const { data } = await supabase
+        .from('project_stages')
+        .select('*')
+        .in('project_id', projectIds);
+
+      if (data) {
+        const grouped: Record<string, any[]> = {};
+        data.forEach(stage => {
+          if (!grouped[stage.project_id]) grouped[stage.project_id] = [];
+          grouped[stage.project_id].push(stage);
+        });
+        setProjectStagesMap(grouped);
+      }
+    };
+
+    if (!loading) {
+      fetchAllProjectStages();
+    }
+  }, [allProjects, loading]);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -139,31 +197,85 @@ export default function MeusProjetos() {
 
         {/* Header */}
         {!selectedProjectId && (
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold">Meus Projetos</h1>
-              <p className="text-muted-foreground">
-                Gerencie seus projetos de crédito de carbono
-              </p>
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">Meus Projetos</h1>
+                <p className="text-muted-foreground">
+                  Gerencie seus projetos de crédito de carbono
+                </p>
+              </div>
+              <Button onClick={handleCreateProject} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Novo Projeto
+              </Button>
             </div>
-            <Button onClick={handleCreateProject} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Novo Projeto
-            </Button>
+
+            {/* View Mode Tabs */}
+            <div className="flex items-center gap-4">
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)} className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-3">
+                  <TabsTrigger value="all" className="gap-1.5">
+                    <LayoutGrid className="w-4 h-4" />
+                    Todos
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {ownedProjects.length + sharedProjects.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="owned" className="gap-1.5">
+                    <FolderOpen className="w-4 h-4" />
+                    Próprios
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {ownedProjects.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="shared" className="gap-1.5">
+                    <Share2 className="w-4 h-4" />
+                    Compartilhados
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {sharedProjects.length}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
         )}
 
         {/* Header Actions for Selected Project */}
         {selectedProjectId && selectedProject && (
-          <div className="flex items-center justify-end gap-2 mb-4">
-            <Button 
-              variant="outline" 
-              onClick={() => handleEditVisibility(selectedProjectId)}
-              className="gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Editar Projeto
-            </Button>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            {/* Show shared indicator */}
+            {isSelectedProjectShared && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="gap-1 bg-primary/10 text-primary border-primary/30">
+                  <Share2 className="w-3 h-3" />
+                  Projeto Compartilhado
+                </Badge>
+                {selectedSharedProject?.owner && (
+                  <span className="text-sm text-muted-foreground">
+                    por {selectedSharedProject.owner.name}
+                  </span>
+                )}
+                {memberStageIds.length > 0 && memberStageIds.length < stages.length && (
+                  <Badge variant="secondary" className="text-xs">
+                    Acesso a {memberStageIds.length}/{stages.length} etapas
+                  </Badge>
+                )}
+              </div>
+            )}
+            
+            {/* Edit button only for owned projects */}
+            {!isSelectedProjectShared && (
+              <Button 
+                variant="outline" 
+                onClick={() => handleEditVisibility(selectedProjectId)}
+                className="gap-2 ml-auto"
+              >
+                <Edit className="w-4 h-4" />
+                Editar Projeto
+              </Button>
+            )}
           </div>
         )}
 
@@ -171,28 +283,38 @@ export default function MeusProjetos() {
         {!selectedProjectId ? (
           // Projects Grid
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {projects.length === 0 ? (
+            {allProjects.length === 0 ? (
               <Card className="col-span-full border-dashed py-12">
                 <CardContent className="flex flex-col items-center">
                   <LayoutGrid className="w-12 h-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground mb-4">
-                    Você ainda não tem projetos cadastrados
+                    {viewMode === 'shared' 
+                      ? 'Você ainda não foi adicionado a nenhum projeto'
+                      : viewMode === 'owned'
+                        ? 'Você ainda não tem projetos próprios'
+                        : 'Você ainda não tem projetos cadastrados'
+                    }
                   </p>
-                  <Button onClick={handleCreateProject}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Criar Primeiro Projeto
-                  </Button>
+                  {viewMode !== 'shared' && (
+                    <Button onClick={handleCreateProject}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Criar Primeiro Projeto
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ) : (
-              projects.map(project => (
+              allProjects.map(project => (
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  stages={[]}
+                  stages={projectStagesMap[project.id] || []}
                   onSelect={() => setSelectedProjectId(project.id)}
-                  onDelete={() => deleteProject(project.id)}
-                  onEditVisibility={() => handleEditVisibility(project.id)}
+                  onDelete={!project.isShared ? () => deleteProject(project.id) : undefined}
+                  onEditVisibility={!project.isShared ? () => handleEditVisibility(project.id) : undefined}
+                  isShared={project.isShared}
+                  owner={project.owner}
+                  memberStageIds={project.memberStageIds}
                 />
               ))
             )}
@@ -201,7 +323,12 @@ export default function MeusProjetos() {
           // Project Detail View
           <>
             {/* Project Header with all key info */}
-            <ProjectDetailHeader project={selectedProject!} stages={stages} />
+            <ProjectDetailHeader 
+              project={selectedProject as CarbonProject} 
+              stages={stages}
+              isShared={isSelectedProjectShared}
+              owner={selectedSharedProject?.owner}
+            />
             
             <Tabs defaultValue="timeline" className="space-y-6">
               <TabsList>
@@ -222,8 +349,10 @@ export default function MeusProjetos() {
               <TabsContent value="timeline">
                 <ProjectTimeline
                   stages={stages}
-                  onStageUpdate={updateStage}
+                  onStageUpdate={isSelectedProjectShared ? undefined : updateStage}
                   projectId={selectedProjectId}
+                  memberStageIds={isSelectedProjectShared ? memberStageIds : undefined}
+                  isReadOnly={isSelectedProjectShared && memberStageIds.length === 0}
                 />
               </TabsContent>
 

@@ -12,10 +12,12 @@ import { cn } from '@/lib/utils';
 import StageDetailDialog from './StageDetailDialog';
 import { useProjectAllStageMembers } from '@/hooks/useProjects';
 
-interface ProjectTimelineProps {
+export interface ProjectTimelineProps {
   stages: ProjectStage[];
-  onStageUpdate: (stageId: string, updates: Partial<ProjectStage>) => void;
+  onStageUpdate?: (stageId: string, updates: Partial<ProjectStage>) => void;
   projectId: string;
+  memberStageIds?: string[];
+  isReadOnly?: boolean;
 }
 
 const STAGE_ICONS: Record<ProjectStageType, typeof FileText> = {
@@ -50,7 +52,7 @@ const AGENT_TYPE_LABELS: Record<string, string> = {
   outro: 'Outro',
 };
 
-export default function ProjectTimeline({ stages, onStageUpdate, projectId }: ProjectTimelineProps) {
+export default function ProjectTimeline({ stages, onStageUpdate, projectId, memberStageIds, isReadOnly }: ProjectTimelineProps) {
   const [selectedStage, setSelectedStage] = useState<ProjectStage | null>(null);
   const { membersByStage, refetch: refetchMembers } = useProjectAllStageMembers(projectId);
 
@@ -58,8 +60,15 @@ export default function ProjectTimeline({ stages, onStageUpdate, projectId }: Pr
     STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage)
   );
 
+  // Check if user has access to a specific stage (for shared projects)
+  const hasStageAccess = (stageId: string) => {
+    if (!memberStageIds) return true; // Not a shared project or full access
+    return memberStageIds.includes(stageId);
+  };
+
   // Find the next stage that can be unlocked
   const getNextUnlockableStage = () => {
+    if (isReadOnly) return null;
     for (let i = 0; i < sortedStages.length; i++) {
       if (sortedStages[i].status === 'pendente') {
         // Check if previous stage is completed or in progress

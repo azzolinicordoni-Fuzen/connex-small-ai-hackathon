@@ -556,3 +556,162 @@ export function useOnlineProjects() {
 
   return { projects, loading, refetch: fetchOnlineProjects };
 }
+
+// Extended project type with owner info and shared status
+export interface ExtendedProject extends CarbonProject {
+  owner?: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+    agent_type: string;
+  };
+  isShared?: boolean;
+  memberStageIds?: string[];
+}
+
+// Hook for fetching projects where user is a member (shared projects)
+export function useSharedProjects(profileId: string | undefined) {
+  const [projects, setProjects] = useState<ExtendedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSharedProjects = useCallback(async () => {
+    if (!profileId) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // First get all stage memberships for this profile
+      const { data: memberships, error: membershipError } = await supabase
+        .from('project_stage_members')
+        .select(`
+          stage_id,
+          stage:project_stages!project_stage_members_stage_id_fkey(
+            id,
+            project_id
+          )
+        `)
+        .eq('member_profile_id', profileId);
+
+      if (membershipError) throw membershipError;
+
+      if (!memberships || memberships.length === 0) {
+        setProjects([]);
+        setLoading(false);
+        return;
+      }
+
+      // Group stage IDs by project
+      const projectStageMap: Record<string, string[]> = {};
+      memberships.forEach(m => {
+        const stage = m.stage as { id: string; project_id: string } | null;
+        if (stage) {
+          if (!projectStageMap[stage.project_id]) {
+            projectStageMap[stage.project_id] = [];
+          }
+          projectStageMap[stage.project_id].push(stage.id);
+        }
+      });
+
+      const projectIds = Object.keys(projectStageMap);
+      
+      if (projectIds.length === 0) {
+        setProjects([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch the actual projects with owner info (excluding own projects)
+      const { data: projectsData, error: projectsError } = await supabase
+        .from('carbon_projects')
+        .select(`
+          *,
+          owner:profiles!carbon_projects_profile_id_fkey(id, name, avatar_url, agent_type)
+        `)
+        .in('id', projectIds)
+        .neq('profile_id', profileId) // Exclude own projects
+        .order('updated_at', { ascending: false });
+
+      if (projectsError) throw projectsError;
+
+      const typedProjects: ExtendedProject[] = (projectsData || []).map(p => ({
+        ...p,
+        visibility_mode: p.visibility_mode as VisibilityMode,
+        owner: p.owner as { id: string; name: string; avatar_url: string | null; agent_type: string },
+        isShared: true,
+        memberStageIds: projectStageMap[p.id] || []
+      }));
+      
+      setProjects(typedProjects);
+    } catch (error: any) {
+      console.error('Error fetching shared projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [profileId]);
+
+  useEffect(() => {
+    fetchSharedProjects();
+  }, [fetchSharedProjects]);
+
+  return { projects, loading, refetch: fetchSharedProjects };
+}
+
+// Hook to check if current user is owner of a project
+export function useProjectRole(projectId: string | undefined, profileId: string | undefined) {
+  const [isOwner, setIsOwner] = useState(false);
+  const [memberStageIds, setMemberStageIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      if (!projectId || !profileId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Check if owner
+        const { data: project } = await supabase
+          .from('carbon_projects')
+          .select('profile_id')
+          .eq('id', projectId)
+          .single();
+
+        if (project?.profile_id === profileId) {
+          setIsOwner(true);
+          setMemberStageIds([]);
+        } else {
+          setIsOwner(false);
+          
+          // Get member stages
+          const { data: memberships } = await supabase
+            .from('project_stage_members')
+            .select('stage_id')
+            .eq('member_profile_id', profileId);
+          
+          // Filter to only stages of this project
+          const { data: projectStages } = await supabase
+            .from('project_stages')
+            .select('id')
+            .eq('project_id', projectId);
+          
+          const projectStageIds = new Set(projectStages?.map(s => s.id) || []);
+          const memberStages = (memberships || [])
+            .map(m => m.stage_id)
+            .filter(id => projectStageIds.has(id));
+          
+          setMemberStageIds(memberStages);
+        }
+      } catch (error) {
+        console.error('Error checking project role:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkRole();
+  }, [projectId, profileId]);
+
+  return { isOwner, memberStageIds, loading };
+}
