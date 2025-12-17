@@ -1,17 +1,25 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   MapPin, Leaf, Calendar, Globe, Lock, Target, 
-  FileText, Layers, TreePine
+  FileText, Layers, TreePine, Share2
 } from 'lucide-react';
 import { CarbonProject, ProjectStage, STAGE_CONFIG } from '@/types/project';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getCategoryBySubtypeId, getSubtypeLabel } from '@/constants/projectTypes';
 
-interface ProjectDetailHeaderProps {
+export interface ProjectDetailHeaderProps {
   project: CarbonProject;
   stages: ProjectStage[];
+  isShared?: boolean;
+  owner?: {
+    id: string;
+    name: string;
+    avatar_url: string | null;
+    agent_type: string;
+  };
 }
 
 interface ParsedDescription {
@@ -32,7 +40,7 @@ function parseProjectDescription(description: string | null): ParsedDescription 
   }
 }
 
-export default function ProjectDetailHeader({ project, stages }: ProjectDetailHeaderProps) {
+export default function ProjectDetailHeader({ project, stages, isShared, owner }: ProjectDetailHeaderProps) {
   const parsed = parseProjectDescription(project.description);
   
   // Get current stage (first non-completed or first pending)
@@ -51,8 +59,30 @@ export default function ProjectDetailHeader({ project, stages }: ProjectDetailHe
       : [];
 
   return (
-    <Card className="mb-6 bg-gradient-to-br from-card to-muted/30 border-primary/20">
+    <Card className={`mb-6 bg-gradient-to-br from-card to-muted/30 ${isShared ? 'border-primary/30' : 'border-primary/20'}`}>
       <CardContent className="pt-6">
+        {/* Shared Project Banner */}
+        {isShared && owner && (
+          <div className="flex items-center gap-3 p-3 mb-4 rounded-lg bg-primary/10 border border-primary/20">
+            <Badge variant="outline" className="gap-1 bg-primary/10 text-primary border-primary/30">
+              <Share2 className="w-3 h-3" />
+              Projeto Compartilhado
+            </Badge>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={owner.avatar_url || undefined} />
+                <AvatarFallback className="text-xs">
+                  {owner.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm">
+                <span className="text-muted-foreground">Criado por </span>
+                <span className="font-medium">{owner.name}</span>
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Top Row: Name + Status */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1">
