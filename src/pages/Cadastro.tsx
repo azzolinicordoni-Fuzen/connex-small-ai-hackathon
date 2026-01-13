@@ -83,7 +83,7 @@ const validateCpfCnpj = (value: string) => {
 
 const signUpSchema = z.object({
   email: z.string().email("E-mail inválido").max(255),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
   confirmPassword: z.string(),
   nomeCompleto: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").max(100),
   cpfCnpj: z.string().refine((val) => validateCpfCnpj(val), "CPF ou CNPJ inválido"),
