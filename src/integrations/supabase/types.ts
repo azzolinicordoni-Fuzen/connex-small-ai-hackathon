@@ -1268,6 +1268,10 @@ export type Database = {
           nome_publico: string | null
           objetivo_plataforma: string | null
           phone: string | null
+          show_cpf_cnpj_to_connections: boolean | null
+          show_location_to_connections: boolean | null
+          show_phone_to_connections: boolean | null
+          show_whatsapp_to_connections: boolean | null
           tipo_perfil: string | null
           updated_at: string
           user_id: string
@@ -1288,6 +1292,10 @@ export type Database = {
           nome_publico?: string | null
           objetivo_plataforma?: string | null
           phone?: string | null
+          show_cpf_cnpj_to_connections?: boolean | null
+          show_location_to_connections?: boolean | null
+          show_phone_to_connections?: boolean | null
+          show_whatsapp_to_connections?: boolean | null
           tipo_perfil?: string | null
           updated_at?: string
           user_id: string
@@ -1308,6 +1316,10 @@ export type Database = {
           nome_publico?: string | null
           objetivo_plataforma?: string | null
           phone?: string | null
+          show_cpf_cnpj_to_connections?: boolean | null
+          show_location_to_connections?: boolean | null
+          show_phone_to_connections?: boolean | null
+          show_whatsapp_to_connections?: boolean | null
           tipo_perfil?: string | null
           updated_at?: string
           user_id?: string
@@ -2039,6 +2051,15 @@ export type Database = {
       are_users_connected: {
         Args: { user1_profile_id: string; user2_profile_id: string }
         Returns: boolean
+      }
+      get_profile_contact_info: {
+        Args: { target_profile_id: string }
+        Returns: {
+          cpf_cnpj: string
+          location: string
+          phone: string
+          whatsapp: string
+        }[]
       }
       is_conversation_participant: {
         Args: { conv_id: string }
