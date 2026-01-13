@@ -2061,6 +2061,10 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      is_connected_to_profile: {
+        Args: { target_profile_id: string }
+        Returns: boolean
+      }
       is_conversation_participant: {
         Args: { conv_id: string }
         Returns: boolean
