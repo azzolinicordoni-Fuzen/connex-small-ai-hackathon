@@ -2052,6 +2052,7 @@ export type Database = {
         Args: { user1_profile_id: string; user2_profile_id: string }
         Returns: boolean
       }
+      get_current_user_profile_id: { Args: never; Returns: string }
       get_profile_contact_info: {
         Args: { target_profile_id: string }
         Returns: {
