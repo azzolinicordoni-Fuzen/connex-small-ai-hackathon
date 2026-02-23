@@ -21,7 +21,7 @@ const keywords = ["REDD+", "ARR", "Verra", "Gold Standard", "ESG", "Net Zero"];
 
 export function AgentTypesSection() {
   return (
-    <section className="py-32 bg-background relative overflow-hidden" id="como-funciona">
+    <section className="py-32 bg-[hsl(220,25%,5%)] relative overflow-hidden" id="como-funciona">
       {/* Animated background effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px] animate-pulse" style={{ animationDuration: "8s" }} />
@@ -51,12 +51,12 @@ export function AgentTypesSection() {
           <p className="text-primary text-sm font-medium tracking-wider uppercase mb-4">
             Ecossistema Completo
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
             Todos os agentes.
             <br />
-            <span className="text-muted-foreground">Uma plataforma.</span>
+            <span className="text-white/60">Uma plataforma.</span>
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-white/50">
             Do proprietário rural ao investidor institucional, conectamos toda a cadeia.
           </p>
         </ScrollReveal>
@@ -71,15 +71,15 @@ export function AgentTypesSection() {
           {agentTypes.map((agent, index) => (
             <ScrollReveal key={index} delay={index * 100}>
               <div 
-                className="group text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 hover:scale-105 hover:-translate-y-1"
+                className="group text-center p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 hover:scale-105 hover:-translate-y-1"
               >
                 <div className="w-14 h-14 rounded-xl bg-primary/10 mb-4 flex items-center justify-center mx-auto group-hover:bg-primary group-hover:shadow-neon transition-all duration-300">
                   <agent.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors" />
                 </div>
-                <h3 className="font-semibold text-foreground text-sm mb-1">
+                <h3 className="font-semibold text-white text-sm mb-1">
                   {agent.title}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/50">
                   {agent.description}
                 </p>
               </div>
