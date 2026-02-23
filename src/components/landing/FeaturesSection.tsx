@@ -19,7 +19,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-32 relative overflow-hidden bg-secondary/10">
+    <section className="py-32 relative overflow-hidden bg-[hsl(220,25%,8%)]">
       {/* Dynamic animated background */}
       <div className="absolute inset-0">
         {/* Animated gradient orbs */}
@@ -58,15 +58,15 @@ export function FeaturesSection() {
             </ScrollReveal>
             
             <ScrollReveal delay={100}>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
                 Simples de usar.
                 <br />
-                <span className="text-muted-foreground">Poderoso nos resultados.</span>
+                <span className="text-white/60">Poderoso nos resultados.</span>
               </h2>
             </ScrollReveal>
             
             <ScrollReveal delay={200}>
-              <p className="text-muted-foreground text-lg mb-10 max-w-md">
+              <p className="text-white/50 text-lg mb-10 max-w-md">
                 Ferramentas desenvolvidas especificamente para o mercado de carbono brasileiro e global.
               </p>
             </ScrollReveal>
@@ -75,14 +75,14 @@ export function FeaturesSection() {
               {features.map((feature, index) => (
                 <ScrollReveal key={index} delay={300 + index * 80}>
                   <div 
-                    className="flex items-center gap-3 p-4 rounded-xl bg-card/70 backdrop-blur-sm border border-border/50 hover:border-primary/20 hover:bg-card transition-all duration-300 group hover:scale-[1.02]"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-primary/30 hover:bg-white/10 transition-all duration-300 group hover:scale-[1.02]"
                   >
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
                       <feature.icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground text-sm">{feature.title}</h4>
-                      <p className="text-xs text-muted-foreground">{feature.description}</p>
+                      <h4 className="font-medium text-white text-sm">{feature.title}</h4>
+                      <p className="text-xs text-white/50">{feature.description}</p>
                     </div>
                   </div>
                 </ScrollReveal>
@@ -104,13 +104,13 @@ export function FeaturesSection() {
               </div>
               
               {/* Floating nodes */}
-              <div className="absolute top-[10%] left-[50%] -translate-x-1/2 w-12 h-12 bg-card border border-border rounded-xl flex items-center justify-center shadow-lg animate-float">
+              <div className="absolute top-[10%] left-[50%] -translate-x-1/2 w-12 h-12 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center shadow-lg animate-float">
                 <Network className="w-5 h-5 text-primary" />
               </div>
-              <div className="absolute top-[40%] right-[5%] w-12 h-12 bg-card border border-border rounded-xl flex items-center justify-center shadow-lg animate-float" style={{ animationDelay: "1s" }}>
+              <div className="absolute top-[40%] right-[5%] w-12 h-12 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center shadow-lg animate-float" style={{ animationDelay: "1s" }}>
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
-              <div className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-card border border-border rounded-xl flex items-center justify-center shadow-lg animate-float" style={{ animationDelay: "2s" }}>
+              <div className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center shadow-lg animate-float" style={{ animationDelay: "2s" }}>
                 <Shield className="w-5 h-5 text-primary" />
               </div>
               
