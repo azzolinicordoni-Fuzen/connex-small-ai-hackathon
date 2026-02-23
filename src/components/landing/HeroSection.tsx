@@ -83,9 +83,9 @@ export function HeroSection() {
 
           {/* Headline - Updated */}
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 animate-fade-up leading-tight" style={{ animationDelay: "0.1s" }}>
-            Democratizando o acesso
+            Conectando o mercado
             <br />
-            <span className="text-primary">ao mercado de carbono</span>
+            <span className="text-primary">de créditos de carbono</span>
           </h1>
 
           {/* Subtitle - More institutional */}
