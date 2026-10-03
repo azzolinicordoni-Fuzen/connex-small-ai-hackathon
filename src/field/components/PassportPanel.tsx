@@ -2,7 +2,7 @@
 // Presentation only: renders the saved structured result; never changes it and never calls the model on open.
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckSquare, ChevronDown, Compass, FileText, Info, ListChecks, Loader2, MapPin, RefreshCw, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, Circle, ClipboardCheck, ChevronDown, Compass, FileText, Info, Landmark, Leaf, ListChecks, Loader2, MapPin, Maximize2, RefreshCw, Scale, ShieldAlert, ShoppingBag, Sprout, Trees, Users, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import type { SessionRec } from "@/field/db";
@@ -96,30 +96,61 @@ const CALM: Record<string, L> = {
 const calm = (id: string, lang: FieldLang) => CALM[id]?.[lang] ?? (lang === "pt" ? "Ponto importante a verificar" : "Important point to verify");
 const T = {
   en: {
-    header: "Connex Field — Initial Passport", prelim: "Preliminary assessment", lang: "Assessment language", langName: { en: "English", pt: "Portuguese" },
-    comp: { low: "Low information completeness", medium: "Medium information completeness", high: "High information completeness" },
-    warn: "This report organizes the information you declared. It is not an eligibility, certification, legal or financial decision.",
-    s1: "Your land at a glance", s2: "Paths worth investigating", s3: "What needs attention", s4: "Information still missing", s5: "Your next three steps", s6: "Who can help",
-    why: "Why this appeared", answers: "Your related answers", verify: "What still needs to be verified", faqRefs: "Related answers",
-    pathLabel: "A path to investigate — not an eligibility conclusion.", otherPaths: "Other possible paths",
-    trig: "Answer that triggered it", whyMatters: "Why review matters", helper: "Who can assist", notRejection: "This is not an automatic rejection.",
-    allSteps: "See all next steps", noMissing: "No missing information was listed.", tech: "Technical details and sources",
-    model: "Model", prompt: "Prompt version", assess: "Assessment version", saved: "This online narrative was generated once, saved and is reused when you reopen it — no new AI call.",
+    header: "Initial Passport", prelim: "Preliminary", purpose: "A first, plain-language guide to what your declared information suggests investigating.",
+    lang: "Assessment language", langName: { en: "English", pt: "Portuguese" }, generated: "Generated",
+    notice: "Initial guidance. It is not a certification or eligibility decision.",
+    s1: "Your land at a glance", s2: "Pathways worth investigating", s3: "Points requiring attention", s4: "Information still needed", s5: "Your next 3 steps", s6: "Who can help",
+    region: "Region", area: "Area size", biome: "Biome", use: "Land use", notProvided: "Not provided",
+    why: "Why it appeared", verify: "What still needs verification", otherPaths: "Other possible paths",
+    attnNote: "An attention point is not an automatic rejection — it is something a specialist should look at with you.",
+    helper: "Who can help", allSteps: "See all next steps", noMissing: "Nothing was listed as missing.",
+    find: "Find specialists on Connex", findNote: "Opens the Connex network. Your assessment answers are never published.",
+    tech: "Technical basis and references", comp: { low: "Low information completeness", medium: "Medium information completeness", high: "High information completeness" },
+    compNote: "Refers only to how much information you declared — not eligibility, quality or credit potential.",
+    fieldsRef: "Assessment questions used", faqRef: "Approved answers referenced", model: "Model", prompt: "Prompt version", assess: "Assessment version",
+    saved: "This online narrative was generated once, saved and is reused when you reopen it — no new AI call.",
     readyFocus: "Your Initial Passport is ready.", nextAction: "Next step", genIntro: "This online report organizes the information you declared and suggests next steps.",
   },
   pt: {
-    header: "Connex Field — Passaporte Inicial", prelim: "Avaliação preliminar", lang: "Idioma da avaliação", langName: { en: "Inglês", pt: "Português" },
-    comp: { low: "Baixa completude de informações", medium: "Média completude de informações", high: "Alta completude de informações" },
-    warn: "Este relatório organiza as informações declaradas por você. Ele não é uma decisão de elegibilidade, certificação, natureza jurídica ou financeira.",
-    s1: "Sua terra em resumo", s2: "Caminhos que vale a pena investigar", s3: "O que precisa de atenção", s4: "Informações que ainda faltam", s5: "Seus próximos três passos", s6: "Quem pode ajudar",
-    why: "Por que apareceu", answers: "Suas respostas relacionadas", verify: "O que ainda precisa ser verificado", faqRefs: "Respostas relacionadas",
-    pathLabel: "Um caminho a investigar — não uma conclusão de elegibilidade.", otherPaths: "Outros caminhos possíveis",
-    trig: "Resposta que gerou o alerta", whyMatters: "Por que a revisão importa", helper: "Quem pode ajudar", notRejection: "Isto não é uma rejeição automática.",
-    allSteps: "Ver todos os próximos passos", noMissing: "Nenhuma informação faltante foi listada.", tech: "Detalhes técnicos e fontes",
-    model: "Modelo", prompt: "Versão do prompt", assess: "Versão da avaliação", saved: "Esta narrativa online foi gerada uma vez, salva e é reutilizada ao reabrir — sem nova chamada de IA.",
+    header: "Passaporte Inicial", prelim: "Preliminar", purpose: "Um primeiro guia, em linguagem simples, do que vale investigar a partir das informações que você declarou.",
+    lang: "Idioma da avaliação", langName: { en: "Inglês", pt: "Português" }, generated: "Gerado em",
+    notice: "Orientação inicial. Não representa certificação ou decisão de elegibilidade.",
+    s1: "Sua terra em resumo", s2: "Caminhos que podem ser investigados", s3: "Pontos que precisam de atenção", s4: "Informações que ainda faltam", s5: "Seus próximos 3 passos", s6: "Quem pode ajudar",
+    region: "Região", area: "Tamanho da área", biome: "Bioma", use: "Uso da terra", notProvided: "Não informado",
+    why: "Por que apareceu", verify: "O que ainda precisa ser verificado", otherPaths: "Outros caminhos possíveis",
+    attnNote: "Um ponto de atenção não é uma rejeição automática — é algo que um especialista deve analisar com você.",
+    helper: "Quem pode ajudar", allSteps: "Ver todos os próximos passos", noMissing: "Nenhuma informação foi listada como faltante.",
+    find: "Encontrar especialistas na Connex", findNote: "Abre a rede Connex. As respostas da sua avaliação nunca são publicadas.",
+    tech: "Base técnica e referências", comp: { low: "Baixa completude de informações", medium: "Média completude de informações", high: "Alta completude de informações" },
+    compNote: "Refere-se apenas a quanta informação você declarou — não a elegibilidade, qualidade ou potencial de créditos.",
+    fieldsRef: "Perguntas da avaliação usadas", faqRef: "Respostas aprovadas referenciadas", model: "Modelo", prompt: "Versão do prompt", assess: "Versão da avaliação",
+    saved: "Esta narrativa online foi gerada uma vez, salva e é reutilizada ao reabrir — sem nova chamada de IA.",
     readyFocus: "Seu Passaporte Inicial está pronto.", nextAction: "Próximo passo", genIntro: "Este relatório online organiza as informações declaradas e sugere próximos passos.",
   },
 };
+// Plain-language pathway names first; technical term as secondary label.
+const PLAIN: Record<string, { name: L; tech: L }> = {
+  forest_conservation: { name: { en: "Keep native forest standing", pt: "Manter a floresta nativa em pé" }, tech: { en: "Forest conservation (REDD+)", pt: "Conservação florestal (REDD+)" } },
+  restoration_reforestation: { name: { en: "Bring back native vegetation", pt: "Recuperar a vegetação nativa" }, tech: { en: "Restoration / reforestation (ARR)", pt: "Restauração / reflorestamento (ARR)" } },
+  regenerative_agriculture_soil: { name: { en: "Farm in ways that build soil", pt: "Produzir cuidando do solo" }, tech: { en: "Regenerative agriculture and soil carbon", pt: "Agricultura regenerativa e carbono no solo" } },
+  improved_livestock_management: { name: { en: "Improve how cattle are managed", pt: "Melhorar o manejo do gado" }, tech: { en: "Improved livestock management", pt: "Manejo pecuário aprimorado" } },
+  waste_methane_management: { name: { en: "Handle waste and manure better", pt: "Tratar melhor resíduos e esterco" }, tech: { en: "Waste and methane management", pt: "Gestão de resíduos e metano" } },
+  renewable_energy: { name: { en: "Produce clean energy on the land", pt: "Gerar energia limpa na propriedade" }, tech: { en: "Renewable energy", pt: "Energia renovável" } },
+  specialist_assessment_required: { name: { en: "Get a specialist to look at the options", pt: "Pedir a um especialista para avaliar as opções" }, tech: { en: "Specialist assessment", pt: "Avaliação por especialista" } },
+};
+const SPEC: Record<string, L> = {
+  land_rights_lawyer: { en: "Land-rights lawyer", pt: "Advogado fundiário" }, safeguards_social: { en: "Social safeguards specialist", pt: "Especialista em salvaguardas sociais" },
+  carbon_project_developer: { en: "Carbon-project developer", pt: "Desenvolvedor de projetos de carbono" }, environmental_consultant: { en: "Environmental consultant", pt: "Consultor ambiental" },
+  agronomist: { en: "Agronomist", pt: "Agrônomo" }, forestry_engineer: { en: "Forestry engineer", pt: "Engenheiro florestal" },
+  mrv_specialist: { en: "Monitoring specialist", pt: "Especialista em monitoramento" }, auditor: { en: "Auditor", pt: "Auditor" },
+  environmental_lawyer: { en: "Environmental lawyer", pt: "Advogado ambiental" }, surveyor: { en: "Land surveyor", pt: "Agrimensor" },
+};
+const spec = (k: string, lang: FieldLang) => SPEC[k]?.[lang] ?? k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+const AGENT_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  desenvolvedor: Sprout, engenheiro: Wrench, advogado: Scale, auditor: ClipboardCheck, certificadora: BadgeCheck,
+  investidor: Landmark, financeira: Landmark, comprador: ShoppingBag, proprietario: Trees, projeto: Compass, outro: Users,
+};
+const uniq = <X,>(xs: X[], key: (x: X) => string) => { const seen = new Set<string>(); return xs.filter((x) => { const k = key(x).trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }); };
 const fl = (id: string, lang: FieldLang) => FIELD[id]?.[lang] ?? id;
 const firstSentence = (s: string) => { const m = s.match(/^.*?[.!?](\s|$)/); return (m ? m[0] : s).trim(); };
 const rest = (s: string) => s.slice(firstSentence(s).length).trim();
@@ -209,76 +240,87 @@ export function PassportPanel({ lang, online, session, onReady }: { lang: FieldL
     </section>
   );
 
-  // ---- Ready Passport: action report ----
-  const facts = [...res.declared_facts].sort((a, b) => {
-    const ia = FACT_ORDER.indexOf(a.field_id), ib = FACT_ORDER.indexOf(b.field_id);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-  });
-  const mainPaths = res.candidate_pathways.slice(0, 3);
-  const otherPaths = res.candidate_pathways.slice(3);
-  const missingFor = (fields: string[]) => res.missing_information.filter((m) => fields.includes(m.field_id));
-  const grouped = GROUPS.map((g) => ({ ...g, items: missingFor(g.fields) })).filter((g) => g.items.length);
-  const ungrouped = res.missing_information.filter((m) => !GROUPS.some((g) => g.fields.includes(m.field_id)));
-  const date = diag.completed_at ? new Date(diag.completed_at).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  // ---- Ready Passport: plain-language action report (no C/K codes outside the technical accordion) ----
+  const factOf = (id: string) => res.declared_facts.find((f) => f.field_id === id)?.statement;
+  const glance = [
+    { label: t.region, icon: MapPin, value: factOf("C06") },
+    { label: t.area, icon: Maximize2, value: factOf("C07") },
+    { label: t.biome, icon: Trees, value: factOf("C06.biome") },
+    { label: t.use, icon: Leaf, value: factOf("C12") },
+  ];
+  const glanceShown = new Set(["C06", "C07", "C06.biome", "C12"]);
+  const otherFacts = uniq(res.declared_facts.filter((f) => !glanceShown.has(f.field_id)), (f) => f.statement);
+  const paths = uniq(res.candidate_pathways, (p) => p.id);
+  const mainPaths = paths.slice(0, 3);
+  const otherPaths = paths.slice(3);
+  const missing = uniq(res.missing_information, (m) => m.field_id);
+  const steps = uniq(res.next_steps, (n) => n.step);
+  const helpers = uniq([
+    ...res.suggested_agent_types.map((a) => ({ key: `a:${a}`, label: AGENT[a]?.[lang] ?? a, Icon: AGENT_ICON[a] ?? Users })),
+    ...res.safeguard_flags.map((f) => ({ key: `s:${f.specialist_type}`, label: spec(f.specialist_type, lang), Icon: ShieldAlert })),
+  ], (h) => h.label);
+  const date = diag.completed_at ? new Date(diag.completed_at).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-GB", { day: "numeric", month: "short", year: "numeric" }) : null;
   const aLang = res.language === "pt" ? "pt" : "en";
+  const evidence = (ids: string[]) => uniq(ids, (x) => fl(x, lang)).slice(0, 3);
+  const allFields = [...new Set([...res.declared_facts.map((f) => f.field_id), ...paths.flatMap((p) => p.supporting_fields), ...res.safeguard_flags.flatMap((f) => f.triggering_fields), ...missing.map((m) => m.field_id)])].sort();
 
-  const PathCard = ({ p }: { p: (typeof res.candidate_pathways)[number] }) => (
+  const PathCard = ({ p }: { p: (typeof paths)[number] }) => (
     <li className="rounded-lg border border-border bg-background/60 p-4">
-      <p className="flex items-start gap-2 font-semibold"><Compass className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />{PATHWAY[p.id]?.[lang] ?? p.id}</p>
+      <p className="flex items-start gap-2 text-base font-semibold leading-snug"><Compass className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />{PLAIN[p.id]?.name[lang] ?? PATHWAY[p.id]?.[lang] ?? p.id}</p>
+      {PLAIN[p.id] && <p className="ml-7 text-xs text-muted-foreground">{PLAIN[p.id].tech[lang]}</p>}
       <p className="mt-2">{firstSentence(p.explanation)}</p>
-      {(rest(p.explanation) || p.supporting_fields.length > 0) && (
-        <div className="mt-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.why}</p>
-          {rest(p.explanation) && <p className="mt-1 text-sm text-muted-foreground">{rest(p.explanation)}</p>}
-          {p.supporting_fields.length > 0 && (
-            <p className="mt-1 text-xs"><span className="sr-only">{t.answers}: </span>{p.supporting_fields.map((f) => <span key={f} className="mr-1 mt-1 inline-block rounded-full bg-muted px-2 py-0.5">{fl(f, lang)}</span>)}</p>
-          )}
-        </div>
-      )}
+      <div className="mt-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.why}</p>
+        {rest(p.explanation) && <p className="mt-1 text-sm text-muted-foreground">{firstSentence(rest(p.explanation))}</p>}
+        {p.supporting_fields.length > 0 && (
+          <ul className="mt-2 flex flex-wrap gap-1.5">{evidence(p.supporting_fields).map((f) => <li key={f} className="rounded-full bg-muted px-2.5 py-1 text-xs">{fl(f, lang)}</li>)}</ul>
+        )}
+      </div>
       {p.open_questions.length > 0 && (
         <div className="mt-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.verify}</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5">{p.open_questions.map((q, i) => <li key={i}>{q}</li>)}</ul>
+          <ul className="mt-1 list-disc space-y-1 pl-5">{uniq(p.open_questions, (q) => q).map((q, i) => <li key={i}>{q}</li>)}</ul>
         </div>
       )}
-      <p className="mt-3 text-xs"><span className="text-muted-foreground">{t.faqRefs}: </span>{chips(p.faq_ids)}</p>
-      <p className="mt-2 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{t.pathLabel}</p>
     </li>
   );
 
   return (
-    <section ref={sectionRef} aria-labelledby="passport-title" className="scroll-mt-4 space-y-4 text-sm" data-testid="passport-panel">
-      <div className="space-y-4" data-testid="passport-ready">
-        {/* Header */}
+    <section ref={sectionRef} aria-labelledby="passport-title" className="scroll-mt-4 space-y-5 text-sm" data-testid="passport-panel">
+      <div className="space-y-5" data-testid="passport-ready">
+        {/* 1. Header */}
         <header className="rounded-xl border border-primary/40 bg-card p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-primary/60 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">{t.prelim}</span>
-            <span className="rounded-full border border-border px-2.5 py-0.5 text-xs" data-testid="passport-completeness">{t.comp[res.data_completeness]}</span>
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="passport-title" ref={readyRef} tabIndex={-1} className="flex items-center gap-2 font-display text-xl font-semibold leading-tight outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <FileText className="h-5 w-5 shrink-0 text-primary" aria-hidden />{t.header}
+            </h2>
+            <span className="shrink-0 rounded-full border border-primary/60 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">{t.prelim}</span>
           </div>
-          <h2 id="passport-title" ref={readyRef} tabIndex={-1} className="mt-2 flex items-center gap-2 font-display text-lg font-semibold leading-tight outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <FileText className="h-5 w-5 shrink-0 text-primary" aria-hidden />{t.header}
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">{date} · {t.lang}: {t.langName[aLang]}</p>
+          <p className="mt-2 text-muted-foreground">{t.purpose}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t.lang}: {t.langName[aLang]}{date && <> · {t.generated} {date}</>}</p>
           <p className="sr-only" aria-live="polite">{justGenerated.current ? t.readyFocus : ""}</p>
           {res.language && res.language !== lang && <p role="note" data-testid="passport-lang-note" className="mt-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">{s.langNote}</p>}
-          <p role="note" className="mt-3 flex gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs"><Info className="h-4 w-4 shrink-0 text-primary" aria-hidden />{t.warn}</p>
-          {res.summary && <p className="mt-3">{res.summary}</p>}
+          <p role="note" className="mt-3 flex gap-2 rounded-md bg-muted/40 p-3 text-xs"><Info className="h-4 w-4 shrink-0 text-primary" aria-hidden />{t.notice}</p>
         </header>
 
-        {/* 1. Land at a glance */}
-        <Card n={1} title={t.s1} icon={<MapPin className="h-4 w-4 text-primary" aria-hidden />}>
-          <dl className="grid gap-2 sm:grid-cols-2">
-            {facts.map((f, i) => (
-              <div key={i} className="rounded-md bg-muted/40 px-3 py-2">
-                <dt className="text-xs text-muted-foreground">{fl(f.field_id, lang)}</dt>
-                <dd className="font-medium">{f.statement}</dd>
-              </div>
+        {/* 2. Land at a glance */}
+        <Card title={t.s1} icon={<MapPin className="h-4 w-4 text-primary" aria-hidden />}>
+          <ul className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+            {glance.map(({ label, icon: Icon, value }) => (
+              <li key={label} className="rounded-lg bg-muted/40 p-3">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5 text-primary" aria-hidden />{label}</p>
+                <p className={`mt-1 text-sm leading-snug ${value ? "font-medium" : "text-muted-foreground"}`}>{value ?? t.notProvided}</p>
+              </li>
             ))}
-          </dl>
+          </ul>
+          {res.summary && <p className="mt-3 text-muted-foreground">{res.summary}</p>}
+          {otherFacts.length > 0 && (
+            <ul className="mt-3 space-y-1 text-sm">{otherFacts.map((f, i) => <li key={i}><span className="text-muted-foreground">{fl(f.field_id, lang)}: </span>{f.statement}</li>)}</ul>
+          )}
         </Card>
 
-        {/* 2. Paths */}
-        <Card n={2} title={t.s2} icon={<Compass className="h-4 w-4 text-primary" aria-hidden />} testid="passport-paths">
+        {/* 3. Pathways */}
+        <Card title={t.s2} icon={<Compass className="h-4 w-4 text-primary" aria-hidden />} testid="passport-paths">
           <ul className="space-y-3">{mainPaths.map((p) => <PathCard key={p.id} p={p} />)}</ul>
           {otherPaths.length > 0 && (
             <Expand label={`${t.otherPaths} (${otherPaths.length})`} testid="passport-other-paths">
@@ -287,73 +329,81 @@ export function PassportPanel({ lang, online, session, onReady }: { lang: FieldL
           )}
         </Card>
 
-        {/* 3. Attention */}
+        {/* 4. Attention points */}
         {res.safeguard_flags.length > 0 && (
-          <Card n={3} title={t.s3} icon={<ShieldCheck className="h-4 w-4 text-primary" aria-hidden />} testid="passport-flags">
-            <ul className="space-y-3">{res.safeguard_flags.map((f) => (
+          <Card title={t.s3} icon={<ShieldAlert className="h-4 w-4 text-primary" aria-hidden />} testid="passport-flags">
+            <p className="mb-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs" data-testid="passport-attn-note">{t.attnNote}</p>
+            <ul className="space-y-3">{uniq(res.safeguard_flags, (f) => f.id).map((f) => (
               <li key={f.id} className="rounded-lg border border-border border-l-4 border-l-primary/60 bg-background/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">{calm(f.id, lang)}</p>
-                <p className="mt-1 font-semibold">{FLAG[f.id]?.[lang] ?? f.id}</p>
-                {f.triggering_fields.length > 0 && <p className="mt-2 text-xs"><span className="text-muted-foreground">{t.trig}: </span>{f.triggering_fields.map((x) => fl(x, lang)).join(", ")}</p>}
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.whyMatters}</p>
-                <p className="mt-1">{f.explanation}</p>
-                <p className="mt-2 text-xs"><span className="text-muted-foreground">{t.helper}: </span>{f.specialist_type.replace(/_/g, " ")}</p>
-                <p className="mt-1 text-xs"><span className="text-muted-foreground">{t.faqRefs}: </span>{chips(f.faq_ids)}</p>
-                <p className="mt-2 text-xs font-medium">{t.notRejection}</p>
-                {f.notice && <p className="mt-1 text-xs italic text-muted-foreground">{f.notice}</p>}
+                <p className="text-base font-semibold">{FLAG[f.id]?.[lang] ?? f.id}</p>
+                <p className="text-xs text-muted-foreground">{calm(f.id, lang)}</p>
+                <p className="mt-2">{firstSentence(f.explanation)}</p>
+                {f.triggering_fields.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.why}</p>
+                    <ul className="mt-1 flex flex-wrap gap-1.5">{evidence(f.triggering_fields).map((x) => <li key={x} className="rounded-full bg-muted px-2.5 py-1 text-xs">{fl(x, lang)}</li>)}</ul>
+                  </div>
+                )}
+                <p className="mt-3 text-xs"><span className="font-semibold uppercase tracking-wide text-muted-foreground">{t.helper}: </span>{spec(f.specialist_type, lang)}</p>
               </li>))}
             </ul>
           </Card>
         )}
 
-        {/* 4. Missing */}
-        <Card n={4} title={t.s4} icon={<ListChecks className="h-4 w-4 text-primary" aria-hidden />} testid="passport-missing">
-          {res.missing_information.length === 0 ? <p className="text-muted-foreground">{t.noMissing}</p> : (
-            <div className="space-y-3">
-              {[...grouped, ...(ungrouped.length ? [{ key: "x", label: GROUPS[5].label, items: ungrouped, fields: [] }] : [])].map((g) => (
-                <div key={g.key}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{g.label[lang]}</p>
-                  <ul className="mt-1 space-y-2">{g.items.map((m, i) => (
-                    <li key={i} className="flex gap-2"><CheckSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                      <span><span className="font-medium">{fl(m.field_id, lang)}</span> — {m.why}</span></li>))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* 5. Next steps */}
-        <Card n={5} title={t.s5} icon={<ArrowRight className="h-4 w-4 text-primary" aria-hidden />} testid="passport-steps" highlight>
-          <ol className="space-y-2">{res.next_steps.slice(0, 3).map((n, i) => (
-            <li key={i} className="flex gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground" aria-hidden>{i + 1}</span>
-              <span className="pt-0.5">{n.step} {n.faq_ids && n.faq_ids.length > 0 && chips(n.faq_ids)}</span></li>))}
+        {/* 5. Next 3 steps — most prominent */}
+        <section aria-label={t.s5} data-testid="passport-steps" className="rounded-xl border-2 border-primary bg-primary/10 p-4">
+          <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-semibold"><ArrowRight className="h-5 w-5 text-primary" aria-hidden />{t.s5}</h3>
+          <ol className="space-y-3">{steps.slice(0, 3).map((n, i) => (
+            <li key={i} className="flex gap-3 rounded-lg border border-border bg-card p-4" data-testid="passport-step-card">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-display text-lg font-bold text-primary-foreground" aria-hidden>{i + 1}</span>
+              <div className="min-w-0">
+                <p className="font-semibold leading-snug">{firstSentence(n.step)}</p>
+                {rest(n.step) && <p className="mt-1 text-muted-foreground">{rest(n.step)}</p>}
+              </div>
+            </li>))}
           </ol>
-          {res.next_steps.length > 3 && (
+          {steps.length > 3 && (
             <Expand label={t.allSteps}>
-              <ol start={4} className="list-decimal space-y-1 pl-5">{res.next_steps.slice(3).map((n, i) => <li key={i}>{n.step} {n.faq_ids && chips(n.faq_ids)}</li>)}</ol>
+              <ol start={4} className="list-decimal space-y-1 pl-5">{steps.slice(3).map((n, i) => <li key={i}>{n.step}</li>)}</ol>
             </Expand>
           )}
-        </Card>
+        </section>
 
         {/* 6. Who can help */}
-        <Card n={6} title={t.s6} icon={<Users className="h-4 w-4 text-primary" aria-hidden />}>
-          <ul className="flex flex-wrap gap-2">{res.suggested_agent_types.map((a) => <li key={a} className="rounded-full border border-primary/40 px-3 py-1 text-xs">{AGENT[a]?.[lang] ?? a}</li>)}</ul>
-          <Button asChild size="lg" className="mt-4 min-h-[48px] w-full sm:w-auto" data-testid="passport-find-agents">
-            <Link to="/conexoes">{s.find}<ArrowRight className="ml-1 h-4 w-4" aria-hidden /></Link>
+        <Card title={t.s6} icon={<Users className="h-4 w-4 text-primary" aria-hidden />}>
+          <ul className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">{helpers.map(({ key, label, Icon }) => (
+            <li key={key} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm"><Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />{label}</li>))}
+          </ul>
+          <Button asChild size="lg" className="mt-4 min-h-[52px] w-full" data-testid="passport-find-agents">
+            <Link to="/conexoes">{t.find}<ArrowRight className="ml-1 h-4 w-4" aria-hidden /></Link>
           </Button>
-          <p className="mt-2 text-xs text-muted-foreground">{s.findNote}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t.findNote}</p>
         </Card>
 
-        {/* Technical details (collapsed) */}
+        {/* 7. Missing information */}
+        <Card title={t.s4} icon={<ListChecks className="h-4 w-4 text-primary" aria-hidden />} testid="passport-missing">
+          {missing.length === 0 ? <p className="text-muted-foreground">{t.noMissing}</p> : (
+            <ul className="space-y-2.5">{missing.map((m, i) => (
+              <li key={i} className="flex gap-2.5"><Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <span><span className="font-medium">{fl(m.field_id, lang)}</span><span className="block text-muted-foreground">{firstSentence(m.why)}</span></span></li>))}
+            </ul>
+          )}
+        </Card>
+
+        {/* Full disclaimer — shown once */}
+        <p role="note" className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">{res.disclaimer}</p>
+
+        {/* 8. Technical basis (collapsed) */}
         <Expand label={t.tech} testid="passport-tech" boxed>
           <div className="space-y-3 text-xs">
-            <ul className="space-y-1">{res.knowledge_references.map((k) => <li key={k}><span className="font-mono">{k}</span> — {faq.find((f) => f.id === k)?.question}</li>)}</ul>
-            <p>{t.model}: <span className="font-mono">{diag.model_id}</span></p>
-            <p>{t.prompt}: <span className="font-mono">{diag.prompt_version}</span></p>
+            <div><p className="font-semibold">{t.comp[res.data_completeness]}</p><p className="text-muted-foreground">{t.compNote}</p></div>
+            <div><p className="font-semibold">{t.fieldsRef}</p><ul className="mt-1 space-y-0.5">{allFields.map((f) => <li key={f}><span className="font-mono">{f}</span> — {fl(f, lang)}</li>)}</ul></div>
+            <div><p className="font-semibold">{t.faqRef}</p><ul className="mt-1 space-y-0.5">{res.knowledge_references.map((k) => <li key={k}><span className="font-mono">{k}</span> — {faq.find((f) => f.id === k)?.question}</li>)}</ul></div>
+            {paths.map((p) => <p key={p.id}>{PLAIN[p.id]?.tech[lang] ?? p.id}: <span className="font-mono">{[...p.supporting_fields, ...p.faq_ids].join(", ")}</span></p>)}
+            {res.safeguard_flags.map((f) => <p key={f.id}>{FLAG[f.id]?.[lang] ?? f.id}: <span className="font-mono">{[...f.triggering_fields, ...f.faq_ids].join(", ")}</span></p>)}
+            <p>{t.model}: <span className="font-mono">{diag.model_id}</span> · {t.prompt}: <span className="font-mono">{diag.prompt_version}</span></p>
             <p>{t.assess}: <span className="font-mono">v{diag.payload_version} · {diag.field_session_id.slice(0, 8)}</span></p>
             <p className="text-muted-foreground">{t.saved}</p>
-            <p role="note" className="rounded-md border border-border bg-muted/40 p-3">{res.disclaimer}</p>
           </div>
         </Expand>
       </div>
@@ -361,12 +411,10 @@ export function PassportPanel({ lang, online, session, onReady }: { lang: FieldL
   );
 }
 
-function Card({ n, title, icon, children, testid, highlight }: { n: number; title: string; icon?: React.ReactNode; children: React.ReactNode; testid?: string; highlight?: boolean }) {
+function Card({ title, icon, children, testid }: { title: string; icon?: React.ReactNode; children: React.ReactNode; testid?: string }) {
   return (
-    <section aria-label={title} data-testid={testid} className={`rounded-xl border bg-card p-4 ${highlight ? "border-primary" : "border-border"}`}>
-      <h3 className="mb-3 flex items-center gap-2 font-display text-base font-semibold">
-        <span className="text-xs font-mono text-muted-foreground" aria-hidden>{n}</span>{icon}{title}
-      </h3>
+    <section aria-label={title} data-testid={testid} className="rounded-xl border border-border bg-card p-4">
+      <h3 className="mb-3 flex items-center gap-2 font-display text-base font-semibold">{icon}{title}</h3>
       {children}
     </section>
   );
