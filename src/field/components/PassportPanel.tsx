@@ -291,8 +291,8 @@ export function PassportPanel({ lang, online, session, onReady }: { lang: FieldL
         {res.safeguard_flags.length > 0 && (
           <Card n={3} title={t.s3} icon={<ShieldCheck className="h-4 w-4 text-primary" aria-hidden />} testid="passport-flags">
             <ul className="space-y-3">{res.safeguard_flags.map((f) => (
-              <li key={f.id} className="rounded-lg border-l-4 border-l-accent border border-border bg-background/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-accent-foreground/80">{calm(f.id, lang)}</p>
+              <li key={f.id} className="rounded-lg border border-border border-l-4 border-l-primary/60 bg-background/60 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">{calm(f.id, lang)}</p>
                 <p className="mt-1 font-semibold">{FLAG[f.id]?.[lang] ?? f.id}</p>
                 {f.triggering_fields.length > 0 && <p className="mt-2 text-xs"><span className="text-muted-foreground">{t.trig}: </span>{f.triggering_fields.map((x) => fl(x, lang)).join(", ")}</p>}
                 <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.whyMatters}</p>
