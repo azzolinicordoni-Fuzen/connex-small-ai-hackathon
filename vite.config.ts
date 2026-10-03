@@ -58,7 +58,9 @@ export default defineConfig(({ mode }) => ({
               plugins: [
                 {
                   // Offline fallback to the precached application shell.
-                  handlerDidError: async () => (await caches.match("/index.html")) ?? Response.error(),
+                  // Runs inside the service worker, where `caches` exists (node typings lack it).
+                  handlerDidError: async () =>
+                    (await (globalThis as unknown as { caches: { match: (k: string) => Promise<Response | undefined> } }).caches.match("/index.html")) ?? Response.error(),
                 },
               ],
             },

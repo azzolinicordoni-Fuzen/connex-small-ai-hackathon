@@ -1,0 +1,267 @@
+{
+ "version": "1.0.0",
+ "language": "pt",
+ "note": "Held-out evaluation set. Never used for training.",
+ "items": [
+  {
+   "text": "pode me dizer o que é um crédito de carbono",
+   "intent": "K01"
+  },
+  {
+   "text": "um crédito equivale a quanto de co2",
+   "intent": "K01"
+  },
+  {
+   "text": "ter árvores significa que já tenho créditos para vender",
+   "intent": "K02"
+  },
+  {
+   "text": "minha terra é coberta de mata já existem créditos",
+   "intent": "K02"
+  },
+  {
+   "text": "o mercado voluntário é diferente do regulado como",
+   "intent": "K03"
+  },
+  {
+   "text": "mercado voluntário e mercado regulado qual a diferença",
+   "intent": "K03"
+  },
+  {
+   "text": "pode explicar o sbce",
+   "intent": "K04"
+  },
+  {
+   "text": "como funciona o sistema brasileiro de comércio de emissões",
+   "intent": "K04"
+  },
+  {
+   "text": "a connex vai certificar meu projeto de carbono",
+   "intent": "K05"
+  },
+  {
+   "text": "a connex é responsável por emitir créditos",
+   "intent": "K05"
+  },
+  {
+   "text": "quem tem a titularidade dos créditos florestais no brasil",
+   "intent": "K06"
+  },
+  {
+   "text": "quem pode ser o dono dos créditos",
+   "intent": "K06"
+  },
+  {
+   "text": "estar inscrito no car basta para provar que sou dono",
+   "intent": "K07"
+  },
+  {
+   "text": "o cadastro rural ambiental mostra que o imóvel me pertence",
+   "intent": "K07"
+  },
+  {
+   "text": "que papelada preciso preparar",
+   "intent": "K08"
+  },
+  {
+   "text": "quais documentos os especialistas olham",
+   "intent": "K08"
+  },
+  {
+   "text": "o que quer dizer um projeto ser adicional",
+   "intent": "K09"
+  },
+  {
+   "text": "isso aconteceria de qualquer forma sem o carbono",
+   "intent": "K09"
+  },
+  {
+   "text": "o que quer dizer linha de base em projetos de carbono",
+   "intent": "K10"
+  },
+  {
+   "text": "qual é o cenário de referência de um projeto",
+   "intent": "K10"
+  },
+  {
+   "text": "o que envolve mensuração relato e verificação",
+   "intent": "K11"
+  },
+  {
+   "text": "como o projeto é monitorado e relatado",
+   "intent": "K11"
+  },
+  {
+   "text": "como a validação difere da verificação",
+   "intent": "K12"
+  },
+  {
+   "text": "validação e verificação são diferentes",
+   "intent": "K12"
+  },
+  {
+   "text": "o que significa permanência em projetos de carbono",
+   "intent": "K13"
+  },
+  {
+   "text": "o que acontece se tiver incêndio depois dos créditos",
+   "intent": "K13"
+  },
+  {
+   "text": "o que significa vazamento em projeto de carbono",
+   "intent": "K14"
+  },
+  {
+   "text": "se o desmate só muda para outra fazenda como chama",
+   "intent": "K14"
+  },
+  {
+   "text": "o que acontece se a mesma tonelada for declarada duas vezes",
+   "intent": "K15"
+  },
+  {
+   "text": "o que quer dizer dupla contagem",
+   "intent": "K15"
+  },
+  {
+   "text": "o que significa metodologia em projetos de carbono",
+   "intent": "K16"
+  },
+  {
+   "text": "que regras são usadas para calcular créditos",
+   "intent": "K16"
+  },
+  {
+   "text": "meu sítio pequeno serve para um projeto",
+   "intent": "K17"
+  },
+  {
+   "text": "preciso de uma área mínima",
+   "intent": "K17"
+  },
+  {
+   "text": "quanto tempo leva o processo todo",
+   "intent": "K18"
+  },
+  {
+   "text": "quantos anos até os créditos serem emitidos",
+   "intent": "K18"
+  },
+  {
+   "text": "quanto custa desenvolver um projeto",
+   "intent": "K19"
+  },
+  {
+   "text": "um projeto de carbono é caro",
+   "intent": "K19"
+  },
+  {
+   "text": "qual preço um crédito de carbono alcança",
+   "intent": "K20"
+  },
+  {
+   "text": "por quanto dá para vender um crédito",
+   "intent": "K20"
+  },
+  {
+   "text": "dá para vender créditos antes da emissão",
+   "intent": "K21"
+  },
+  {
+   "text": "o comprador pode pagar antes dos créditos serem emitidos",
+   "intent": "K21"
+  },
+  {
+   "text": "a área já tem um acordo de carbono assinado o que faço",
+   "intent": "K22"
+  },
+  {
+   "text": "alguém já tem contrato de carbono na minha terra",
+   "intent": "K22"
+  },
+  {
+   "text": "o que acontece se comunidades indígenas vivem na área",
+   "intent": "K23"
+  },
+  {
+   "text": "as comunidades precisam ser consultadas",
+   "intent": "K23"
+  },
+  {
+   "text": "minhas respostas ficam no celular sem internet",
+   "intent": "K24"
+  },
+  {
+   "text": "minhas informações são enviadas para algum lugar offline",
+   "intent": "K24"
+  },
+  {
+   "text": "o que acontece quando a conexão retorna",
+   "intent": "K25"
+  },
+  {
+   "text": "minhas respostas sincronizam quando eu ficar online",
+   "intent": "K25"
+  },
+  {
+   "text": "esse resultado significa que meu projeto foi aprovado",
+   "intent": "K26"
+  },
+  {
+   "text": "tem garantia de que meu projeto vai passar",
+   "intent": "K26"
+  }
+ ],
+ "out_of_domain": [
+  "como está o tempo em lisboa",
+  "como faço pão",
+  "qual o placar do jogo",
+  "quanto custa um saco de adubo",
+  "quando passa o próximo ônibus",
+  "como trato uma vaca doente",
+  "qual o melhor celular",
+  "como abro conta no banco",
+  "me conta uma história",
+  "quanto é dois mais dois",
+  "como conserto a cerca",
+  "onde compro sementes",
+  "qual a população do brasil",
+  "como carregar o celular mais rápido",
+  "que dia é amanhã",
+  "como plantar tomate",
+  "quem escreveu dom casmurro",
+  "qual a cotação do dólar",
+  "como fazer café",
+  "canta uma música"
+ ],
+ "required": [
+  {
+   "text": "Só por ter mata em pé eu já posso vender alguma coisa?",
+   "expect": "K02"
+  },
+  {
+   "text": "O cadastro ambiental prova que a terra é minha?",
+   "expect": "K07"
+  },
+  {
+   "text": "Como sei se o projeto só aconteceu por causa do carbono?",
+   "expect": "K09"
+  },
+  {
+   "text": "Existe um preço fixo para cada tonelada?",
+   "expect": "K20"
+  },
+  {
+   "text": "o que é adicionalidadi",
+   "expect": "K09"
+  },
+  {
+   "text": "diferença",
+   "expect": "ambiguous"
+  },
+  {
+   "text": "Como está o tempo em Lisboa?",
+   "expect": "reject"
+  }
+ ]
+}

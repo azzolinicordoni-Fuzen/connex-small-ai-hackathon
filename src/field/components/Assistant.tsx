@@ -1,16 +1,18 @@
-// Offline assistant UI over the deterministic search. No network calls.
-import { useEffect, useState } from "react";
-import { BookOpen, Search } from "lucide-react";
+// Offline assistant UI: on-device intent model first, deterministic search fallback. No network calls.
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, Cpu, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { faqById, searchFaq, type FaqEntry, type SearchResult } from "@/field/search";
+import { faqById, type FaqEntry } from "@/field/search";
+import { answerQuestion, MODEL_INFO, modelReady, type InferenceResult } from "@/field/ai/inference";
 import { REFERENCES } from "@/field/references";
-import { addConversation, loadConversations, type ConversationRec } from "@/field/db";
+import { addConversation, loadConversations, logInference, type ConversationRec } from "@/field/db";
 import type { FieldLang, FieldStrings } from "@/field/i18n";
 
 export function Assistant({ lang, t, sessionId }: { lang: FieldLang; t: FieldStrings; sessionId: string | null }) {
   const [q, setQ] = useState("");
-  const [res, setRes] = useState<SearchResult | null>(null);
+  const [res, setRes] = useState<InferenceResult | null>(null);
+  const aiOk = useMemo(() => modelReady(), []);
   const [shown, setShown] = useState<FaqEntry | null>(null);
   const [history, setHistory] = useState<ConversationRec[]>([]);
 
@@ -27,9 +29,11 @@ export function Assistant({ lang, t, sessionId }: { lang: FieldLang; t: FieldStr
   }, [lang]);
 
   const ask = async (query: string) => {
-    const r = searchFaq(query, lang);
+    const r = answerQuestion(query, lang);
     setRes(r);
     setShown(r.kind === "answer" ? r.entry : null);
+    // Local audit only: no question text, no personal data.
+    void logInference({ faq_id: r.kind === "answer" ? r.entry.id : null, method: r.method, outcome: r.kind, model_version: MODEL_INFO.version, ms: r.ms });
     if (sessionId) {
       await addConversation({ local_session_id: sessionId, language: lang, query, result_id: r.kind === "answer" ? r.entry.id : null, outcome: r.kind });
       setHistory(await loadConversations(sessionId).then((h) => h.sort((a, b) => b.created_at.localeCompare(a.created_at))));
@@ -42,6 +46,35 @@ export function Assistant({ lang, t, sessionId }: { lang: FieldLang; t: FieldStr
     <section aria-labelledby="assistant-title" className="space-y-4">
       <h2 id="assistant-title" className="font-display text-2xl font-bold">{t.assistantTitle}</h2>
       <p className="text-sm text-muted-foreground">{t.assistantHint}</p>
+
+      <div className="rounded-md border border-primary/40 bg-card p-3 text-sm" role="status">
+        <div className="flex items-start gap-2">
+          <Cpu className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          {aiOk ? (
+            <div>
+              <p className="font-semibold">{t.aiReady}</p>
+              <p className="text-muted-foreground">{t.aiRunsHere} · {t.aiNoCloud}</p>
+            </div>
+          ) : (
+            <p>{t.aiFallbackMode}</p>
+          )}
+        </div>
+        <details className="group mt-2">
+          <summary className="flex cursor-pointer list-none items-center gap-1 text-primary">
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />{t.howItWorks}
+          </summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+            <li>{t.how1}</li><li>{t.how2}</li><li>{t.how3}</li><li>{t.how4}</li>
+          </ul>
+          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-5">
+            <div><dt className="text-muted-foreground">{t.modelName}</dt><dd className="font-mono">{MODEL_INFO.name}</dd></div>
+            <div><dt className="text-muted-foreground">{t.modelVersion}</dt><dd className="font-mono">{MODEL_INFO.version}</dd></div>
+            <div><dt className="text-muted-foreground">{t.modelSize}</dt><dd className="font-mono">{(MODEL_INFO.bytes / 1024).toFixed(0)} KB</dd></div>
+            <div><dt className="text-muted-foreground">{t.aiLanguage}</dt><dd>EN · PT</dd></div>
+            <div><dt className="text-muted-foreground">{t.offlineReady}</dt><dd>{aiOk ? t.yes : t.no}</dd></div>
+          </dl>
+        </details>
+      </div>
       <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) ask(q.trim()); }} className="flex gap-2">
         <Input aria-label={t.ask} placeholder={t.askPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} maxLength={300} />
         <Button type="submit"><Search className="mr-1 h-4 w-4" />{t.ask}</Button>
@@ -51,7 +84,7 @@ export function Assistant({ lang, t, sessionId }: { lang: FieldLang; t: FieldStr
         <p role="status" className="rounded-md border border-border bg-card p-4 font-medium">{res.text}</p>
       )}
       {res?.kind === "clarify" && (
-        <div role="status" className="rounded-md border border-border bg-card p-4">
+        <div role="status" data-method={res.method} className="rounded-md border border-border bg-card p-4">
           <p className="mb-2 font-medium">{t.didYouMean}</p>
           <ul className="space-y-1">
             {res.options.map((e) => (
@@ -63,6 +96,9 @@ export function Assistant({ lang, t, sessionId }: { lang: FieldLang; t: FieldStr
       {shown && (
         <article className="rounded-md border border-primary/40 bg-card p-4" aria-live="polite">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">{t.source}: {shown.id}</p>
+          {res?.kind === "answer" && (
+            <p className="mt-0.5 text-xs text-muted-foreground" data-method={res.method}>{res.method === "local_ml" ? t.methodMl : t.methodDet}</p>
+          )}
           <h3 className="mt-1 font-semibold">{shown.question}</h3>
           <p className="mt-2 leading-relaxed">{shown.approved_answer}</p>
           <div className="mt-3 text-xs text-muted-foreground">

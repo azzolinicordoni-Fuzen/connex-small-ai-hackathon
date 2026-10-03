@@ -1,0 +1,267 @@
+{
+ "version": "1.0.0",
+ "language": "en",
+ "note": "Held-out evaluation set. Never used for training.",
+ "items": [
+  {
+   "text": "can you tell me what a carbon credit is",
+   "intent": "K01"
+  },
+  {
+   "text": "what is one credit equal to in co2",
+   "intent": "K01"
+  },
+  {
+   "text": "having trees means i already have credits to sell?",
+   "intent": "K02"
+  },
+  {
+   "text": "my land is covered with forest, are there credits already",
+   "intent": "K02"
+  },
+  {
+   "text": "how is the compliance market different from the voluntary market",
+   "intent": "K03"
+  },
+  {
+   "text": "voluntary vs compliance",
+   "intent": "K03"
+  },
+  {
+   "text": "what is the brazilian emissions trading scheme",
+   "intent": "K04"
+  },
+  {
+   "text": "can you explain the sbce",
+   "intent": "K04"
+  },
+  {
+   "text": "will connex certify my carbon project",
+   "intent": "K05"
+  },
+  {
+   "text": "is connex responsible for issuing credits",
+   "intent": "K05"
+  },
+  {
+   "text": "who is entitled to forest carbon credits in brazil",
+   "intent": "K06"
+  },
+  {
+   "text": "who can be the titleholder of the credits",
+   "intent": "K06"
+  },
+  {
+   "text": "is being registered in the car enough to show i own the land",
+   "intent": "K07"
+  },
+  {
+   "text": "does the rural environmental registration prove the property belongs to me",
+   "intent": "K07"
+  },
+  {
+   "text": "what paperwork do i need to prepare",
+   "intent": "K08"
+  },
+  {
+   "text": "which documents do specialists look at",
+   "intent": "K08"
+  },
+  {
+   "text": "what does it mean for a project to be additional",
+   "intent": "K09"
+  },
+  {
+   "text": "would this happen anyway without carbon finance",
+   "intent": "K09"
+  },
+  {
+   "text": "what is meant by baseline in carbon projects",
+   "intent": "K10"
+  },
+  {
+   "text": "what is the reference scenario for a project",
+   "intent": "K10"
+  },
+  {
+   "text": "what does measurement reporting verification involve",
+   "intent": "K11"
+  },
+  {
+   "text": "how is a project monitored and reported",
+   "intent": "K11"
+  },
+  {
+   "text": "how does validation differ from verification",
+   "intent": "K12"
+  },
+  {
+   "text": "validation and verification are they different",
+   "intent": "K12"
+  },
+  {
+   "text": "what does permanence mean in carbon projects",
+   "intent": "K13"
+  },
+  {
+   "text": "what happens if there is a fire after credits",
+   "intent": "K13"
+  },
+  {
+   "text": "what does leakage mean in a carbon project",
+   "intent": "K14"
+  },
+  {
+   "text": "if clearing just moves to another farm what is that called",
+   "intent": "K14"
+  },
+  {
+   "text": "what happens if the same tonne is claimed twice",
+   "intent": "K15"
+  },
+  {
+   "text": "what does double counting mean",
+   "intent": "K15"
+  },
+  {
+   "text": "what does methodology mean in carbon projects",
+   "intent": "K16"
+  },
+  {
+   "text": "what rules are used to calculate credits",
+   "intent": "K16"
+  },
+  {
+   "text": "is my small farm big enough for a project",
+   "intent": "K17"
+  },
+  {
+   "text": "do i need a minimum area",
+   "intent": "K17"
+  },
+  {
+   "text": "how much time does the whole process take",
+   "intent": "K18"
+  },
+  {
+   "text": "how many years until credits are issued",
+   "intent": "K18"
+  },
+  {
+   "text": "what does it cost to develop a project",
+   "intent": "K19"
+  },
+  {
+   "text": "how expensive is a carbon project",
+   "intent": "K19"
+  },
+  {
+   "text": "what price does a carbon credit get",
+   "intent": "K20"
+  },
+  {
+   "text": "how much can one credit be sold for",
+   "intent": "K20"
+  },
+  {
+   "text": "is it possible to sell credits ahead of issuance",
+   "intent": "K21"
+  },
+  {
+   "text": "can buyers pay me before credits are issued",
+   "intent": "K21"
+  },
+  {
+   "text": "the area already has a signed carbon agreement what should i do",
+   "intent": "K22"
+  },
+  {
+   "text": "someone already has a carbon contract on my land",
+   "intent": "K22"
+  },
+  {
+   "text": "what happens if indigenous communities live in the area",
+   "intent": "K23"
+  },
+  {
+   "text": "do communities need to be consulted",
+   "intent": "K23"
+  },
+  {
+   "text": "are my answers kept on the phone when there is no internet",
+   "intent": "K24"
+  },
+  {
+   "text": "is my information sent anywhere while offline",
+   "intent": "K24"
+  },
+  {
+   "text": "what happens when connection is back",
+   "intent": "K25"
+  },
+  {
+   "text": "do my answers sync when i get online",
+   "intent": "K25"
+  },
+  {
+   "text": "does this result mean my project is approved",
+   "intent": "K26"
+  },
+  {
+   "text": "is there a guarantee my project will pass",
+   "intent": "K26"
+  }
+ ],
+ "out_of_domain": [
+  "what is the weather in lisbon",
+  "how do i bake bread",
+  "what's the score of the game",
+  "how much is a bag of fertilizer",
+  "when is the next bus",
+  "how do i treat a sick cow",
+  "what is the best smartphone",
+  "how do i open a bank account",
+  "tell me a story",
+  "what is two plus two",
+  "how do i repair a fence",
+  "where can i buy seeds",
+  "what is the population of brazil",
+  "how do i charge my phone faster",
+  "what day is tomorrow",
+  "how do i grow tomatoes",
+  "who wrote don quixote",
+  "what is the exchange rate of the dollar",
+  "how do i make coffee",
+  "sing me a song"
+ ],
+ "required": [
+  {
+   "text": "If I keep the forest standing, do I already have something I can sell?",
+   "expect": "K02"
+  },
+  {
+   "text": "Does my rural environmental registration prove the land belongs to me?",
+   "expect": "K07"
+  },
+  {
+   "text": "What makes this different from business as usual?",
+   "expect": "K09"
+  },
+  {
+   "text": "Is there a fixed market price for every tonne?",
+   "expect": "K20"
+  },
+  {
+   "text": "waht is aditionalty",
+   "expect": "K09"
+  },
+  {
+   "text": "difference",
+   "expect": "ambiguous"
+  },
+  {
+   "text": "What is the weather in Lisbon?",
+   "expect": "reject"
+  }
+ ]
+}

@@ -97,3 +97,14 @@ npm run build && npm run preview   # production build; service worker active
 ```
 
 Offline test procedure: `docs/offline-test.md`.
+
+### Connex Field architecture (what is AI and what is not)
+
+| Component | Kind | Where |
+|---|---|---|
+| Intent classifier `connex-intent` v1 | **Genuine on-device machine learning.** A Multinomial Naive Bayes model over word 1–2-grams and character 3–4-grams, trained from data in the repo. It runs in the browser and returns only an FAQ ID. | `src/field/ai/` · model card: `docs/offline-ai-model-card.md` |
+| Keyword search | **Deterministic fallback**, used when the model is uncertain, fails or can't run | `src/field/search.ts` |
+| Pathway and safeguard engine | **Transparent rules** over the declared answers. Lists pathways to investigate. Does not decide eligibility and gives no scores or estimates. | `src/field/pathways.ts` |
+| Initial Passport diagnosis | **Future online generative AI**, used only after the user authorizes sync. Not built yet. | — |
+
+Retrain and re-evaluate: `node scripts/train-field-intent-model.mjs`. Tests: `bun test ./tests/field.test.ts ./tests/field-ai.test.ts`.
