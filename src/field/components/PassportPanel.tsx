@@ -40,7 +40,7 @@ const AGENT: Record<string, L> = {
 };
 const S = {
   en: {
-    title: "Initial Passport", intro: "Optional online summary prepared from your synchronized assessment. Your offline result stays the reference.",
+    title: "Initial Passport", langNote: "This Passport was generated in the assessment language.", intro: "Optional online summary prepared from your synchronized assessment. Your offline result stays the reference.",
     gen: "Generate Initial Passport", generating: "Preparing your Initial Passport…", needOnline: "Connect to the internet to generate it.",
     needAuth: "Sign in to generate it.", unavailable: "The Initial Passport is temporarily unavailable. Your offline result is safe. Try again later.",
     config: "Model configuration required. The online passport is not available yet; your offline result is unaffected.",
@@ -52,7 +52,7 @@ const S = {
     find: "Find compatible Connex agents", findNote: "Opens the Connex network. Your assessment answers are never published.",
   },
   pt: {
-    title: "Passaporte Inicial", intro: "Resumo online opcional preparado a partir da sua avaliação sincronizada. Seu resultado offline continua sendo a referência.",
+    title: "Passaporte Inicial", langNote: "Este Passaporte foi gerado no idioma da avaliação.", intro: "Resumo online opcional preparado a partir da sua avaliação sincronizada. Seu resultado offline continua sendo a referência.",
     gen: "Gerar Passaporte Inicial", generating: "Preparando seu Passaporte Inicial…", needOnline: "Conecte-se à internet para gerar.",
     needAuth: "Entre na sua conta para gerar.", unavailable: "O Passaporte Inicial está temporariamente indisponível. Seu resultado offline está seguro. Tente mais tarde.",
     config: "Configuração do modelo necessária. O passaporte online ainda não está disponível; seu resultado offline não foi afetado.",
@@ -127,6 +127,7 @@ export function PassportPanel({ lang, online, session }: { lang: FieldLang; onli
 
       {res && diag && (
         <div className="mt-3 space-y-5" data-testid="passport-ready">
+          {res.language && res.language !== lang && <p role="note" data-testid="passport-lang-note" className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">{s.langNote}</p>}
           <div>
             <p className="font-semibold">{res.passport_title}</p>
             <p className="text-xs text-muted-foreground">{s.id}: <span className="font-mono">{diag.field_session_id.slice(0, 8)}</span> · v{diag.payload_version} · {s.date}: {diag.completed_at ? new Date(diag.completed_at).toLocaleString(lang === "pt" ? "pt-BR" : "en-GB") : "—"}</p>
