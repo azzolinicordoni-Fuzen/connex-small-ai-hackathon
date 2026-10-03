@@ -100,12 +100,14 @@ export default function Login() {
   
   const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
+  // Connex Field (Phase 4): safe same-origin return path, allowlisted to /field only.
+  const redirectTo = new URLSearchParams(window.location.search).get("redirect") === "/field" ? "/field" : "/dashboard";
 
   useEffect(() => {
     if (!loading && user) {
-      navigate("/dashboard");
+      navigate(redirectTo);
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, redirectTo]);
 
   const handleCpfCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCpfCnpj(e.target.value);
@@ -158,7 +160,7 @@ export default function Login() {
     }
     
     toast.success("Login realizado com sucesso!");
-    navigate("/dashboard");
+    navigate(redirectTo);
   };
 
   if (loading) {

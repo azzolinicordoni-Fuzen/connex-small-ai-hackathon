@@ -20,6 +20,7 @@ import {
 import { buildLocalResult, SPECIALISTS, type LocalResult } from "@/field/pathways";
 import { QuestionInput } from "@/field/components/QuestionInput";
 import { Assistant } from "@/field/components/Assistant";
+import { SyncPanel } from "@/field/components/SyncPanel";
 
 const LANG_KEY = "connex-field-lang";
 const REVIEW = STEPS.length;
@@ -131,6 +132,8 @@ export default function Field() {
     if (session) {
       await saveAnswer(session.local_session_id, qid, value);
       if (qid === "C01") setSession(await updateSession(session.local_session_id, { language: value as FieldLang }));
+      // Phase 4: explicit sync authorization timestamp (cleared if withdrawn).
+      if (qid === "C19") setSession(await updateSession(session.local_session_id, { sync_consented_at: value === "authorize_now" ? new Date().toISOString() : undefined }));
     }
   }, [answers, lang, session]);
 
@@ -166,7 +169,11 @@ export default function Field() {
     toast.success(t.deleted);
   };
 
-  const startOrResume = () => { setView("triage"); if (!session) setStep(0); };
+  const startOrResume = () => {
+    // A synced session keeps only its receipt; a new triage starts fresh.
+    if (session?.status === "synced") { setSession(null); setStored(null); setAnswers({}); setStep(0); setView("triage"); return; }
+    setView("triage"); if (!session) setStep(0);
+  };
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
@@ -287,6 +294,7 @@ export default function Field() {
             t={t} lang={lang} answers={answers} session={session} stored={stored}
             onEdit={(n) => goTo(n)} onBack={() => goTo(REVIEW - 1)}
             onSync={(v) => setAnswer("C19", v)} onFinish={finish} headingRef={headingRef}
+            online={online} onSession={setSession}
           />
         )}
 
@@ -299,12 +307,19 @@ export default function Field() {
   );
 }
 
-function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onFinish, headingRef }: {
+function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onFinish, headingRef, online, onSession }: {
+  online: boolean; onSession: (s: SessionRec) => void;
   t: FieldStrings; lang: FieldLang; answers: Record<string, unknown>; session: SessionRec | null; stored: LocalResult | null;
   onEdit: (step: number) => void; onBack: () => void; onSync: (v: string) => void; onFinish: () => void;
   headingRef: React.RefObject<HTMLHeadingElement>;
 }) {
   const status = session?.status ?? "draft";
+  if (status === "synced") return (
+    <section aria-labelledby="review-title" className="space-y-6">
+      <h1 id="review-title" ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold outline-none">{t.resultTitle}</h1>
+      <SyncPanel lang={lang} online={online} session={session} answers={answers} result={stored} onSession={onSession} />
+    </section>
+  );
   // Draft: live result. After saving: the stored result (reopens offline unchanged).
   const result = status !== "draft" && stored ? stored : buildLocalResult(answers);
   const missing = result.missing;
@@ -402,11 +417,8 @@ function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onF
 
       <QuestionInput q={qById("C19")} value={answers.C19} onChange={(v) => onSync(v as string)} lang={lang} t={t} />
 
-      <div className="rounded-md border border-border bg-card p-4 text-sm">
-        <h2 className="font-semibold">{t.syncStatus}</h2>
-        <p className="mt-1" role="status">{t[`status_${status}` as keyof FieldStrings]}</p>
-        <p className="mt-1 text-muted-foreground">{t.syncNotInPhase}</p>
-      </div>
+      <p className="text-sm" role="status">{t.syncStatus}: {t[`status_${status}` as keyof FieldStrings]}</p>
+      <SyncPanel lang={lang} online={online} session={session} answers={answers} result={stored} onSession={onSession} />
 
       <div className="flex justify-between gap-3">
         <Button variant="outline" onClick={onBack}>{t.back}</Button>
