@@ -255,7 +255,7 @@ export function normalize(o: any): any {
   };
 }
 
-export type Finalized = { ok: true; result: Record<string, unknown> } | { ok: false; code: string };
+export type Finalized = { ok: true; result: Record<string, unknown>; code?: undefined } | { ok: false; code: string; result?: undefined };
 
 export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record<string, any>; offline: any }): Finalized {
   let obj: unknown;
@@ -322,7 +322,7 @@ export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record
 // ---------- handler ----------
 export interface SessionRow { id: string; profile_id: string; status: string; language: string; payload_version: number; answers: any; offline_result: any }
 export interface DiagRow { id: string; status: string; result: any; safe_error_code: string | null; started_at: string | null; updated_at: string; completed_at: string | null; payload_version: number; prompt_version: string; model_id: string; field_session_id: string }
-export type ModelCall = { ok: true; content: string } | { ok: false; code: string };
+export type ModelCall = { ok: true; content: string; code?: undefined } | { ok: false; code: string; content?: undefined };
 
 export interface Deps {
   z: any;
