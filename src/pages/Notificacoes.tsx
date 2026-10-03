@@ -122,7 +122,7 @@ export default function Notificacoes() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-xl">AgroConnect</span>
+              <span className="font-display font-bold text-xl">Connex</span>
             </Link>
           </div>
 
