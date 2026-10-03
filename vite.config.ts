@@ -45,6 +45,11 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         // Navigations go through NetworkFirst below (never cache-first HTML).
         navigateFallback: null,
+        // Stop the precache route from answering "/" with a stale index.html
+        // (cache-first). "/" must go through NetworkFirst so new deploys show online.
+        directoryIndex: "__no_directory_index__.html",
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             // Same-origin page navigations, excluding OAuth technical routes.

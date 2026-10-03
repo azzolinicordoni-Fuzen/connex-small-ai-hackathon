@@ -32,6 +32,26 @@ export function registerConnexFieldSW() {
     return;
   }
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register(SW_URL, { scope: "/" }).catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    // A new deployment took control: reload once so the fresh shell is shown.
+    // Offline data lives in IndexedDB and is untouched by this.
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
+    navigator.serviceWorker
+      .register(SW_URL, { scope: "/", updateViaCache: "none" })
+      .then((reg) => {
+        const check = () => {
+          if (navigator.onLine) void reg.update().catch(() => {});
+        };
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") check();
+        });
+        window.addEventListener("online", check);
+      })
+      .catch(() => {});
   });
 }
