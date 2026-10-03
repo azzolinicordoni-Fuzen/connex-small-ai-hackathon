@@ -3,57 +3,70 @@
  "version": "1.0.0",
  "languages": {
   "en": {
-   "training_examples": 256,
-   "in_domain_training": 236,
-   "ood_training": 20,
-   "vocab_size": 3006,
-   "cv_utility": 172.5,
-   "scale": 3,
+   "training_examples": 294,
+   "in_domain_training": 264,
+   "ood_training": 30,
+   "vocab_size": 3481,
+   "cv_utility": 194,
+   "scale": 4,
    "thresholds": {
-    "accept": 0.25,
-    "margin": 0.2,
+    "accept": 0.55,
+    "margin": 0.05,
     "clarify": 0.1,
-    "oodReject": 0.3,
-    "minCoverage": 0.5
+    "oodReject": 0.5,
+    "minCoverage": 0.2
    },
    "evaluation": {
     "in_domain": {
      "n": 52,
-     "top1_accuracy": 0.9038,
-     "auto_answered": 33,
+     "top1_accuracy": 0.8269,
+     "auto_answered": 32,
      "auto_answer_precision": 1,
      "wrong_auto_answers": 0,
-     "clarify_shown": 19,
+     "clarify_shown": 20,
      "clarify_contains_truth": 19,
      "not_answered_by_model": 0
     },
     "out_of_domain": {
      "n": 20,
-     "not_auto_answered": 18,
-     "rejection_rate": 0.9,
-     "leaks": [
-      {
-       "text": "what is two plus two",
-       "id": "K15"
-      },
-      {
-       "text": "what is the population of brazil",
-       "id": "K04"
-      }
-     ]
+     "not_auto_answered": 20,
+     "rejection_rate": 1,
+     "leaks": []
     },
     "confusion": {
-     "K13->K25": 1,
+     "K10->K09": 1,
+     "K11->K09": 1,
+     "K13->K09": 1,
+     "K13->K20": 1,
      "K14->K09": 1,
-     "K19->K18": 1,
-     "K20->K01": 1,
+     "K16->K09": 1,
+     "K18->K20": 1,
+     "K19->K09": 1,
      "K24->K25": 1
     },
     "errors": [
      {
+      "text": "what is meant by baseline in carbon projects",
+      "expected": "K10",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
+      "text": "how is a project monitored and reported",
+      "expected": "K11",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
+      "text": "what does permanence mean in carbon projects",
+      "expected": "K13",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
       "text": "what happens if there is a fire after credits",
       "expected": "K13",
-      "top1": "K25",
+      "top1": "K20",
       "decision": "clarify"
      },
      {
@@ -63,15 +76,21 @@
       "decision": "clarify"
      },
      {
-      "text": "how expensive is a carbon project",
-      "expected": "K19",
-      "top1": "K18",
+      "text": "what does methodology mean in carbon projects",
+      "expected": "K16",
+      "top1": "K09",
       "decision": "clarify"
      },
      {
-      "text": "what price does a carbon credit get",
-      "expected": "K20",
-      "top1": "K01",
+      "text": "how much time does the whole process take",
+      "expected": "K18",
+      "top1": "K20",
+      "decision": "clarify"
+     },
+     {
+      "text": "how expensive is a carbon project",
+      "expected": "K19",
+      "top1": "K09",
       "decision": "clarify"
      },
      {
@@ -89,9 +108,9 @@
       "decision": "answer",
       "id": "K02",
       "candidates": [
-       "K02:0.64",
-       "K22:0.03",
-       "K21:0.03"
+       "K02:0.82",
+       "K22:0.02",
+       "K21:0.01"
       ]
      },
      {
@@ -101,44 +120,45 @@
       "decision": "answer",
       "id": "K07",
       "candidates": [
-       "K07:0.51",
-       "K26:0.03",
-       "K23:0.02"
+       "K07:0.75",
+       "K09:0.02",
+       "K26:0.01"
       ]
      },
      {
       "text": "What makes this different from business as usual?",
       "expect": "K09",
       "detected_language": "en",
-      "decision": "uncertain",
-      "id": null,
+      "decision": "answer",
+      "id": "K09",
       "candidates": [
-       "K09:0.07",
-       "K12:0.07",
-       "K10:0.05"
+       "K09:0.81",
+       "K01:0.01",
+       "K12:0.01"
       ]
      },
      {
       "text": "Is there a fixed market price for every tonne?",
       "expect": "K20",
       "detected_language": "en",
-      "decision": "clarify",
-      "id": null,
+      "decision": "answer",
+      "id": "K20",
       "candidates": [
-       "K03:0.13",
-       "K20:0.08",
-       "K01:0.07"
+       "K20:0.81",
+       "K03:0.03",
+       "K01:0.03"
       ]
      },
      {
       "text": "waht is aditionalty",
       "expect": "K09",
       "detected_language": "en",
-      "decision": "clarify",
-      "id": null,
+      "decision": "answer",
+      "id": "K09",
       "candidates": [
-       "K09:0.77",
-       "K23:0.07"
+       "K09:0.94",
+       "K23:0.03",
+       "K12:0.00"
       ]
      },
      {
@@ -148,8 +168,8 @@
       "decision": "clarify",
       "id": null,
       "candidates": [
-       "K03:0.64",
-       "K12:0.19"
+       "K03:0.81",
+       "K12:0.14"
       ]
      },
      {
@@ -159,75 +179,97 @@
       "decision": "reject",
       "id": null,
       "candidates": [
-       "K22:0.06",
        "K01:0.06",
-       "K14:0.05"
+       "K20:0.05",
+       "K09:0.04"
       ]
      }
     ],
-    "mean_inference_ms_node": 0.856
+    "mean_inference_ms_node": 0.489
    }
   },
   "pt": {
-   "training_examples": 256,
-   "in_domain_training": 236,
-   "ood_training": 20,
-   "vocab_size": 2876,
-   "cv_utility": 176,
-   "scale": 3,
+   "training_examples": 294,
+   "in_domain_training": 264,
+   "ood_training": 30,
+   "vocab_size": 3303,
+   "cv_utility": 192,
+   "scale": 4,
    "thresholds": {
-    "accept": 0.35,
-    "margin": 0.2,
+    "accept": 0.55,
+    "margin": 0.05,
     "clarify": 0.1,
-    "oodReject": 0.3,
-    "minCoverage": 0.4
+    "oodReject": 0.5,
+    "minCoverage": 0.5
    },
    "evaluation": {
     "in_domain": {
      "n": 52,
-     "top1_accuracy": 0.8846,
-     "auto_answered": 26,
-     "auto_answer_precision": 0.9615,
-     "wrong_auto_answers": 1,
+     "top1_accuracy": 0.8077,
+     "auto_answered": 28,
+     "auto_answer_precision": 0.9286,
+     "wrong_auto_answers": 2,
      "clarify_shown": 23,
      "clarify_contains_truth": 21,
-     "not_answered_by_model": 3
+     "not_answered_by_model": 1
     },
     "out_of_domain": {
      "n": 20,
-     "not_auto_answered": 19,
-     "rejection_rate": 0.95,
-     "leaks": [
-      {
-       "text": "quanto custa um saco de adubo",
-       "id": "K19"
-      }
-     ]
+     "not_auto_answered": 20,
+     "rejection_rate": 1,
+     "leaks": []
     },
     "confusion": {
-     "K01->K20": 1,
+     "K10->K09": 1,
+     "K11->K09": 1,
+     "K13->K09": 1,
      "K13->K25": 1,
-     "K14->K09": 1,
+     "K14->K09": 2,
+     "K16->K09": 1,
      "K17->K09": 1,
      "K18->K21": 1,
      "K19->K09": 1
     },
     "errors": [
      {
-      "text": "um crédito equivale a quanto de co2",
-      "expected": "K01",
-      "top1": "K20",
-      "decision": "answer"
+      "text": "qual é o cenário de referência de um projeto",
+      "expected": "K10",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
+      "text": "como o projeto é monitorado e relatado",
+      "expected": "K11",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
+      "text": "o que significa permanência em projetos de carbono",
+      "expected": "K13",
+      "top1": "K09",
+      "decision": "clarify"
      },
      {
       "text": "o que acontece se tiver incêndio depois dos créditos",
       "expected": "K13",
       "top1": "K25",
-      "decision": "uncertain"
+      "decision": "clarify"
      },
      {
       "text": "o que significa vazamento em projeto de carbono",
       "expected": "K14",
+      "top1": "K09",
+      "decision": "answer"
+     },
+     {
+      "text": "se o desmate só muda para outra fazenda como chama",
+      "expected": "K14",
+      "top1": "K09",
+      "decision": "clarify"
+     },
+     {
+      "text": "o que significa metodologia em projetos de carbono",
+      "expected": "K16",
       "top1": "K09",
       "decision": "clarify"
      },
@@ -247,7 +289,7 @@
       "text": "um projeto de carbono é caro",
       "expected": "K19",
       "top1": "K09",
-      "decision": "clarify"
+      "decision": "answer"
      }
     ],
     "required": [
@@ -258,9 +300,9 @@
       "decision": "answer",
       "id": "K02",
       "candidates": [
-       "K02:0.50",
+       "K02:0.64",
        "K21:0.10",
-       "K07:0.03"
+       "K07:0.02"
       ]
      },
      {
@@ -270,33 +312,33 @@
       "decision": "answer",
       "id": "K07",
       "candidates": [
-       "K07:0.75",
-       "K17:0.02",
-       "K26:0.01"
+       "K07:0.92",
+       "K09:0.01",
+       "K17:0.01"
       ]
      },
      {
       "text": "Como sei se o projeto só aconteceu por causa do carbono?",
       "expect": "K09",
       "detected_language": "pt",
-      "decision": "clarify",
-      "id": null,
+      "decision": "answer",
+      "id": "K09",
       "candidates": [
-       "K09:0.24",
-       "K23:0.07",
-       "K22:0.06"
+       "K09:0.93",
+       "K23:0.01",
+       "K20:0.01"
       ]
      },
      {
       "text": "Existe um preço fixo para cada tonelada?",
       "expect": "K20",
       "detected_language": "pt",
-      "decision": "clarify",
-      "id": null,
+      "decision": "answer",
+      "id": "K20",
       "candidates": [
-       "K20:0.14",
-       "K01:0.07",
-       "K17:0.07"
+       "K20:0.72",
+       "K01:0.11",
+       "K17:0.01"
       ]
      },
      {
@@ -306,9 +348,9 @@
       "decision": "answer",
       "id": "K09",
       "candidates": [
-       "K09:0.90",
-       "K23:0.03",
-       "K12:0.01"
+       "K09:0.98",
+       "K23:0.01",
+       "K12:0.00"
       ]
      },
      {
@@ -318,8 +360,8 @@
       "decision": "clarify",
       "id": null,
       "candidates": [
-       "K03:0.48",
-       "K12:0.39"
+       "K03:0.56",
+       "K12:0.41"
       ]
      },
      {
@@ -329,15 +371,15 @@
       "decision": "reject",
       "id": null,
       "candidates": [
-       "K18:0.03",
-       "K13:0.03",
-       "K23:0.02"
+       "K18:0.02",
+       "K09:0.01",
+       "K13:0.01"
       ]
      }
     ],
-    "mean_inference_ms_node": 0.319
+    "mean_inference_ms_node": 0.23
    }
   }
  },
- "artifact_bytes": 172914
+ "artifact_bytes": 200743
 }
