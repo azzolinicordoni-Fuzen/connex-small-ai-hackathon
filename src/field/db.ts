@@ -71,7 +71,7 @@ export async function createSession(language: "en" | "pt", answers: Record<strin
 export async function getLatestSession() {
   const db = await getDB();
   const all = await db.getAllFromIndex("session", "by_updated");
-  return all.at(-1) ?? null;
+  return all[all.length - 1] ?? null;
 }
 
 export async function updateSession(id: string, patch: Partial<SessionRec>) {

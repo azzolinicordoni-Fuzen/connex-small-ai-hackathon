@@ -1,8 +1,8 @@
 // Hack-Nation 2026 — Connex Field Phase 2 validation. Run: bun test src/field
 import { describe, expect, test } from "bun:test";
-import { QUESTIONS, STEPS, PROHIBITED_FIELDS } from "../questions";
-import { FAQ, searchFaq, FALLBACK_TEXT } from "../search";
-import { computeFlags, missingAnswers } from "../summary";
+import { QUESTIONS, STEPS, PROHIBITED_FIELDS } from "../src/field/questions";
+import { FAQ, searchFaq, FALLBACK_TEXT } from "../src/field/search";
+import { computeFlags, missingAnswers } from "../src/field/summary";
 
 describe("triage", () => {
   test("exactly 19 stable IDs C01–C19", () => {
