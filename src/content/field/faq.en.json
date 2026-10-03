@@ -1,0 +1,598 @@
+[
+  {
+    "id": "K01",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is a carbon credit?",
+    "approved_answer": "It is a tradable unit representing one tonne of carbon dioxide equivalent effectively reduced, removed or retained according to the applicable rules and methodology. In Brazil, Law No. 15,042 defines the carbon credit in this way. The existence of a forest or a sustainable practice, on its own, does not mean that credits have already been issued.",
+    "tags": [
+      "carbon credit",
+      "credit",
+      "tonne",
+      "co2",
+      "unit"
+    ],
+    "synonyms": [
+      "what is a credit",
+      "carbon offset",
+      "offset",
+      "credits meaning"
+    ],
+    "category": "basics",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K02",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Does having a forest mean I already have credits?",
+    "approved_answer": "Not automatically. A project needs to demonstrate results according to a methodology, define a baseline, assess additionality, monitor the results and go through the stages required by the program, including independent validation and verification when applicable.",
+    "tags": [
+      "forest",
+      "already",
+      "credits",
+      "have"
+    ],
+    "synonyms": [
+      "i have trees",
+      "my forest",
+      "do i have credits",
+      "woods",
+      "native vegetation"
+    ],
+    "category": "basics",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K03",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is the difference between the regulated and voluntary markets?",
+    "approved_answer": "The regulated market arises from public rules that create obligations and compliance assets. The voluntary market brings together projects and buyers that use independent programs and standards. Law No. 15,042 established the SBCE in Brazil, but the Connex triage does not determine whether a credit can be used in the regulated system.",
+    "tags": [
+      "regulated",
+      "voluntary",
+      "market",
+      "difference",
+      "compliance"
+    ],
+    "synonyms": [
+      "types of market",
+      "compliance market"
+    ],
+    "category": "market",
+    "references": [
+      1,
+      4
+    ]
+  },
+  {
+    "id": "K04",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is the SBCE?",
+    "approved_answer": "It is the Brazilian Greenhouse Gas Emissions Trading System, established by Law No. 15,042 of 2024. Its implementation depends on regulation, measurement, reporting and verification infrastructure, and a central registry. The regulatory situation must be checked at the time of each project.",
+    "tags": [
+      "sbce",
+      "emissions trading",
+      "brazil",
+      "system"
+    ],
+    "synonyms": [
+      "brazilian system",
+      "cap and trade"
+    ],
+    "category": "market",
+    "references": [
+      1,
+      4
+    ]
+  },
+  {
+    "id": "K05",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Does Connex certify or issue credits?",
+    "approved_answer": "No. Connex organizes preliminary data, facilitates connections and helps find specialists. Certification, registration and issuance depend on the program, the methodology and the applicable independent assessments.",
+    "tags": [
+      "connex",
+      "certify",
+      "issue",
+      "certification"
+    ],
+    "synonyms": [
+      "does connex issue",
+      "connex certification",
+      "who certifies"
+    ],
+    "category": "connex",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K06",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Who can hold forest credits in Brazil?",
+    "approved_answer": "Law No. 15,042 establishes rules on original ownership and recognizes, among other cases, private owners or usufructuaries, as well as specific rights of Indigenous peoples, traditional communities, quilombolas and settlers. Contracts may provide for sharing or assignment. The concrete situation requires documentary and legal verification.",
+    "tags": [
+      "owner",
+      "holder",
+      "ownership",
+      "rights",
+      "who"
+    ],
+    "synonyms": [
+      "who owns credits",
+      "credit ownership",
+      "who holds"
+    ],
+    "category": "rights",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K07",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Does the CAR prove that I am the owner?",
+    "approved_answer": "No. The Rural Environmental Registry (CAR) is a mandatory environmental registry for rural properties, but it does not constitute a title of ownership or possession. For this reason, the triage records the CAR and land documents as different pieces of information.",
+    "tags": [
+      "car",
+      "rural environmental registry",
+      "proof",
+      "ownership",
+      "owner"
+    ],
+    "synonyms": [
+      "car registration",
+      "is car a title",
+      "prove property"
+    ],
+    "category": "rights",
+    "references": [
+      5
+    ]
+  },
+  {
+    "id": "K08",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Which documents are usually analyzed?",
+    "approved_answer": "Depending on the case, documents may be needed on ownership, possession or usufruct, perimeter and maps, CAR, land-use history, authorizations, existing contracts, production records and information about people or communities with rights in the area. The final list depends on the methodology and the legal situation.",
+    "tags": [
+      "documents",
+      "papers",
+      "analyzed",
+      "needed"
+    ],
+    "synonyms": [
+      "what documents",
+      "which papers",
+      "paperwork",
+      "required documents"
+    ],
+    "category": "rights",
+    "references": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": "K09",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is additionality?",
+    "approved_answer": "It is the demonstration that the reduction or removal would not occur in the same way without the incentive of the carbon project, according to the tests of the applicable methodology. The triage only identifies relevant facts; it does not prove additionality.",
+    "tags": [
+      "additionality",
+      "additional"
+    ],
+    "synonyms": [
+      "would happen anyway",
+      "additionality test"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      6
+    ]
+  },
+  {
+    "id": "K10",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is a baseline?",
+    "approved_answer": "It is the reference scenario used to compare what would probably occur without the project. The methodology defines how to establish the baseline and which data are needed.",
+    "tags": [
+      "baseline",
+      "reference scenario"
+    ],
+    "synonyms": [
+      "base line",
+      "without the project"
+    ],
+    "category": "methodology",
+    "references": [
+      2
+    ]
+  },
+  {
+    "id": "K11",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is MRV?",
+    "approved_answer": "It is the set of measurement, reporting and verification of climate results. Good systems record data consistently and submit results to independent assessment when required.",
+    "tags": [
+      "mrv",
+      "measurement",
+      "reporting",
+      "verification",
+      "monitoring"
+    ],
+    "synonyms": [
+      "measure report verify",
+      "monitoring system"
+    ],
+    "category": "methodology",
+    "references": [
+      1,
+      3
+    ]
+  },
+  {
+    "id": "K12",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is the difference between validation and verification?",
+    "approved_answer": "Validation assesses the project design and its compliance with the rules before or at the start of the cycle. Verification assesses the monitored results to confirm reductions or removals before issuance, according to the applicable program.",
+    "tags": [
+      "validation",
+      "verification",
+      "difference",
+      "audit"
+    ],
+    "synonyms": [
+      "validate vs verify",
+      "auditor"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K13",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is permanence?",
+    "approved_answer": "It is the capacity to maintain the reduction or removal over the required period. In forest and land-use projects, fire, deforestation, drought, pests and changes in management can reverse the stored carbon, which is why programs adopt risk-management measures.",
+    "tags": [
+      "permanence",
+      "reversal",
+      "fire",
+      "risk"
+    ],
+    "synonyms": [
+      "long term",
+      "forest burns",
+      "carbon lost"
+    ],
+    "category": "methodology",
+    "references": [
+      6
+    ]
+  },
+  {
+    "id": "K14",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is leakage?",
+    "approved_answer": "It is the increase in emissions outside the project area caused by the displacement of the activity. The methodology defines how to identify, quantify and address this risk.",
+    "tags": [
+      "leakage",
+      "displacement"
+    ],
+    "synonyms": [
+      "emissions elsewhere",
+      "moving deforestation"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      6
+    ]
+  },
+  {
+    "id": "K15",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is double counting?",
+    "approved_answer": "It occurs when the same climate result is counted or claimed more than once. Registries, ownership rules, cancellation and, in some international contexts, authorizations and corresponding adjustments help avoid this problem.",
+    "tags": [
+      "double counting",
+      "counted twice",
+      "claim"
+    ],
+    "synonyms": [
+      "double claim",
+      "sold twice",
+      "corresponding adjustment"
+    ],
+    "category": "methodology",
+    "references": [
+      6,
+      7
+    ]
+  },
+  {
+    "id": "K16",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What is a methodology?",
+    "approved_answer": "It is the set of procedures that defines eligible activities, boundaries, baseline, additionality, calculations, monitoring and risk treatment. The appropriate methodology depends on the activity, the location and the chosen program.",
+    "tags": [
+      "methodology",
+      "method",
+      "procedures",
+      "standard"
+    ],
+    "synonyms": [
+      "which methodology",
+      "rules of the project"
+    ],
+    "category": "methodology",
+    "references": [
+      2
+    ]
+  },
+  {
+    "id": "K17",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Is there a minimum property size?",
+    "approved_answer": "There is no universal limit valid for all projects. The methodology may impose conditions, and development costs may make small projects difficult individually. In these cases, aggregation, cooperatives or grouped programs may be alternatives.",
+    "tags": [
+      "minimum",
+      "size",
+      "small",
+      "hectares",
+      "area"
+    ],
+    "synonyms": [
+      "small farm",
+      "too small",
+      "how big",
+      "minimum area"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K18",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "How long does it take?",
+    "approved_answer": "There is no single timeframe. Data collection, choice of methodology, stakeholder consultation, design, validation, monitoring, verification and registration can take different periods. Connex should not provide a timeframe promise without analysis of the case.",
+    "tags": [
+      "time",
+      "long",
+      "timeline",
+      "duration",
+      "years"
+    ],
+    "synonyms": [
+      "how long does it take",
+      "when will i get",
+      "how many years"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K19",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "How much does it cost?",
+    "approved_answer": "Costs vary according to type, scale, methodology, data needs, auditing, registration, monitoring, legal aspects and commercial structure. The triage does not provide a budget; it identifies which specialists need to estimate the costs.",
+    "tags": [
+      "cost",
+      "price",
+      "expensive",
+      "budget",
+      "fees"
+    ],
+    "synonyms": [
+      "how much does it cost",
+      "project cost",
+      "cost of certification"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K20",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "How much is a credit worth?",
+    "approved_answer": "There is no single price. The value depends on the market, project type, integrity, methodology, additional benefits, risk, contract, demand and possibility of use. The World Bank tracks very different ranges across instruments and types of credits. Connex should not promise a price.",
+    "tags": [
+      "worth",
+      "value",
+      "price",
+      "pay",
+      "money",
+      "sell"
+    ],
+    "synonyms": [
+      "credit price",
+      "how much will i earn",
+      "how much money",
+      "price per ton"
+    ],
+    "category": "market",
+    "references": [
+      8
+    ]
+  },
+  {
+    "id": "K21",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Can I sell credits before they are issued?",
+    "approved_answer": "Financing, forward-purchase and assignment contracts exist, but the risks and rules vary. In Brazil, Law No. 15,042 contains specific provisions on contracts and jurisdictional programs. Never sign or promise credits without reviewing rights, methodology, volume, risks, exclusivity and obligations with independent advice.",
+    "tags": [
+      "sell",
+      "before",
+      "issued",
+      "forward",
+      "advance",
+      "contract"
+    ],
+    "synonyms": [
+      "sell in advance",
+      "presale",
+      "forward sale",
+      "pre sell"
+    ],
+    "category": "contracts",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K22",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What happens if there is already a carbon contract?",
+    "approved_answer": "The area must be flagged for review before any new negotiation. It is necessary to check scope, perimeter, term, exclusivity, assignments, obligations, registry annotations and possible overlapping rights. Connex does not interpret the contract automatically in the MVP.",
+    "tags": [
+      "contract",
+      "existing",
+      "already",
+      "signed"
+    ],
+    "synonyms": [
+      "i signed a contract",
+      "already have a deal",
+      "existing agreement"
+    ],
+    "category": "contracts",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K23",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "How do community rights work?",
+    "approved_answer": "Projects that affect Indigenous peoples, traditional communities, quilombolas or settlers require respect for specific rights and safeguards. Law No. 15,042 provides, in defined cases, for free, prior and informed consultation and benefit-sharing rules. The triage must stop automatic conclusions and refer to specialists.",
+    "tags": [
+      "community",
+      "indigenous",
+      "quilombola",
+      "traditional",
+      "consultation",
+      "rights"
+    ],
+    "synonyms": [
+      "indigenous peoples",
+      "fpic",
+      "settlers",
+      "local community"
+    ],
+    "category": "rights",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K24",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What happens to my data when I am offline?",
+    "approved_answer": "Your answers stay on the device until you authorize synchronization. You can delete the local session. The MVP must not store copies of titles, CPF or sensitive documents in offline mode.",
+    "tags": [
+      "data",
+      "offline",
+      "privacy",
+      "stored",
+      "device"
+    ],
+    "synonyms": [
+      "where is my data",
+      "is my data safe",
+      "delete data"
+    ],
+    "category": "data",
+    "references": [
+      9
+    ]
+  },
+  {
+    "id": "K25",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "What happens when the internet comes back?",
+    "approved_answer": "With your authorization, the application sends the triage to Connex, avoids duplication through a unique identifier and requests the generation of the Initial Passport. If there is an error, the local data remain available for a new attempt.",
+    "tags": [
+      "internet",
+      "online",
+      "sync",
+      "synchronization",
+      "connection"
+    ],
+    "synonyms": [
+      "when connected",
+      "back online",
+      "send data"
+    ],
+    "category": "data",
+    "references": [
+      9
+    ]
+  },
+  {
+    "id": "K26",
+    "content_version": "0.1.1",
+    "language": "en",
+    "question": "Does the result guarantee that my project will be approved?",
+    "approved_answer": "No. The result is a preliminary triage based on what you reported. Eligibility, quantification, certification, registration, issuance and commercialization depend on technical, legal and socio-environmental analysis and on the rules in force.",
+    "tags": [
+      "guarantee",
+      "approved",
+      "result",
+      "approval"
+    ],
+    "synonyms": [
+      "will i be approved",
+      "is it guaranteed",
+      "guaranteed approval"
+    ],
+    "category": "connex",
+    "references": [
+      1,
+      2,
+      3
+    ]
+  }
+]
