@@ -57,9 +57,9 @@ export function HeroSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Animated Logo Icon */}
-          <div className="mb-6 sm:mb-10 animate-fade-up">
+          <div className="mb-2 min-[360px]:mb-6 sm:mb-10 animate-fade-up">
             <div className="inline-flex relative p-4">
-              <LogoIcon size="xl" className="scale-150 sm:scale-[1.8] opacity-90" />
+              <LogoIcon size="xl" className="scale-110 min-[360px]:scale-150 sm:scale-[1.8] opacity-90" />
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: "4s" }} />
             </div>
           </div>
@@ -82,19 +82,19 @@ export function HeroSection() {
           </div>
 
           {/* Headline - Updated */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 animate-fade-up leading-tight" style={{ animationDelay: "0.1s" }}>
+          <h1 className="font-display text-3xl min-[360px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 animate-fade-up leading-tight" style={{ animationDelay: "0.1s" }}>
             Conectando o mercado
             <br />
             <span className="text-primary">de créditos de carbono</span>
           </h1>
 
           {/* Subtitle - More institutional */}
-          <p className="text-lg sm:text-xl text-white/50 mb-4 max-w-2xl mx-auto animate-fade-up font-light" style={{ animationDelay: "0.2s" }}>
+          <p className="text-base sm:text-xl text-white/50 mb-4 max-w-2xl mx-auto animate-fade-up font-light" style={{ animationDelay: "0.2s" }}>
             A plataforma que conecta todos os agentes do ecossistema de créditos de carbono em um único lugar.
           </p>
           
           {/* Secondary tagline */}
-          <p className="text-sm text-white/30 mb-8 sm:mb-12 animate-fade-up" style={{ animationDelay: "0.25s" }}>
+          <p className="hidden min-[360px]:block text-sm text-white/30 mb-8 sm:mb-12 animate-fade-up" style={{ animationDelay: "0.25s" }}>
             Tecnologia • Transparência • Transformação
           </p>
 
