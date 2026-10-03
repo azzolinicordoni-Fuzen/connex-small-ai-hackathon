@@ -11,6 +11,8 @@ const getNavItems = (isAuthenticated: boolean) => [
   { label: "Início", href: isAuthenticated ? "/dashboard" : "/" },
   { label: "Conexões", href: "/conexoes" },
   { label: "Feed", href: "/feed" },
+  // Hack-Nation 2026 — public entry to the offline module
+  { label: "Connex Field", href: "/field" },
 ];
 
 export function Header() {

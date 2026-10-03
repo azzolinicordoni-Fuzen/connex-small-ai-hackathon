@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, WifiOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LogoIcon } from "@/components/brand/Logo";
 import { useEffect, useState } from "react";
@@ -94,7 +94,7 @@ export function HeroSection() {
           </p>
           
           {/* Secondary tagline */}
-          <p className="text-sm text-white/30 mb-12 animate-fade-up" style={{ animationDelay: "0.25s" }}>
+          <p className="text-sm text-white/30 mb-8 sm:mb-12 animate-fade-up" style={{ animationDelay: "0.25s" }}>
             Tecnologia • Transparência • Transformação
           </p>
 
@@ -111,6 +111,26 @@ export function HeroSection() {
                 Já tenho conta
               </Link>
             </Button>
+          </div>
+
+          {/* Hack-Nation 2026 — Connex Field entry (public, no login) */}
+          <div className="mt-6 flex flex-col items-center gap-2 animate-fade-up" style={{ animationDelay: "0.35s" }}>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Hack-Nation 2026 · World Bank Challenge
+            </span>
+            <Link
+              to="/field"
+              data-testid="hero-field-cta"
+              className="group inline-flex items-center gap-3 rounded-xl border border-primary/40 bg-white/[0.03] px-5 py-3 text-left backdrop-blur transition-colors hover:border-primary hover:bg-primary/10"
+            >
+              <WifiOff className="h-5 w-5 shrink-0 text-primary" />
+              <span className="flex flex-col">
+                <span className="font-display text-base font-semibold text-white">Conheça o Connex Field</span>
+                <span className="text-xs text-white/50">Offline AI for rural producers</span>
+              </span>
+              <ArrowRight className="h-4 w-4 text-primary transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
 
           {/* Minimal Stats */}
