@@ -21,6 +21,7 @@ import MeusProjetos from "./pages/MeusProjetos";
 import Notificacoes from "./pages/Notificacoes";
 import Configuracoes from "./pages/Configuracoes";
 import Mensagens from "./pages/Mensagens";
+import Field from "./pages/Field";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/configuracoes/notificacoes" element={<Configuracoes />} />
             <Route path="/mensagens" element={<Mensagens />} />
+            <Route path="/field" element={<Field />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
