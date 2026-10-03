@@ -4,7 +4,7 @@ import { describe, expect, test } from "bun:test";
 import { z } from "zod";
 import { readFileSync } from "node:fs";
 import {
-  handle, findProhibited, finalize, assessmentData, buildMessages, type Deps, type DiagRow, type SessionRow,
+  handle, findProhibited, finalize, assessmentData, buildMessages, isUnsafeText, revalidateResult, DISCLAIMER, FLAG_NOTICE, type Deps, type DiagRow, type SessionRow,
 } from "../supabase/functions/field-diagnosis/logic";
 
 const UID_A = "user-a", UID_B = "user-b", PA = "11111111-1111-4111-8111-111111111111", PB = "22222222-2222-4222-8222-222222222222";
@@ -104,13 +104,14 @@ describe("field-diagnosis (mocked)", () => {
   test("9b repair attempt can succeed", async () => {
     const s = setup(async (n) => ({ ok: true, content: n === 1 ? "oops" : good() })); expect((await call(s.deps, { field_session_id: SID_A })).status).toBe(200);
   });
-  test("10 prohibited claims rejected", async () => {
+  test("10 prohibited claims never reach the result (dropped, no extra model call)", async () => {
     for (const bad of ["Your project is eligible for credits.", "You could earn R$ 50 per tonne.", "Expect 1200 tCO2e per year.", "Certification takes 3 years.", "Sign the contract with the developer."]) {
-      const o = JSON.parse(good()); o.summary = bad;
+      const o = JSON.parse(good()); o.summary = `You declared native vegetation. ${bad}`;
       const s = setup(async () => ({ ok: true, content: JSON.stringify(o) }));
-      const r = await call(s.deps, { field_session_id: SID_A }); expect(r.body.error).toBe("PROHIBITED_CLAIM");
+      const r = await call(s.deps, { field_session_id: SID_A });
+      expect(r.status).toBe(200); expect(s.calls()).toBe(1);
+      expect(r.body.diagnosis.result.summary).toBe("You declared native vegetation.");
     }
-    expect(findProhibited({ a: "This is not an eligibility decision and the project is not certified." })).toBeNull();
     expect(findProhibited({ a: "Do not sign any contract before review." })).toBeNull();
   });
   test("11 prompt injection in a field stays data; name never sent", async () => {
@@ -165,3 +166,84 @@ describe("field-diagnosis (mocked)", () => {
     for (const l of ["en", "pt"]) expect(readFileSync(`supabase/functions/field-diagnosis/faq.${l}.json`, "utf8")).toBe(readFileSync(`src/content/field/faq.${l}.json`, "utf8"));
   });
 });
+
+// ---------- Phase 5.1 (all mocked; zero live gateway calls) ----------
+const UNSAFE = "Gather land records to ensure project eligibility.";
+const unsafeResult = () => {
+  const o = JSON.parse(good());
+  o.summary = `You declared native vegetation. ${UNSAFE}`;
+  o.safeguard_flags[0].explanation = `Communities may have rights to consider. ${UNSAFE}`;
+  o.next_steps.push({ step: UNSAFE });
+  return o;
+};
+describe("Phase 5.1 safety and localization (mocked)", () => {
+  test("1 'to ensure project eligibility' is dropped everywhere", async () => {
+    const s = setup(async () => ({ ok: true, content: JSON.stringify(unsafeResult()) }));
+    const r = await call(s.deps, { field_session_id: SID_A });
+    expect(r.status).toBe(200);
+    const ai = { ...r.body.diagnosis.result, disclaimer: "" };
+    expect(JSON.stringify(ai)).not.toContain("ensure project eligibility");
+    expect(JSON.stringify(ai).toLowerCase()).not.toContain("eligib");
+  });
+  test("2 Portuguese eligibility equivalents are blocked", () => {
+    for (const t of ["Reúna documentos para garantir a elegibilidade do projeto.", "A área está apta para créditos.", "O projeto pode ser aprovado.", "Isso vai assegurar a emissão.", "A propriedade é elegível.", "A terra se qualifica para o mercado.", "O projeto será certificado."])
+      expect(isUnsafeText(t)).toBe(true);
+  });
+  test("3 subtle approval/certification/guarantee/qualification claims are blocked", () => {
+    for (const t of ["to ensure project eligibility", "This should help with approval.", "Certification bodies will look favorably.", "This guarantees a smooth review.", "The land likely qualifies.", "Not eligible yet, but close."])
+      expect(isUnsafeText(t)).toBe(true);
+    expect(isUnsafeText("Talk to a qualified specialist about land records.")).toBe(false);
+    expect(isUnsafeText("Converse com um especialista qualificado.")).toBe(false);
+  });
+  test("4 controlled disclaimer stays visible (added after the scan)", async () => {
+    const s = setup(async () => ({ ok: true, content: JSON.stringify(unsafeResult()) }));
+    const r = await call(s.deps, { field_session_id: SID_A });
+    expect(r.body.diagnosis.result.disclaimer).toBe(DISCLAIMER.en);
+    expect(r.body.diagnosis.result.disclaimer).toContain("eligibility");
+  });
+  test("5/6 cached unsafe diagnosis is corrected before display with zero model calls", async () => {
+    const s = setup(); await call(s.deps, { field_session_id: SID_A }); expect(s.calls()).toBe(1);
+    // Simulate the saved Phase 5 live result containing the exact unsafe phrase.
+    s.diags[0].result.safeguard_flags[0].explanation = `Communities may have rights to consider. ${UNSAFE}`;
+    s.diags[0].result.next_steps.push({ step: UNSAFE });
+    const r = await call(s.deps, { field_session_id: SID_A });
+    expect(r.body.cached).toBe(true); expect(r.body.corrected).toBe(true); expect(s.calls()).toBe(1);
+    expect(JSON.stringify(r.body.diagnosis.result)).not.toContain("ensure project eligibility");
+    expect(JSON.stringify(s.diags[0].result)).not.toContain("ensure project eligibility"); // stored copy fixed
+    const again = await call(s.deps, { field_session_id: SID_A });
+    expect(again.body.corrected).toBe(false); expect(s.calls()).toBe(1);
+  });
+  test("client-side revalidation also strips the phrase (on-device copy)", () => {
+    const res = { ...unsafeResult(), language: "en", disclaimer: DISCLAIMER.en };
+    const out = revalidateResult(res, "en").result;
+    expect(JSON.stringify({ ...out, disclaimer: "" })).not.toContain("eligibility");
+  });
+  test("7 English session → English server-controlled text", async () => {
+    const s = setup(); const r = await call(s.deps, { field_session_id: SID_A }); const res = r.body.diagnosis.result;
+    expect(res.language).toBe("en"); expect(res.disclaimer).toBe(DISCLAIMER.en); expect(res.safeguard_flags[0].notice).toBe(FLAG_NOTICE.en);
+  });
+  test("8 Portuguese session → Portuguese server-controlled text", async () => {
+    const s = setup(); s.sessions[SID_A].language = "pt";
+    const r = await call(s.deps, { field_session_id: SID_A }); const res = r.body.diagnosis.result;
+    expect(res.language).toBe("pt"); expect(res.disclaimer).toBe(DISCLAIMER.pt);
+    for (const f of res.safeguard_flags) expect(f.notice).toBe(FLAG_NOTICE.pt);
+    // Cached result stored with English notices (Phase 5 bug) is re-localized to the assessment language.
+    s.diags[0].result.safeguard_flags[0].notice = FLAG_NOTICE.en;
+    const again = await call(s.deps, { field_session_id: SID_A });
+    expect(again.body.diagnosis.result.safeguard_flags[0].notice).toBe(FLAG_NOTICE.pt); expect(s.calls()).toBe(1);
+  });
+  test("9 interface language is not part of the request; switching uses zero model calls", async () => {
+    const s = setup(); await call(s.deps, { field_session_id: SID_A });
+    for (let i = 0; i < 4; i++) await call(s.deps, { field_session_id: SID_A });
+    expect(s.calls()).toBe(1);
+    expect((await call(s.deps, { field_session_id: SID_A, ui_lang: "pt" })).status).toBe(400);
+  });
+  test("10 automatic tests cannot call the live gateway", () => {
+    expect(process.env.RUN_FIELD_AI_LIVE_TEST === "true").toBe(false);
+    const { readdirSync } = require("node:fs");
+    for (const f of readdirSync("tests")) expect(readFileSync(`tests/${f}`, "utf8")).not.toMatch(/ai\.gateway\.lovable\.dev/);
+    // The handler only reaches the model through the injected callModel; the logic module has no fetch.
+    expect(readFileSync("supabase/functions/field-diagnosis/logic.ts", "utf8")).not.toMatch(/\bfetch\(/);
+  });
+});
+
