@@ -83,7 +83,7 @@ export function searchFaq(query: string, lang: FieldLang): SearchResult {
   const entries = FAQ[lang];
   const ranked = entries.map((e) => ({ e, s: scoreEntry(query, e) })).filter((r) => r.s > 0).sort((a, b) => b.s - a.s);
   const top = ranked[0];
-  if (!top || top.s < SCORE_THRESHOLD) return { kind: "fallback", text: FALLBACK_TEXT[lang] };
+  if (!top || top.s + 1e-9 < SCORE_THRESHOLD) return { kind: "fallback", text: FALLBACK_TEXT[lang] };
   const second = ranked[1];
   if (second && second.s >= top.s * AMBIGUITY_RATIO) {
     return { kind: "clarify", options: ranked.filter((r) => r.s >= top.s * AMBIGUITY_RATIO).slice(0, 3).map((r) => r.e) };
