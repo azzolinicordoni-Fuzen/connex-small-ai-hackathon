@@ -30,22 +30,22 @@ export interface PassportResult {
 }
 export type GenOutcome = { ok: true; diag: PassportDiag } | { ok: false; code: string; retryable: boolean };
 
-/** Saved diagnosis (RLS: own rows only) — no model call. Falls back to the on-device copy when offline. */
+/** Saved diagnosis — on-device copy first (zero network on reopen), then own row via RLS. Never calls the model. */
 export async function loadSavedPassport(localId: string, remoteId: string, online: boolean): Promise<PassportDiag | null> {
-  if (online) {
-    const { data } = await supabase.from("field_diagnoses")
-      .select("id, field_session_id, payload_version, prompt_version, model_id, status, result, safe_error_code, completed_at")
-      .eq("field_session_id", remoteId).eq("status", "ready").order("payload_version", { ascending: false }).limit(1).maybeSingle();
-    if (data) {
-      const d = safeDiag(data as unknown as PassportDiag)!;
-      await cache(localId, d);
-      return d;
-    }
-  }
   const c = await loadDiagnosis(localId).catch(() => undefined);
-  if (!c) return null;
-  const d = safeDiag(JSON.parse(c.result_json) as PassportDiag);
-  if (d) await cache(localId, d); // overwrite any unsafe on-device copy
+  if (c) {
+    const raw = JSON.parse(c.result_json) as PassportDiag;
+    const d = safeDiag(raw);
+    if (d && JSON.stringify(d) !== c.result_json) await cache(localId, d); // overwrite only an unsafe on-device copy
+    return d;
+  }
+  if (!online) return null;
+  const { data } = await supabase.from("field_diagnoses")
+    .select("id, field_session_id, payload_version, prompt_version, model_id, status, result, safe_error_code, completed_at")
+    .eq("field_session_id", remoteId).eq("status", "ready").order("payload_version", { ascending: false }).limit(1).maybeSingle();
+  if (!data) return null;
+  const d = safeDiag(data as unknown as PassportDiag)!;
+  await cache(localId, d);
   return d;
 }
 
