@@ -1,7 +1,7 @@
 // Hack-Nation 2026 — Connex Field (Phase 2: offline triage, local persistence, offline FAQ)
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Wifi, WifiOff, ShieldAlert, Check, ArrowLeft, Trash2, MessageCircleQuestion, ClipboardList, AlertTriangle } from "lucide-react";
+import { Wifi, WifiOff, ShieldAlert, Check, ArrowLeft, Trash2, MessageCircleQuestion, ClipboardList, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
@@ -302,7 +302,7 @@ export default function Field() {
           <Review
             t={t} lang={lang} answers={answers} session={session} stored={stored}
             onEdit={(n) => goTo(n)} onBack={() => goTo(REVIEW - 1)}
-            onSync={(v) => setAnswer("C19", v)} onFinish={finish} headingRef={headingRef}
+            onSync={(v) => setAnswer("C19", v)} onFinish={finish} headingRef={headingRef} onPassportReady={setPassportReady}
             online={online} onSession={setSession}
           />
         )}
@@ -454,7 +454,7 @@ function JourneyIndicator({ lang, status, passportReady }: { lang: FieldLang; st
           const st = i < cur ? "done" : i === cur ? "current" : "pending";
           return (
             <li key={name} aria-current={st === "current" ? "step" : undefined} className="flex flex-col items-center gap-1 text-center">
-              <span className={`h-1.5 w-full rounded-full ${st === "pending" ? "bg-muted" : "bg-primary"} ${st === "current" ? "animate-pulse" : ""}`} aria-hidden />
+              <span className={`h-1.5 w-full rounded-full ${st === "pending" ? "bg-muted" : "bg-primary"}`} aria-hidden />
               <span className={`flex items-center gap-1 text-[11px] leading-tight sm:text-xs ${st === "pending" ? "text-muted-foreground" : st === "current" ? "font-semibold text-primary" : "text-foreground"}`}>
                 {st === "done" && <CheckCircle2 className="hidden h-3 w-3 shrink-0 min-[360px]:block" aria-hidden />}{name}
               </span>
