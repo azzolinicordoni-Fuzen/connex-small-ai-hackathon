@@ -22,7 +22,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[hsl(220,25%,6%)]">
+    <section className="relative min-h-screen flex items-start sm:items-center pt-20 sm:pt-0 justify-center overflow-hidden bg-[hsl(220,25%,6%)]">
       {/* Animated Gradient Background */}
       <div className="absolute inset-0">
         {/* Animated gradient orbs */}
@@ -57,7 +57,7 @@ export function HeroSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Animated Logo Icon */}
-          <div className="mb-10 animate-fade-up">
+          <div className="mb-6 sm:mb-10 animate-fade-up">
             <div className="inline-flex relative p-4">
               <LogoIcon size="xl" className="scale-150 sm:scale-[1.8] opacity-90" />
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: "4s" }} />
@@ -65,7 +65,7 @@ export function HeroSection() {
           </div>
 
           {/* Floating Concept Word */}
-          <div className="h-8 mb-6 overflow-hidden">
+          <div className="h-8 mb-3 sm:mb-6 overflow-hidden">
             {floatingWords.map((word, index) => (
               <div
                 key={word.text}
@@ -106,6 +106,20 @@ export function HeroSection() {
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
+            {/* Mobile-only (<640px): full-width Connex Field CTA right below "Entrar na Rede" */}
+            <Link
+              to="/field"
+              data-testid="hero-field-cta-mobile"
+              className="sm:hidden group relative z-10 flex w-full min-h-[64px] items-center gap-3 rounded-xl border-2 border-primary bg-primary/15 px-4 py-3 text-left transition-colors active:bg-primary/25"
+            >
+              <WifiOff className="h-6 w-6 shrink-0 text-primary" />
+              <span className="flex flex-1 flex-col">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-primary">Hack-Nation 2026 · World Bank</span>
+                <span className="font-display text-base font-semibold text-white">Conheça o Connex Field</span>
+                <span className="text-xs text-white/70">IA offline para produtores rurais</span>
+              </span>
+              <ArrowRight className="h-5 w-5 shrink-0 text-primary" />
+            </Link>
             <Button variant="ghost" size="xl" asChild className="text-white/60 hover:text-white hover:bg-white/5 border border-white/10">
               <Link to="/login">
                 Já tenho conta
@@ -114,7 +128,7 @@ export function HeroSection() {
           </div>
 
           {/* Hack-Nation 2026 — Connex Field entry (public, no login) */}
-          <div className="mt-6 flex flex-col items-center gap-2 animate-fade-up" style={{ animationDelay: "0.35s" }}>
+          <div className="mt-6 hidden sm:flex flex-col items-center gap-2 animate-fade-up" style={{ animationDelay: "0.35s" }}>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Hack-Nation 2026 · World Bank Challenge
