@@ -3,15 +3,15 @@
  "version": "1.0.0",
  "languages": {
   "en": {
-   "training_examples": 294,
-   "in_domain_training": 264,
+   "training_examples": 292,
+   "in_domain_training": 262,
    "ood_training": 30,
-   "vocab_size": 3481,
-   "cv_utility": 194,
+   "vocab_size": 3467,
+   "cv_utility": 201.5,
    "scale": 4,
    "thresholds": {
-    "accept": 0.55,
-    "margin": 0.05,
+    "accept": 0.25,
+    "margin": 0.2,
     "clarify": 0.1,
     "oodReject": 0.5,
     "minCoverage": 0.2
@@ -19,27 +19,30 @@
    "evaluation": {
     "in_domain": {
      "n": 52,
-     "top1_accuracy": 0.8269,
-     "auto_answered": 32,
-     "auto_answer_precision": 1,
-     "wrong_auto_answers": 0,
-     "clarify_shown": 20,
-     "clarify_contains_truth": 19,
+     "top1_accuracy": 0.8654,
+     "auto_answered": 38,
+     "auto_answer_precision": 0.9737,
+     "wrong_auto_answers": 1,
+     "clarify_shown": 14,
+     "clarify_contains_truth": 13,
      "not_answered_by_model": 0
     },
     "out_of_domain": {
      "n": 20,
-     "not_auto_answered": 20,
-     "rejection_rate": 1,
-     "leaks": []
+     "not_auto_answered": 19,
+     "rejection_rate": 0.95,
+     "leaks": [
+      {
+       "text": "who wrote don quixote",
+       "id": "K06"
+      }
+     ]
     },
     "confusion": {
      "K10->K09": 1,
-     "K11->K09": 1,
      "K13->K09": 1,
      "K13->K20": 1,
      "K14->K09": 1,
-     "K16->K09": 1,
      "K18->K20": 1,
      "K19->K09": 1,
      "K24->K25": 1
@@ -48,12 +51,6 @@
      {
       "text": "what is meant by baseline in carbon projects",
       "expected": "K10",
-      "top1": "K09",
-      "decision": "clarify"
-     },
-     {
-      "text": "how is a project monitored and reported",
-      "expected": "K11",
       "top1": "K09",
       "decision": "clarify"
      },
@@ -73,13 +70,7 @@
       "text": "what does leakage mean in a carbon project",
       "expected": "K14",
       "top1": "K09",
-      "decision": "clarify"
-     },
-     {
-      "text": "what does methodology mean in carbon projects",
-      "expected": "K16",
-      "top1": "K09",
-      "decision": "clarify"
+      "decision": "answer"
      },
      {
       "text": "how much time does the whole process take",
@@ -132,9 +123,9 @@
       "decision": "answer",
       "id": "K09",
       "candidates": [
-       "K09:0.81",
-       "K01:0.01",
-       "K12:0.01"
+       "K09:0.63",
+       "K01:0.03",
+       "K12:0.02"
       ]
      },
      {
@@ -156,9 +147,9 @@
       "decision": "answer",
       "id": "K09",
       "candidates": [
-       "K09:0.94",
+       "K09:0.93",
        "K23:0.03",
-       "K12:0.00"
+       "K12:0.01"
       ]
      },
      {
@@ -181,37 +172,37 @@
       "candidates": [
        "K01:0.06",
        "K20:0.05",
-       "K09:0.04"
+       "K22:0.04"
       ]
      }
     ],
-    "mean_inference_ms_node": 0.489
+    "mean_inference_ms_node": 0.583
    }
   },
   "pt": {
-   "training_examples": 294,
-   "in_domain_training": 264,
+   "training_examples": 292,
+   "in_domain_training": 262,
    "ood_training": 30,
-   "vocab_size": 3303,
-   "cv_utility": 192,
-   "scale": 4,
+   "vocab_size": 3276,
+   "cv_utility": 203,
+   "scale": 6,
    "thresholds": {
     "accept": 0.55,
     "margin": 0.05,
     "clarify": 0.1,
     "oodReject": 0.5,
-    "minCoverage": 0.5
+    "minCoverage": 0.2
    },
    "evaluation": {
     "in_domain": {
      "n": 52,
-     "top1_accuracy": 0.8077,
-     "auto_answered": 28,
-     "auto_answer_precision": 0.9286,
+     "top1_accuracy": 0.8846,
+     "auto_answered": 39,
+     "auto_answer_precision": 0.9487,
      "wrong_auto_answers": 2,
-     "clarify_shown": 23,
-     "clarify_contains_truth": 21,
-     "not_answered_by_model": 1
+     "clarify_shown": 13,
+     "clarify_contains_truth": 11,
+     "not_answered_by_model": 0
     },
     "out_of_domain": {
      "n": 20,
@@ -220,29 +211,14 @@
      "leaks": []
     },
     "confusion": {
-     "K10->K09": 1,
-     "K11->K09": 1,
      "K13->K09": 1,
      "K13->K25": 1,
-     "K14->K09": 2,
-     "K16->K09": 1,
+     "K14->K09": 1,
      "K17->K09": 1,
      "K18->K21": 1,
      "K19->K09": 1
     },
     "errors": [
-     {
-      "text": "qual é o cenário de referência de um projeto",
-      "expected": "K10",
-      "top1": "K09",
-      "decision": "clarify"
-     },
-     {
-      "text": "como o projeto é monitorado e relatado",
-      "expected": "K11",
-      "top1": "K09",
-      "decision": "clarify"
-     },
      {
       "text": "o que significa permanência em projetos de carbono",
       "expected": "K13",
@@ -260,18 +236,6 @@
       "expected": "K14",
       "top1": "K09",
       "decision": "answer"
-     },
-     {
-      "text": "se o desmate só muda para outra fazenda como chama",
-      "expected": "K14",
-      "top1": "K09",
-      "decision": "clarify"
-     },
-     {
-      "text": "o que significa metodologia em projetos de carbono",
-      "expected": "K16",
-      "top1": "K09",
-      "decision": "clarify"
      },
      {
       "text": "meu sítio pequeno serve para um projeto",
@@ -300,9 +264,9 @@
       "decision": "answer",
       "id": "K02",
       "candidates": [
-       "K02:0.64",
-       "K21:0.10",
-       "K07:0.02"
+       "K02:0.90",
+       "K21:0.05",
+       "K07:0.01"
       ]
      },
      {
@@ -312,9 +276,9 @@
       "decision": "answer",
       "id": "K07",
       "candidates": [
-       "K07:0.92",
-       "K09:0.01",
-       "K17:0.01"
+       "K07:1.00",
+       "K17:0.00",
+       "K09:0.00"
       ]
      },
      {
@@ -324,9 +288,9 @@
       "decision": "answer",
       "id": "K09",
       "candidates": [
-       "K09:0.93",
+       "K09:0.95",
        "K23:0.01",
-       "K20:0.01"
+       "K22:0.01"
       ]
      },
      {
@@ -336,9 +300,9 @@
       "decision": "answer",
       "id": "K20",
       "candidates": [
-       "K20:0.72",
-       "K01:0.11",
-       "K17:0.01"
+       "K20:0.92",
+       "K01:0.06",
+       "K17:0.00"
       ]
      },
      {
@@ -348,8 +312,8 @@
       "decision": "answer",
       "id": "K09",
       "candidates": [
-       "K09:0.98",
-       "K23:0.01",
+       "K09:1.00",
+       "K23:0.00",
        "K12:0.00"
       ]
      },
@@ -360,7 +324,7 @@
       "decision": "clarify",
       "id": null,
       "candidates": [
-       "K03:0.56",
+       "K03:0.59",
        "K12:0.41"
       ]
      },
@@ -371,15 +335,15 @@
       "decision": "reject",
       "id": null,
       "candidates": [
-       "K18:0.02",
-       "K09:0.01",
-       "K13:0.01"
+       "K18:0.01",
+       "K13:0.00",
+       "K23:0.00"
       ]
      }
     ],
-    "mean_inference_ms_node": 0.23
+    "mean_inference_ms_node": 0.332
    }
   }
  },
- "artifact_bytes": 200743
+ "artifact_bytes": 199183
 }
