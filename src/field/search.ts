@@ -17,7 +17,7 @@ export const FALLBACK_TEXT: Record<FieldLang, string> = {
   pt: "Sem resposta validada. Pergunte após conectar.",
 };
 
-export const SCORE_THRESHOLD = 4;
+export const SCORE_THRESHOLD = 3.5;
 export const AMBIGUITY_RATIO = 0.85;
 
 const STOP = new Set(
