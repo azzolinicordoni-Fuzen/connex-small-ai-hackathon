@@ -78,6 +78,8 @@ export function answerQuestion(query: string, lang: FieldLang): InferenceResult 
       }
       if (d.kind === "clarify") return { kind: "clarify", options: d.candidates.map((c) => faqById(c.id, lang)), method: "local_ml", ms: ms() };
       if (d.kind === "reject") return { kind: "fallback", text: FALLBACK_TEXT[lang], method: "no_match", ms: ms() };
+      // Domain gate: no carbon/land evidence at all -> fixed fallback (no suggestions).
+      if ((d as { gated?: boolean }).gated) return { kind: "fallback", text: FALLBACK_TEXT[lang], method: "no_match", ms: ms() };
       // "uncertain" -> deterministic fallback below.
     } catch (e) {
       loadError = e;

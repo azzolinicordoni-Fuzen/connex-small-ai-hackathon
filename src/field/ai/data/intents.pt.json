@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1",
  "language": "pt",
  "note": "Training paraphrases of approved FAQ questions only. Contains no answers or claims.",
  "intents": {
@@ -13,7 +13,14 @@
    "um crédito é uma tonelada de co2",
    "crédito de carbono?",
    "o que é credito de carbon",
-   "o que significa crédito no mercado de carbono"
+   "o que significa crédito no mercado de carbono",
+   "quanto co2 um crédito representa",
+   "um crédito corresponde a quantas toneladas de gás carbônico",
+   "qual a unidade física de um crédito de carbono",
+   "quantas toneladas de co2 equivalente tem um crédito",
+   "crédito é quantidade de carbono ou preço",
+   "uma unidade de crédito representa quanta emissão",
+   "a quantas toneladas de co2 equivale cada crédito"
   ],
   "K02": [
    "ter floresta significa que eu já tenho créditos",
@@ -36,7 +43,9 @@
    "mercado de conformidade versus voluntário",
    "dois tipos de mercado de carbono",
    "diferenca mercado regulado voluntario",
-   "regulado x voluntario"
+   "regulado x voluntario",
+   "mercado regulado e voluntário são a mesma coisa",
+   "o que separa o mercado de conformidade do voluntário"
   ],
   "K04": [
    "o que é o sbce",
@@ -102,7 +111,14 @@
    "como sei se meu projeto é adicional",
    "o projeto aconteceria sem o dinheiro do carbono",
    "o que é adcionalidade",
-   "significado de adicionalidade"
+   "significado de adicionalidade",
+   "essa mudança aconteceria mesmo sem o dinheiro do carbono",
+   "como isso se compara ao cenário de negócios usuais",
+   "o que aconteceria na minha terra sem a receita do carbono",
+   "a atividade depende do financiamento de carbono para acontecer",
+   "qual é o cenário contrafactual",
+   "isso vai além do que normalmente aconteceria",
+   "eu faria isso de qualquer jeito mesmo sem créditos"
   ],
   "K10": [
    "o que é linha de base",
@@ -113,7 +129,8 @@
    "qual é o cenário de linha de base",
    "linha de base?",
    "como se define a linha de base",
-   "o que e linha de bse"
+   "o que e linha de bse",
+   "como se define a linha de base em projetos de carbono"
   ],
   "K11": [
    "o que é mrv",
@@ -146,7 +163,9 @@
    "e se as árvores forem cortadas depois",
    "quanto tempo o carbono precisa ficar estocado",
    "o que e permanencia",
-   "risco de incêndio no projeto"
+   "risco de incêndio no projeto",
+   "explique permanência para projetos de carbono",
+   "e se as árvores queimarem depois da emissão dos créditos"
   ],
   "K14": [
    "o que é vazamento",
@@ -157,7 +176,8 @@
    "vazamento no carbono",
    "emissões indo para outra área",
    "o que e vazamneto",
-   "atividade deslocada para outro lugar"
+   "atividade deslocada para outro lugar",
+   "vazamento em projetos de carbono explicado"
   ],
   "K15": [
    "o que é dupla contagem",
@@ -179,7 +199,8 @@
    "quais são as regras e procedimentos do projeto",
    "qual método padrão é usado",
    "o que e metodolojia",
-   "método para calcular créditos"
+   "método para calcular créditos",
+   "qual metodologia se aplica a projetos de carbono"
   ],
   "K17": [
    "existe tamanho mínimo de propriedade",
@@ -190,7 +211,8 @@
    "tamanho mínimo?",
    "10 hectares é suficiente",
    "qual o número mínimo de hectares",
-   "existe tamanho minimo"
+   "existe tamanho minimo",
+   "uma fazenda pequena pode entrar num projeto de carbono"
   ],
   "K18": [
    "quanto tempo demora",
@@ -201,7 +223,8 @@
    "quanto tempo dura o processo",
    "prazo?",
    "quando vou ver resultado",
-   "quanto tenpo demora"
+   "quanto tenpo demora",
+   "quantos meses ou anos leva o processo"
   ],
   "K19": [
    "quanto custa",
@@ -212,7 +235,10 @@
    "quais são as taxas",
    "quanto custa a certificação",
    "qual orçamento preciso",
-   "quanto cusata"
+   "quanto cusata",
+   "quanto custa desenvolver isso",
+   "quais as despesas para desenvolver o projeto",
+   "projetos de carbono são caros"
   ],
   "K20": [
    "quanto vale um crédito",
@@ -223,7 +249,15 @@
    "quanto dinheiro por tonelada",
    "por quanto os créditos são vendidos",
    "quanto paga um crédito",
-   "quanto vale um credto"
+   "quanto vale um credto",
+   "o preço de mercado do crédito é sempre o mesmo",
+   "existe um valor único por tonelada de carbono",
+   "por quanto dinheiro se vende o crédito de uma tonelada",
+   "o preço dos créditos varia de projeto para projeto",
+   "qual é o preço de venda dos créditos de carbono",
+   "qual o valor monetário de um crédito",
+   "o preço do crédito é fixo ou muda",
+   "o que define quanto um crédito vale no mercado"
   ],
   "K21": [
    "posso vender créditos antes de serem emitidos",
@@ -312,6 +346,16 @@
   "qual a distância até a cidade",
   "me indica um filme",
   "como emagrecer",
-  "quem é o presidente"
+  "quem é o presidente",
+  "quanto é cinco vezes três",
+  "quantas pessoas moram na índia",
+  "qual o tamanho da argentina",
+  "quanto custa um saco de semente",
+  "qual o preço do diesel",
+  "calcula dez menos quatro",
+  "qual o maior país do mundo",
+  "quanto custa um trator novo",
+  "qual a raiz quadrada de nove",
+  "quanto custa a ração do gado"
  ]
 }

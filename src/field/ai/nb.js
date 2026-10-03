@@ -1,6 +1,7 @@
 // Hack-Nation 2026 — Multinomial Naive Bayes inference over the compact artifact.
 // Shared by the training script (for evaluation) and the browser runtime.
 import { extractFeatures } from "./features.js";
+import { domainEvidence } from "./domain.js";
 
 export const OOD = "__ood__";
 
@@ -34,7 +35,7 @@ export function predictProba(pm, text, lang, scale) {
   const ex = s.map((v) => Math.exp(v - mx));
   const z = ex.reduce((a, b) => a + b, 0);
   const ranked = ex.map((e, c) => ({ id: pm.classes[c], p: e / z })).sort((a, b) => b.p - a.p);
-  return { ranked, coverage, nWords };
+  return { ranked, coverage, nWords, domain: domainEvidence(text, lang) };
 }
 
 /**
@@ -45,6 +46,14 @@ export function predictProba(pm, text, lang, scale) {
  * uncertain-> nothing reliable; caller runs the deterministic fallback
  */
 export function decide(pred, th) {
+  const d = decideModel(pred, th);
+  // Domain gate (Phase 3.1): without any domain evidence the model may not answer or suggest;
+  // the caller then runs the deterministic fallback, which ends in the fixed no-answer text.
+  if (pred.domain === 0 && (d.kind === "answer" || d.kind === "clarify")) return { kind: "uncertain", candidates: d.candidates, gated: true };
+  return d;
+}
+
+function decideModel(pred, th) {
   const inDomain = pred.ranked.filter((r) => r.id !== OOD);
   const top = pred.ranked[0];
   if (pred.coverage < th.minCoverage) {
