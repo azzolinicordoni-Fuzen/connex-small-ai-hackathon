@@ -237,6 +237,11 @@ export default function Field() {
             <p className="mt-4 text-sm text-muted-foreground">{online ? t.onlineMsg : t.offlineMsg}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" onClick={startOrResume} disabled={!loaded}>{session ? t.resume : t.begin}</Button>
+              {session?.status === "synced" && session.remote_id && (
+                <Button size="lg" variant="outline" onClick={() => setView("review")} data-testid="field-open-passport">
+                  {lang === "pt" ? "Ver Passaporte Inicial" : "View Initial Passport"}
+                </Button>
+              )}
               <Button size="lg" variant="outline" onClick={() => setView("assistant")}>{t.askAssistant}</Button>
             </div>
           </>
