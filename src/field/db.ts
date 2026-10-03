@@ -20,6 +20,8 @@ export interface SessionRec {
 export interface TriageRec { id: string; local_session_id: string; question_id: string; value_json: string; answered_at: string; updated_at: string }
 export interface ConversationRec { id: string; local_session_id: string; language: string; query: string; result_id: string | null; outcome: "answer" | "clarify" | "fallback"; created_at: string }
 export interface OutboxRec { local_session_id: string; operation: string; payload_version: string; payload_json: string; attempts: number; last_error: string | null }
+/** Local-only inference audit record. Deliberately contains no question text and no personal data. */
+export interface InferenceLogRec { id: string; faq_id: string | null; method: "local_ml" | "deterministic_fallback" | "no_match"; outcome: string; model_version: string; ms: number; created_at: string }
 export interface DiagnosisRec { local_session_id: string; payload_version: string; result_json: string; received_at: string }
 
 interface FieldDB extends DBSchema {
@@ -28,13 +30,19 @@ interface FieldDB extends DBSchema {
   conversations: { key: string; value: ConversationRec; indexes: { by_session: string } };
   outbox: { key: string; value: OutboxRec };
   diagnosis: { key: string; value: DiagnosisRec };
+  inference_log: { key: string; value: InferenceLogRec };
 }
 
 let dbp: Promise<IDBPDatabase<FieldDB>> | null = null;
 export function getDB() {
   if (!dbp) {
-    dbp = openDB<FieldDB>("connex_field", 1, {
-      upgrade(db) {
+    dbp = openDB<FieldDB>("connex_field", 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 2 && oldVersion >= 1) {
+          db.createObjectStore("inference_log", { keyPath: "id" });
+          return;
+        }
+        db.createObjectStore("inference_log", { keyPath: "id" });
         db.createObjectStore("session", { keyPath: "local_session_id" }).createIndex("by_updated", "updated_at");
         db.createObjectStore("triage", { keyPath: "id" }).createIndex("by_session", "local_session_id");
         db.createObjectStore("conversations", { keyPath: "id" }).createIndex("by_session", "local_session_id");
@@ -107,6 +115,25 @@ export async function loadConversations(sid: string) {
   return db.getAllFromIndex("conversations", "by_session", sid);
 }
 
+export async function logInference(rec: Omit<InferenceLogRec, "id" | "created_at">) {
+  try {
+    const db = await getDB();
+    await db.put("inference_log", { ...rec, id: crypto.randomUUID(), created_at: now() });
+  } catch {
+    /* logging must never break the assistant */
+  }
+}
+
+export async function saveDiagnosis(rec: DiagnosisRec) {
+  const db = await getDB();
+  await db.put("diagnosis", rec);
+}
+
+export async function loadDiagnosis(sid: string) {
+  const db = await getDB();
+  return (await db.get("diagnosis", sid)) ?? null;
+}
+
 /** Deletes a session and all related triage, conversations, outbox and diagnosis rows. */
 export async function deleteSession(sid: string) {
   const db = await getDB();
@@ -121,7 +148,8 @@ export async function deleteSession(sid: string) {
 
 export async function deleteAllLocalData() {
   const db = await getDB();
-  const tx = db.transaction(["session", "triage", "conversations", "outbox", "diagnosis"], "readwrite");
-  await Promise.all(["session", "triage", "conversations", "outbox", "diagnosis"].map((s) => tx.objectStore(s as "session").clear()));
+  const stores = ["session", "triage", "conversations", "outbox", "diagnosis", "inference_log"] as const;
+  const tx = db.transaction([...stores], "readwrite");
+  await Promise.all(stores.map((s) => tx.objectStore(s as "session").clear()));
   await tx.done;
 }

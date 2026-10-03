@@ -14,10 +14,10 @@ import {
 import { fieldStrings, type FieldLang, type FieldStrings } from "@/field/i18n";
 import { QUESTIONS, STEPS, BIOMES, qById, optLabel, type LocationValue } from "@/field/questions";
 import {
-  createSession, deleteAllLocalData, getDB, getLatestSession, loadAnswers, requestPersistence,
+  createSession, deleteAllLocalData, getDB, getLatestSession, loadAnswers, loadDiagnosis, requestPersistence, saveDiagnosis,
   saveAnswer, updateSession, type SessionRec,
 } from "@/field/db";
-import { computeFlags, missingAnswers } from "@/field/summary";
+import { buildLocalResult, SPECIALISTS, type LocalResult } from "@/field/pathways";
 import { QuestionInput } from "@/field/components/QuestionInput";
 import { Assistant } from "@/field/components/Assistant";
 
@@ -78,6 +78,7 @@ export default function Field() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [consentRefused, setConsentRefused] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [stored, setStored] = useState<LocalResult | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -95,6 +96,8 @@ export default function Field() {
           setSession(s);
           setAnswers(await loadAnswers(s.local_session_id));
           setStep(s.step);
+          const d = await loadDiagnosis(s.local_session_id);
+          if (d) setStored(JSON.parse(d.result_json));
           if (s.status === "draft") setView("triage");
         }
       } finally {
@@ -150,12 +153,16 @@ export default function Field() {
       local_session_id: session.local_session_id, operation: "sync_triage", payload_version: session.pack_version,
       payload_json: JSON.stringify(answers), attempts: 0, last_error: null,
     });
+    const result = buildLocalResult(answers);
+    await saveDiagnosis({ local_session_id: session.local_session_id, payload_version: result.assessment_version, result_json: JSON.stringify(result), received_at: result.generated_at });
+    setStored(result);
     setSession(await updateSession(session.local_session_id, { status: "ready_to_sync", step: REVIEW }));
+    toast.success(t.savedResult);
   };
 
   const wipe = async () => {
     await deleteAllLocalData();
-    setSession(null); setAnswers({}); setStep(0); setErrors({}); setConsentRefused(false); setView("home");
+    setSession(null); setStored(null); setAnswers({}); setStep(0); setErrors({}); setConsentRefused(false); setView("home");
     toast.success(t.deleted);
   };
 
@@ -276,7 +283,7 @@ export default function Field() {
 
         {view === "triage" && step >= REVIEW && (
           <Review
-            t={t} lang={lang} answers={answers} session={session}
+            t={t} lang={lang} answers={answers} session={session} stored={stored}
             onEdit={(n) => goTo(n)} onBack={() => goTo(REVIEW - 1)}
             onSync={(v) => setAnswer("C19", v)} onFinish={finish} headingRef={headingRef}
           />
@@ -291,14 +298,16 @@ export default function Field() {
   );
 }
 
-function Review({ t, lang, answers, session, onEdit, onBack, onSync, onFinish, headingRef }: {
-  t: FieldStrings; lang: FieldLang; answers: Record<string, unknown>; session: SessionRec | null;
+function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onFinish, headingRef }: {
+  t: FieldStrings; lang: FieldLang; answers: Record<string, unknown>; session: SessionRec | null; stored: LocalResult | null;
   onEdit: (step: number) => void; onBack: () => void; onSync: (v: string) => void; onFinish: () => void;
   headingRef: React.RefObject<HTMLHeadingElement>;
 }) {
-  const flags = computeFlags(answers);
-  const missing = missingAnswers(answers);
   const status = session?.status ?? "draft";
+  // Draft: live result. After saving: the stored result (reopens offline unchanged).
+  const result = status !== "draft" && stored ? stored : buildLocalResult(answers);
+  const missing = result.missing;
+  const stepOf = (k: string) => STEPS.findIndex((s) => s.questions.includes(k));
   const facts: { key: string; step: number }[] = [];
   STEPS.forEach((s, i) => s.questions.forEach((k) => {
     if (k === "C02") return;
@@ -310,7 +319,7 @@ function Review({ t, lang, answers, session, onEdit, onBack, onSync, onFinish, h
 
   return (
     <section aria-labelledby="review-title" className="space-y-6">
-      <h1 id="review-title" ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold outline-none">{t.reviewTitle}</h1>
+      <h1 id="review-title" ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold outline-none">{t.resultTitle}</h1>
 
       <div>
         <h2 className="mb-2 font-semibold">{t.facts}</h2>
@@ -334,7 +343,7 @@ function Review({ t, lang, answers, session, onEdit, onBack, onSync, onFinish, h
             {missing.map((k) => (
               <li key={k} className="flex items-center justify-between gap-2">
                 <span><span className="mr-1 font-mono text-xs text-muted-foreground">{k.replace(".biome", "")}</span>{label(k)}</span>
-                <Button variant="link" size="sm" onClick={() => onEdit(STEPS.findIndex((s) => s.questions.includes(k)))}>{t.edit}</Button>
+                <Button variant="link" size="sm" onClick={() => onEdit(stepOf(k))}>{t.edit}</Button>
               </li>
             ))}
           </ul>
@@ -342,18 +351,53 @@ function Review({ t, lang, answers, session, onEdit, onBack, onSync, onFinish, h
       </div>
 
       <div>
-        <h2 className="mb-2 font-semibold">{t.flags}</h2>
-        {flags.length === 0 ? <p className="text-sm text-muted-foreground">{t.noFlags}</p> : (
+        <h2 className="mb-2 font-semibold">{t.pathwaysTitle}</h2>
+        <ul className="space-y-3">
+          {result.pathways.map((p) => (
+            <li key={p.id} data-pathway={p.id} className="rounded-md border border-primary/40 bg-card p-4 text-sm">
+              <p className="font-semibold">{p.label[lang]}</p>
+              <p className="mt-1 text-xs italic text-muted-foreground">{p.notice[lang]}</p>
+              <p className="mt-2"><span className="text-muted-foreground">{t.whyAppeared}: </span>{p.why[lang]}</p>
+              <p className="mt-1"><span className="text-muted-foreground">{t.contributed}: </span>
+                {p.contributions.map((c) => `${c.question.replace(".biome", "")} (${formatAnswer(c.question, c.question === "C06.biome" ? c.value : answers[c.question] ?? c.value, lang, t)})`).join("; ")}</p>
+              <p className="mt-1"><span className="text-muted-foreground">{t.missingInfo}: </span>
+                {p.missing.length ? p.missing.map((k) => `${k.replace(".biome", "")} ${label(k)}`).join("; ") : t.none}</p>
+              <p className="mt-1"><span className="text-muted-foreground">{t.relatedFaq}: </span>{p.faq.join(", ")}</p>
+              <p className="mt-1"><span className="text-muted-foreground">{t.specialistsTitle}: </span>{p.specialists.map((x) => SPECIALISTS[x][lang]).join(", ")}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2 className="mb-2 font-semibold">{t.safeguardsTitle}</h2>
+        {result.safeguards.length === 0 ? <p className="text-sm text-muted-foreground">{t.noSafeguards}</p> : (
           <ul className="space-y-2">
-            {flags.map((f) => (
-              <li key={f.id} className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+            {result.safeguards.map((f) => (
+              <li key={f.id} data-flag={f.id} className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                <span>{f.text[lang]} <span className="text-xs text-muted-foreground">({f.faq})</span></span>
+                <div>
+                  <p>{f.why[lang]} <span className="text-xs text-muted-foreground">({f.faq})</span></p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t.triggeredBy}: {f.trigger.map((c) => `${c.question} (${c.value ? formatAnswer(c.question, answers[c.question] ?? c.value, lang, t) : "—"})`).join("; ")}</p>
+                  <p className="mt-1 text-xs italic text-muted-foreground">{f.notice[lang]}</p>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <div>
+        <h2 className="mb-2 font-semibold">{t.nextStepsTitle}</h2>
+        <ol className="list-decimal space-y-1 pl-5 text-sm">{result.next_steps.map((n) => <li key={n.id}>{n.text[lang]}</li>)}</ol>
+      </div>
+
+      <div>
+        <h2 className="mb-2 font-semibold">{t.specialistsTitle}</h2>
+        <ul className="flex flex-wrap gap-2">{result.specialists.map((x) => <li key={x}><Badge variant="secondary">{SPECIALISTS[x][lang]}</Badge></li>)}</ul>
+      </div>
+
+      <p className="text-xs text-muted-foreground">{t.assessmentVersion}: <span className="font-mono">{result.assessment_version}</span> · {t.aiModelVersion}: <span className="font-mono">{result.model.name} {result.model.version}</span></p>
 
       <QuestionInput q={qById("C19")} value={answers.C19} onChange={(v) => onSync(v as string)} lang={lang} t={t} />
 
