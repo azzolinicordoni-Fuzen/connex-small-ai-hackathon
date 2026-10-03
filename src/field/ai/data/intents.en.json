@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1",
  "language": "en",
  "note": "Training paraphrases of approved FAQ questions only. Contains no answers or claims.",
  "intents": {
@@ -13,7 +13,14 @@
    "what exactly is a credit in the carbon market",
    "is a carbon credit one tonne of co2",
    "carbon credit?",
-   "what is a carbon credt"
+   "what is a carbon credt",
+   "how much co2 does one credit represent",
+   "one credit equals how many tonnes of carbon dioxide",
+   "what physical unit is a carbon credit",
+   "how many tonnes of co2 equivalent are in a credit",
+   "is a credit a quantity of carbon or a price",
+   "what amount of emissions does a single credit stand for",
+   "a credit corresponds to what quantity of co2"
   ],
   "K02": [
    "does having a forest mean i already have credits",
@@ -36,7 +43,9 @@
    "explain voluntary and regulated markets",
    "difference between compliance and voluntary carbon",
    "regulated and voluntry market difference",
-   "two types of carbon market"
+   "two types of carbon market",
+   "are regulated and voluntary carbon markets the same thing",
+   "what separates the compliance market from the voluntary market"
   ],
   "K04": [
    "what is the sbce",
@@ -102,7 +111,16 @@
    "how do i know if my project is additional",
    "would the project happen without carbon money",
    "what is aditionality",
-   "additionality meaning"
+   "additionality meaning",
+   "would this change happen anyway without carbon money",
+   "how is the project compared with business as usual",
+   "what would happen on my land without the carbon project",
+   "does the activity depend on carbon finance to happen",
+   "what is the counterfactual scenario for my project",
+   "is my project beyond business as usual practice",
+   "what makes a project additional compared to what normally happens",
+   "would i do this anyway even without credits",
+   "how do they prove the change is not business as usual"
   ],
   "K10": [
    "what is a baseline",
@@ -212,7 +230,9 @@
    "what are the fees",
    "how much does certification cost",
    "what budget do i need",
-   "how much does it cots"
+   "how much does it cots",
+   "how much does it cost to develop a carbon project",
+   "what are the project development expenses"
   ],
   "K20": [
    "how much is a credit worth",
@@ -223,7 +243,15 @@
    "how much money per tonne",
    "how much do credits sell for",
    "what is a credit worth",
-   "how much is a credit wroth"
+   "how much is a credit wroth",
+   "is the market price of a credit always the same",
+   "is there one fixed price per tonne of carbon",
+   "how much money is one tonne credit sold for",
+   "do credit prices vary from project to project",
+   "what is the selling price of carbon credits",
+   "what monetary value does a credit have",
+   "is the credit price fixed or does it change",
+   "what determines how much a credit sells for in the market"
   ],
   "K21": [
    "can i sell credits before they are issued",
@@ -312,6 +340,16 @@
   "how far is the city",
   "recommend a movie",
   "how do i lose weight",
-  "who is the president"
+  "who is the president",
+  "what is five times three",
+  "how many people live in india",
+  "what is the area of argentina",
+  "how much does a sack of seed cost",
+  "what is the price of diesel",
+  "calculate ten minus four",
+  "what is the largest country in the world",
+  "how much is a new tractor",
+  "what is the square root of nine",
+  "how much does animal feed cost"
  ]
 }
