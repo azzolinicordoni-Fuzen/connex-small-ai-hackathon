@@ -50,10 +50,10 @@ function train(exs, lang) {
   };
 }
 
-// Utility for tuning: right answer +1, right rejection +1, clarify containing truth +0.5, wrong answer -2.
+// Utility for tuning: right answer +1, right rejection +1, clarify containing truth +0.5, wrong answer -4 (Phase 3.1: a wrong auto-answer costs more than a safe "Did you mean").
 function utility(dec, y) {
-  if (y === OOD) return dec.kind === "answer" ? -2 : 1;
-  if (dec.kind === "answer") return dec.id === y ? 1 : -2;
+  if (y === OOD) return dec.kind === "answer" ? -4 : 1;
+  if (dec.kind === "answer") return dec.id === y ? 1 : -4;
   if (dec.kind === "clarify") return dec.candidates.some((c) => c.id === y) ? 0.5 : 0;
   return 0;
 }
