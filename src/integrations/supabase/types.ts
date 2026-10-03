@@ -776,6 +776,76 @@ export type Database = {
           },
         ]
       }
+      field_diagnoses: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          field_session_id: string
+          id: string
+          model_id: string
+          payload_version: number
+          profile_id: string
+          prompt_version: string
+          result: Json | null
+          safe_error_code: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          field_session_id: string
+          id?: string
+          model_id: string
+          payload_version: number
+          profile_id: string
+          prompt_version: string
+          result?: Json | null
+          safe_error_code?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          field_session_id?: string
+          id?: string
+          model_id?: string
+          payload_version?: number
+          profile_id?: string
+          prompt_version?: string
+          result?: Json | null
+          safe_error_code?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_diagnoses_field_session_id_fkey"
+            columns: ["field_session_id"]
+            isOneToOne: false
+            referencedRelation: "field_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_diagnoses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_diagnoses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       field_sessions: {
         Row: {
           answers: Json

@@ -21,6 +21,7 @@ import { buildLocalResult, SPECIALISTS, type LocalResult } from "@/field/pathway
 import { QuestionInput } from "@/field/components/QuestionInput";
 import { Assistant } from "@/field/components/Assistant";
 import { SyncPanel } from "@/field/components/SyncPanel";
+import { PassportPanel } from "@/field/components/PassportPanel";
 
 const LANG_KEY = "connex-field-lang";
 const REVIEW = STEPS.length;
@@ -236,6 +237,11 @@ export default function Field() {
             <p className="mt-4 text-sm text-muted-foreground">{online ? t.onlineMsg : t.offlineMsg}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" onClick={startOrResume} disabled={!loaded}>{session ? t.resume : t.begin}</Button>
+              {session?.status === "synced" && session.remote_id && (
+                <Button size="lg" variant="outline" onClick={() => { setStep(REVIEW); setView("triage"); }} data-testid="field-open-passport">
+                  {lang === "pt" ? "Ver Passaporte Inicial" : "View Initial Passport"}
+                </Button>
+              )}
               <Button size="lg" variant="outline" onClick={() => setView("assistant")}>{t.askAssistant}</Button>
             </div>
           </>
@@ -318,6 +324,7 @@ function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onF
     <section aria-labelledby="review-title" className="space-y-6">
       <h1 id="review-title" ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold outline-none">{t.resultTitle}</h1>
       <SyncPanel lang={lang} online={online} session={session} answers={answers} result={stored} onSession={onSession} />
+      {session && <PassportPanel lang={lang} online={online} session={session} />}
     </section>
   );
   // Draft: live result. After saving: the stored result (reopens offline unchanged).

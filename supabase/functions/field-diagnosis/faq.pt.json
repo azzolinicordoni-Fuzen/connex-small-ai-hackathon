@@ -1,0 +1,587 @@
+[
+  {
+    "id": "K01",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é um crédito de carbono?",
+    "approved_answer": "É uma unidade negociável que representa uma tonelada de dióxido de carbono equivalente efetivamente reduzida, removida ou retida conforme regras e metodologia aplicáveis. No Brasil, a Lei nº 15.042 define o crédito de carbono dessa forma. A existência de uma floresta ou prática sustentável, sozinha, não significa que créditos já foram emitidos.",
+    "tags": [
+      "credito de carbono",
+      "credito",
+      "tonelada",
+      "co2",
+      "unidade"
+    ],
+    "synonyms": [
+      "o que e credito",
+      "credito carbono",
+      "compensacao",
+      "significado credito"
+    ],
+    "category": "basics",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K02",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Ter floresta significa que eu já tenho créditos?",
+    "approved_answer": "Não automaticamente. Um projeto precisa demonstrar resultados segundo uma metodologia, definir linha de base, avaliar adicionalidade, monitorar os resultados e passar pelas etapas exigidas pelo programa, incluindo validação e verificação independentes quando aplicável.",
+    "tags": [
+      "floresta",
+      "ja",
+      "creditos",
+      "tenho"
+    ],
+    "synonyms": [
+      "tenho mata",
+      "minha floresta",
+      "tenho creditos",
+      "mata nativa",
+      "arvores"
+    ],
+    "category": "basics",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K03",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Qual é a diferença entre mercado regulado e voluntário?",
+    "approved_answer": "O mercado regulado decorre de regras públicas que criam obrigações e ativos de conformidade. O mercado voluntário reúne projetos e compradores que utilizam programas e padrões independentes. A Lei nº 15.042 instituiu o SBCE no Brasil, mas a triagem da Connex não determina se um crédito poderá ser usado no sistema regulado.",
+    "tags": [
+      "regulado",
+      "voluntario",
+      "mercado",
+      "diferenca"
+    ],
+    "synonyms": [
+      "tipos de mercado",
+      "mercado obrigatorio"
+    ],
+    "category": "market",
+    "references": [
+      1,
+      4
+    ]
+  },
+  {
+    "id": "K04",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é o SBCE?",
+    "approved_answer": "É o Sistema Brasileiro de Comércio de Emissões de Gases de Efeito Estufa, instituído pela Lei nº 15.042 de 2024. Sua implementação depende de regulamentação, infraestrutura de mensuração, relato e verificação e registro central. A situação regulatória deve ser conferida no momento de cada projeto.",
+    "tags": [
+      "sbce",
+      "comercio de emissoes",
+      "sistema brasileiro"
+    ],
+    "synonyms": [
+      "sistema de emissoes",
+      "lei do mercado"
+    ],
+    "category": "market",
+    "references": [
+      1,
+      4
+    ]
+  },
+  {
+    "id": "K05",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "A Connex certifica ou emite créditos?",
+    "approved_answer": "Não. A Connex organiza dados preliminares, facilita conexões e ajuda a encontrar especialistas. Certificação, registro e emissão dependem do programa, da metodologia e das avaliações independentes aplicáveis.",
+    "tags": [
+      "connex",
+      "certifica",
+      "emite",
+      "certificacao"
+    ],
+    "synonyms": [
+      "connex emite",
+      "quem certifica"
+    ],
+    "category": "connex",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K06",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Quem pode ser titular de créditos florestais no Brasil?",
+    "approved_answer": "A Lei nº 15.042 estabelece regras de titularidade originária e reconhece, entre outros casos, proprietários ou usufrutuários privados, além de direitos específicos de povos indígenas, comunidades tradicionais, quilombolas e assentados. Contratos podem prever compartilhamento ou cessão. A situação concreta exige verificação documental e jurídica.",
+    "tags": [
+      "titular",
+      "titularidade",
+      "dono",
+      "direitos",
+      "quem"
+    ],
+    "synonyms": [
+      "de quem sao os creditos",
+      "quem e dono"
+    ],
+    "category": "rights",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K07",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O CAR prova que eu sou proprietário?",
+    "approved_answer": "Não. O Cadastro Ambiental Rural é um registro ambiental obrigatório para imóveis rurais, mas não constitui título de propriedade ou posse. Por isso, a triagem registra o CAR e os documentos fundiários como informações diferentes.",
+    "tags": [
+      "car",
+      "cadastro ambiental rural",
+      "prova",
+      "proprietario"
+    ],
+    "synonyms": [
+      "car e titulo",
+      "prova de propriedade",
+      "cadastro ambiental"
+    ],
+    "category": "rights",
+    "references": [
+      5
+    ]
+  },
+  {
+    "id": "K08",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Quais documentos costumam ser analisados?",
+    "approved_answer": "Dependendo do caso, podem ser necessários documentos sobre propriedade, posse ou usufruto, perímetro e mapas, CAR, histórico de uso do solo, autorizações, contratos existentes, registros produtivos e informações sobre pessoas ou comunidades com direitos na área. A lista final depende da metodologia e da situação jurídica.",
+    "tags": [
+      "documentos",
+      "papeis",
+      "analisados",
+      "necessarios"
+    ],
+    "synonyms": [
+      "quais documentos",
+      "documentacao necessaria",
+      "papelada"
+    ],
+    "category": "rights",
+    "references": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": "K09",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é adicionalidade?",
+    "approved_answer": "É a demonstração de que a redução ou remoção não ocorreria da mesma forma sem o incentivo do projeto de carbono, conforme os testes da metodologia aplicável. A triagem só identifica fatos relevantes; ela não comprova adicionalidade.",
+    "tags": [
+      "adicionalidade",
+      "adicional"
+    ],
+    "synonyms": [
+      "aconteceria de qualquer forma",
+      "teste de adicionalidade"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      6
+    ]
+  },
+  {
+    "id": "K10",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é linha de base?",
+    "approved_answer": "É o cenário de referência usado para comparar o que provavelmente ocorreria sem o projeto. A metodologia define como estabelecer a linha de base e quais dados são necessários.",
+    "tags": [
+      "linha de base",
+      "cenario de referencia"
+    ],
+    "synonyms": [
+      "sem o projeto",
+      "base"
+    ],
+    "category": "methodology",
+    "references": [
+      2
+    ]
+  },
+  {
+    "id": "K11",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é MRV?",
+    "approved_answer": "É o conjunto de mensuração, relato e verificação dos resultados climáticos. Bons sistemas registram dados de forma consistente e submetem os resultados a avaliação independente quando exigido.",
+    "tags": [
+      "mrv",
+      "mensuracao",
+      "relato",
+      "verificacao",
+      "monitoramento"
+    ],
+    "synonyms": [
+      "medir relatar verificar",
+      "sistema de monitoramento"
+    ],
+    "category": "methodology",
+    "references": [
+      1,
+      3
+    ]
+  },
+  {
+    "id": "K12",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Qual é a diferença entre validação e verificação?",
+    "approved_answer": "Validação avalia o desenho do projeto e sua conformidade com as regras antes ou no início do ciclo. Verificação avalia os resultados monitorados para confirmar reduções ou remoções antes da emissão, conforme o programa aplicável.",
+    "tags": [
+      "validacao",
+      "verificacao",
+      "diferenca",
+      "auditoria"
+    ],
+    "synonyms": [
+      "validar ou verificar",
+      "auditor"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K13",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é permanência?",
+    "approved_answer": "É a capacidade de manter a redução ou remoção ao longo do período exigido. Em projetos florestais e de uso do solo, incêndio, desmatamento, seca, pragas e mudança de manejo podem reverter o carbono armazenado, por isso programas adotam medidas de gestão de risco.",
+    "tags": [
+      "permanencia",
+      "reversao",
+      "incendio",
+      "risco"
+    ],
+    "synonyms": [
+      "longo prazo",
+      "queimada",
+      "perder carbono"
+    ],
+    "category": "methodology",
+    "references": [
+      6
+    ]
+  },
+  {
+    "id": "K14",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é vazamento?",
+    "approved_answer": "É o aumento de emissões fora da área do projeto causado pelo deslocamento da atividade. A metodologia define como identificar, quantificar e tratar esse risco.",
+    "tags": [
+      "vazamento",
+      "deslocamento"
+    ],
+    "synonyms": [
+      "emissoes fora",
+      "deslocar desmatamento"
+    ],
+    "category": "methodology",
+    "references": [
+      2,
+      6
+    ]
+  },
+  {
+    "id": "K15",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é dupla contagem?",
+    "approved_answer": "Ocorre quando o mesmo resultado climático é contado ou reivindicado mais de uma vez. Registros, regras de titularidade, cancelamento e, em alguns contextos internacionais, autorizações e ajustes correspondentes ajudam a evitar esse problema.",
+    "tags": [
+      "dupla contagem",
+      "contado duas vezes"
+    ],
+    "synonyms": [
+      "vendido duas vezes",
+      "ajuste correspondente"
+    ],
+    "category": "methodology",
+    "references": [
+      6,
+      7
+    ]
+  },
+  {
+    "id": "K16",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que é uma metodologia?",
+    "approved_answer": "É o conjunto de procedimentos que define atividades elegíveis, limites, linha de base, adicionalidade, cálculos, monitoramento e tratamento de riscos. A metodologia adequada depende da atividade, do local e do programa escolhido.",
+    "tags": [
+      "metodologia",
+      "metodo",
+      "procedimentos",
+      "padrao"
+    ],
+    "synonyms": [
+      "qual metodologia",
+      "regras do projeto"
+    ],
+    "category": "methodology",
+    "references": [
+      2
+    ]
+  },
+  {
+    "id": "K17",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Existe tamanho mínimo de propriedade?",
+    "approved_answer": "Não existe um limite universal válido para todos os projetos. A metodologia pode impor condições e os custos de desenvolvimento podem tornar projetos pequenos difíceis individualmente. Nesses casos, agregação, cooperativas ou programas agrupados podem ser alternativas.",
+    "tags": [
+      "minimo",
+      "tamanho",
+      "pequena",
+      "hectares",
+      "area"
+    ],
+    "synonyms": [
+      "propriedade pequena",
+      "muito pequena",
+      "area minima",
+      "pequeno produtor"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K18",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Quanto tempo demora?",
+    "approved_answer": "Não há prazo único. Levantamento de dados, escolha de metodologia, consulta a partes interessadas, elaboração, validação, monitoramento, verificação e registro podem levar períodos diferentes. A Connex não deve fornecer promessa de prazo sem análise do caso.",
+    "tags": [
+      "tempo",
+      "demora",
+      "prazo",
+      "duracao",
+      "anos"
+    ],
+    "synonyms": [
+      "quanto tempo",
+      "quando recebo",
+      "quantos anos"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K19",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Quanto custa?",
+    "approved_answer": "Os custos variam conforme tipo, escala, metodologia, necessidade de dados, auditoria, registro, monitoramento, aspectos jurídicos e estrutura comercial. A triagem não fornece orçamento; ela identifica quais especialistas precisam estimar os custos.",
+    "tags": [
+      "custo",
+      "custa",
+      "caro",
+      "orcamento",
+      "taxas"
+    ],
+    "synonyms": [
+      "quanto custa",
+      "custo do projeto",
+      "custo da certificacao"
+    ],
+    "category": "project",
+    "references": [
+      2,
+      3
+    ]
+  },
+  {
+    "id": "K20",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Quanto vale um crédito?",
+    "approved_answer": "Não há preço único. O valor depende do mercado, tipo de projeto, integridade, metodologia, benefícios adicionais, risco, contrato, demanda e possibilidade de uso. O Banco Mundial acompanha faixas muito diferentes entre instrumentos e tipos de créditos. A Connex não deve prometer preço.",
+    "tags": [
+      "vale",
+      "valor",
+      "preco",
+      "paga",
+      "dinheiro"
+    ],
+    "synonyms": [
+      "preco do credito",
+      "quanto vou ganhar",
+      "quanto dinheiro",
+      "preco por tonelada"
+    ],
+    "category": "market",
+    "references": [
+      8
+    ]
+  },
+  {
+    "id": "K21",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Posso vender créditos antes de serem emitidos?",
+    "approved_answer": "Existem contratos de financiamento, compra futura e cessão, mas os riscos e as regras variam. No Brasil, a Lei nº 15.042 contém disposições específicas sobre contratos e programas jurisdicionais. Nunca assine ou prometa créditos sem revisar direitos, metodologia, volume, riscos, exclusividade e obrigações com assessoria independente.",
+    "tags": [
+      "vender",
+      "antes",
+      "emitidos",
+      "antecipada",
+      "contrato"
+    ],
+    "synonyms": [
+      "venda antecipada",
+      "pre venda",
+      "vender antes"
+    ],
+    "category": "contracts",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K22",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que acontece se já houver contrato de carbono?",
+    "approved_answer": "A área deve ser marcada para análise antes de nova negociação. É necessário verificar escopo, perímetro, prazo, exclusividade, cessões, obrigações, averbações e possível sobreposição de direitos. A Connex não interpreta o contrato automaticamente no MVP.",
+    "tags": [
+      "contrato",
+      "existente",
+      "ja",
+      "assinado"
+    ],
+    "synonyms": [
+      "ja assinei",
+      "ja tenho contrato",
+      "acordo existente"
+    ],
+    "category": "contracts",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K23",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "Como funcionam direitos de comunidades?",
+    "approved_answer": "Projetos que afetem povos indígenas, comunidades tradicionais, quilombolas ou assentados exigem respeito a direitos específicos e salvaguardas. A Lei nº 15.042 prevê, em hipóteses definidas, consulta livre, prévia e informada e regras de repartição de benefícios. A triagem deve interromper conclusões automáticas e encaminhar para especialistas.",
+    "tags": [
+      "comunidade",
+      "indigenas",
+      "quilombolas",
+      "tradicionais",
+      "consulta",
+      "direitos"
+    ],
+    "synonyms": [
+      "povos indigenas",
+      "consulta previa",
+      "assentados",
+      "comunidade local"
+    ],
+    "category": "rights",
+    "references": [
+      1
+    ]
+  },
+  {
+    "id": "K24",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que acontece com meus dados quando estou offline?",
+    "approved_answer": "As respostas ficam no dispositivo até que você autorize a sincronização. Você poderá apagar a sessão local. O MVP não deve guardar cópias de títulos, CPF ou documentos sensíveis no modo offline.",
+    "tags": [
+      "dados",
+      "offline",
+      "privacidade",
+      "armazenados",
+      "dispositivo"
+    ],
+    "synonyms": [
+      "onde ficam meus dados",
+      "meus dados estao seguros",
+      "apagar dados"
+    ],
+    "category": "data",
+    "references": [
+      9
+    ]
+  },
+  {
+    "id": "K25",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O que acontece quando a internet volta?",
+    "approved_answer": "Com sua autorização, a aplicação envia a triagem para a Connex, evita duplicidade por meio de um identificador único e solicita a geração do Passaporte Inicial. Se houver erro, os dados locais permanecem disponíveis para nova tentativa.",
+    "tags": [
+      "internet",
+      "online",
+      "sincronizacao",
+      "conexao",
+      "sincronizar"
+    ],
+    "synonyms": [
+      "quando conectar",
+      "voltar online",
+      "enviar dados"
+    ],
+    "category": "data",
+    "references": [
+      9
+    ]
+  },
+  {
+    "id": "K26",
+    "content_version": "0.1.1",
+    "language": "pt",
+    "question": "O resultado garante que meu projeto será aprovado?",
+    "approved_answer": "Não. O resultado é uma triagem preliminar baseada no que você informou. Elegibilidade, quantificação, certificação, registro, emissão e comercialização dependem de análise técnica, jurídica, socioambiental e das regras vigentes.",
+    "tags": [
+      "garante",
+      "aprovado",
+      "resultado",
+      "aprovacao"
+    ],
+    "synonyms": [
+      "vou ser aprovado",
+      "e garantido",
+      "aprovacao garantida"
+    ],
+    "category": "connex",
+    "references": [
+      1,
+      2,
+      3
+    ]
+  }
+]
