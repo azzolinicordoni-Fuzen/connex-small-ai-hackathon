@@ -163,6 +163,24 @@ export function completeness(answers: Record<string, any>): "low" | "medium" | "
   return filled >= 0.85 ? "high" : filled >= 0.6 ? "medium" : "low";
 }
 
+/** Tolerant pre-validation cleanup: trims text, drops unknown ids/fields. Never invents content. */
+export function normalize(o: any): any {
+  if (!o || typeof o !== "object" || Array.isArray(o)) return o;
+  const arr = (v: any) => (Array.isArray(v) ? v : []);
+  const str = (v: any, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : v);
+  const ids = (v: any, re: RegExp, n: number) => [...new Set(arr(v).map((x: any) => String(x).trim().toUpperCase().replace(/^(C\d\d)\.BIOME$/, "$1.biome")).filter((x: string) => re.test(x)))].slice(0, n);
+  const fld = (v: any) => { const m = String(v ?? "").trim().toUpperCase().match(/^C(0[1-9]|1[0-9])/); return m ? (/BIOME/.test(String(v).toUpperCase()) ? `${m[0]}.biome` : m[0]) : null; };
+  return {
+    passport_title: str(o.passport_title, 120), summary: str(o.summary, 900),
+    declared_facts: arr(o.declared_facts).map((f: any) => ({ field_id: fld(f?.field_id), statement: str(f?.statement, 240) })).filter((f: any) => f.field_id && f.statement).slice(0, 20),
+    candidate_pathways: arr(o.candidate_pathways).map((c: any) => ({ id: c?.id, explanation: str(c?.explanation, 600), supporting_fields: arr(c?.supporting_fields).map(fld).filter(Boolean).slice(0, 12), open_questions: arr(c?.open_questions).filter((q: any) => typeof q === "string" && q.trim()).map((q: string) => q.trim().slice(0, 240)).slice(0, 6), faq_ids: ids(c?.faq_ids, FAQ_RE, 6) })).slice(0, 7),
+    safeguard_flags: arr(o.safeguard_flags).map((f: any) => ({ id: f?.id, explanation: str(f?.explanation, 500), triggering_fields: arr(f?.triggering_fields).map(fld).filter(Boolean).slice(0, 8), faq_ids: ids(f?.faq_ids, FAQ_RE, 4), specialist_type: String(f?.specialist_type ?? "carbon_project_developer").toLowerCase().replace(/[^a-z_]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "carbon_project_developer" })).slice(0, 9),
+    missing_information: arr(o.missing_information).map((m: any) => ({ field_id: fld(m?.field_id), why: str(m?.why, 240) })).filter((m: any) => m.field_id && m.why).slice(0, 20),
+    next_steps: arr(o.next_steps).map((n: any) => (typeof n === "string" ? { step: n.trim().slice(0, 260) } : { step: str(n?.step, 260), faq_ids: ids(n?.faq_ids, FAQ_RE, 4) })).filter((n: any) => n.step).slice(0, 8),
+    suggested_agent_types: arr(o.suggested_agent_types).map((a: any) => String(a).toLowerCase().trim()).filter((a: string) => (AGENT_TYPES as readonly string[]).includes(a)).slice(0, 6),
+  };
+}
+
 export type Finalized = { ok: true; result: Record<string, unknown> } | { ok: false; code: string };
 
 export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record<string, any>; offline: any }): Finalized {
@@ -170,8 +188,12 @@ export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record
   try {
     obj = JSON.parse(raw.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ""));
   } catch { return { ok: false, code: "MALFORMED_OUTPUT" }; }
-  const p = outputSchema(z).safeParse(obj);
-  if (!p.success) return { ok: false, code: "MALFORMED_OUTPUT" };
+  const p = outputSchema(z).safeParse(normalize(obj));
+  if (!p.success) {
+    // Log only schema paths (never content) to diagnose model drift.
+    console.error("field-diagnosis schema", p.error.issues.slice(0, 5).map((i: any) => `${i.path.join(".")}:${i.code}`).join(" "));
+    return { ok: false, code: "MALFORMED_OUTPUT" };
+  }
   const o = p.data;
   const bad = findProhibited(o);
   if (bad) return { ok: false, code: "PROHIBITED_CLAIM" };
