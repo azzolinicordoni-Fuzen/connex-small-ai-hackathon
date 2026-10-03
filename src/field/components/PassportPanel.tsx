@@ -83,8 +83,9 @@ export function PassportPanel({ lang, online, session }: { lang: FieldLang; onli
   const run = async () => {
     setState("generating");
     const r = await generatePassport(session.local_session_id, remote);
-    if (r.ok) { setDiag(r.diag); setState("ready"); return; }
-    if (r.code === "IN_PROGRESS") {
+    if (r.ok === true) { setDiag(r.diag); setState("ready"); return; }
+    const code = (r as { code: string }).code;
+    if (code === "IN_PROGRESS") {
       setState("busy");
       setTimeout(async () => {
         const d = await loadSavedPassport(session.local_session_id, remote, true);
@@ -92,8 +93,8 @@ export function PassportPanel({ lang, online, session }: { lang: FieldLang; onli
       }, 8000);
       return;
     }
-    if (r.code === "MODEL_NOT_CONFIGURED") setState("config");
-    else if (["RATE_LIMITED", "CREDITS_EXHAUSTED", "GATEWAY_ACCESS", "GATEWAY_TIMEOUT", "NETWORK"].includes(r.code)) setState("unavailable");
+    if (code === "MODEL_NOT_CONFIGURED") setState("config");
+    else if (["RATE_LIMITED", "CREDITS_EXHAUSTED", "GATEWAY_ACCESS", "GATEWAY_TIMEOUT", "NETWORK"].includes(code)) setState("unavailable");
     else setState("error");
   };
 
