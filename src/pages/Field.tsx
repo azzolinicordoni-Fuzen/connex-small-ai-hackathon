@@ -75,6 +75,7 @@ export default function Field() {
   const online = useOnline();
   const [view, setView] = useState<View>("home");
   const [session, setSession] = useState<SessionRec | null>(null);
+  const [passportReady, setPassportReady] = useState(false);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -222,6 +223,8 @@ export default function Field() {
         </AlertDialog>
       </nav>
 
+      <JourneyIndicator lang={lang} status={session?.status ?? null} passportReady={passportReady && session?.status === "synced"} />
+
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
         {view === "home" && (
           <>
@@ -313,8 +316,8 @@ export default function Field() {
   );
 }
 
-function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onFinish, headingRef, online, onSession }: {
-  online: boolean; onSession: (s: SessionRec) => void;
+function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onFinish, headingRef, online, onSession, onPassportReady }: {
+  online: boolean; onSession: (s: SessionRec) => void; onPassportReady?: (ready: boolean) => void;
   t: FieldStrings; lang: FieldLang; answers: Record<string, unknown>; session: SessionRec | null; stored: LocalResult | null;
   onEdit: (step: number) => void; onBack: () => void; onSync: (v: string) => void; onFinish: () => void;
   headingRef: React.RefObject<HTMLHeadingElement>;
@@ -324,7 +327,7 @@ function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onF
     <section aria-labelledby="review-title" className="space-y-6">
       <h1 id="review-title" ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold outline-none">{t.resultTitle}</h1>
       <SyncPanel lang={lang} online={online} session={session} answers={answers} result={stored} onSession={onSession} />
-      {session && <PassportPanel lang={lang} online={online} session={session} />}
+      {session && <PassportPanel lang={lang} online={online} session={session} onReady={onPassportReady} />}
     </section>
   );
   // Draft: live result. After saving: the stored result (reopens offline unchanged).
@@ -432,5 +435,34 @@ function Review({ t, lang, answers, session, stored, onEdit, onBack, onSync, onF
         <Button onClick={onFinish} disabled={!session || status !== "draft"}>{t.finish}</Button>
       </div>
     </section>
+  );
+}
+
+// Phase 5.2: four-stage journey (progress through the flow only — never a score).
+const JOURNEY = {
+  en: { label: "Your progress", stages: ["Assessment", "Offline result", "Synchronization", "Initial Passport"], done: "completed", current: "current step", pending: "pending" },
+  pt: { label: "Seu progresso", stages: ["Avaliação", "Resultado offline", "Sincronização", "Passaporte Inicial"], done: "concluído", current: "etapa atual", pending: "pendente" },
+};
+function JourneyIndicator({ lang, status, passportReady }: { lang: FieldLang; status: string | null; passportReady: boolean }) {
+  const j = JOURNEY[lang];
+  // index of the current stage; 4 = all completed
+  const cur = !status || status === "draft" ? 0 : status === "synced" ? (passportReady ? 4 : 3) : 2;
+  return (
+    <nav aria-label={j.label} className="mx-auto mt-4 max-w-3xl px-4" data-testid="field-journey">
+      <ol className="grid grid-cols-4 gap-1">
+        {j.stages.map((name, i) => {
+          const st = i < cur ? "done" : i === cur ? "current" : "pending";
+          return (
+            <li key={name} aria-current={st === "current" ? "step" : undefined} className="flex flex-col items-center gap-1 text-center">
+              <span className={`h-1.5 w-full rounded-full ${st === "pending" ? "bg-muted" : "bg-primary"} ${st === "current" ? "animate-pulse" : ""}`} aria-hidden />
+              <span className={`flex items-center gap-1 text-[11px] leading-tight sm:text-xs ${st === "pending" ? "text-muted-foreground" : st === "current" ? "font-semibold text-primary" : "text-foreground"}`}>
+                {st === "done" && <CheckCircle2 className="hidden h-3 w-3 shrink-0 min-[360px]:block" aria-hidden />}{name}
+              </span>
+              <span className="sr-only">({j[st]})</span>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
