@@ -1,0 +1,2 @@
+- Connex Field offline: vite-plugin-pwa generateSW, registered only via src/pwa/registerSW.ts (prod, non-preview, non-iframe); navigations NetworkFirst, cross-origin (Cloud/auth/AI) never cached — keeps preview safe and data fresh.
+- Hackathon work lives in /field, src/field, src/pwa and docs/ — separates it from the pre-existing Connex platform.

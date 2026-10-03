@@ -1,156 +1,99 @@
-# Connex Small AI – Hackathon
+# Welcome to your Lovable project
 
-1. Estrutura Geral da Plataforma
+## Project info
 
-A plataforma deve ter:
-	•	Landing Page institucional
-	•	Página de cadastro
-	•	Página de login
-	•	Validação de e-mail
-	•	Recuperação de senha
-	•	Painel do usuário
-	•	Sistema de conexões (igual ao LinkedIn)
-	•	Feed de publicações
-	•	Chat interno
-	•	Gerenciador de projetos áreas
-	•	Planos (gratuito e premium)
-	•	Dashboard administrativo
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-Design moderno, limpo, com UX fluida e navegação intuitiva.
+## How can I edit this code?
 
-⸻
+There are several ways of editing your application.
 
-2. Tipos de Usuários / Agentes
+**Use Lovable**
 
-No cadastro, o usuário deve escolher seu tipo:
-	1.	Proprietário de terra
-	2.	Engenheiro
-	3.	Desenvolvedor de projetos
-	4.	Certificadora
-	5.	Banco ou fundo de investimento
-	6.	Projetos já prontos
-	7.	Outros agentes
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-Cada tipo terá questionários específicos, com campos próprios.
+Changes made via Lovable will be committed automatically to this repo.
 
-⸻
+**Use your preferred IDE**
 
-3. Funcionalidades Específicas por Módulo
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-3.1. Módulo de Cadastro e Autenticação
-	•	Cadastro com escolha do tipo de agente
-	•	Formulários específicos por categoria
-	•	Upload de fotos, vídeos e documentos
-	•	Login seguro (JWT ou equivalente)
-	•	Validação por e-mail
-	•	Recuperação de senha
-	•	Perfil público e privado
-	•	Edição e atualização de dados
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-⸻
-
-3.2. Módulo de Áreas e Projetos (Apenas para proprietários e desenvolvedores)
-	•	Cadastro de múltiplas áreas/projetos
-	•	Upload de documentos, imagens e vídeos
-	•	Inserção de informações técnicas
-	•	Georreferenciamento (mapa)
-	•	Indicação do tipo de projeto (ex: soja, floresta, pecuária etc.)
-	•	Sugestão automática de agentes próximos e projetos similares
-
-⸻
-
-3.3. Módulo de Conexões (igual LinkedIn)
-	•	Página de descoberta de agentes
-	•	Filtros por:
-	•	localização
-	•	tipo de agente
-	•	área de interesse
-	•	Botão Conectar
-	•	Sugestões automáticas de conexões relacionadas
-	•	Perfis com e-mail, telefone e WhatsApp
-	•	Chat interno entre usuários
-	•	Possibilidade de integração com WhatsApp
-
-⸻
-
-3.4. Feed de Publicações
-	•	Usuários podem postar:
-	•	artigos
-	•	notícias
-	•	atualizações
-	•	fotos
-	•	Comentários e curtidas
-	•	Filtros por categoria de conteúdo
-
-⸻
-
-3.5. Planos e Assinaturas
-	•	Plano gratuito com acesso básico
-	•	Plano premium com:
-	•	mais conexões por mês
-	•	maior visibilidade
-	•	mais uploads
-	•	mais áreas cadastradas
-	•	Integração com gateway de pagamento
-	•	Gestão de ativação, renovação e inadimplência
-
-⸻
-
-3.6. Módulo Administrativo
-
-Dashboard completo com:
-	•	número de agentes por tipo
-	•	conexões feitas
-	•	projetos cadastrados
-	•	métricas de uso
-	•	moderação de conteúdo
-	•	gestão de planos, pagamentos e usuários
-	•	exportação de dados
-
-⸻
-
-4. Exigências Técnicas
-	•	Sistema totalmente responsivo
-	•	Banco de dados robusto
-	•	Backend seguro
-	•	Interface moderna e intuitiva
-	•	Performance otimizada
-
-⸻
-
-5. Entrega Final Esperada
-
-Quero que você gere todo o sistema completo, incluindo:
-	•	Estrutura de banco de dados
-	•	Backend
-	•	Frontend
-	•	APIs
-	•	Fluxos de autenticação
-	•	Páginas de usuário
-	•	Chat
-	•	Feed
-	•	Módulo administrativo
-	•	Landing page
-
-⸻
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/c67738c2-bbb4-4c32-8f64-cbbd46c30d87).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Follow these steps:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
 npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Hack-Nation 2026 — Connex Field
+
+**Challenge 4 — Small AI for Development · Sector: Agriculture · Sponsor: World Bank**
+
+**Problem.** Rural landowners and agricultural producers often lack reliable connectivity and accessible technical guidance, which keeps them out of carbon-market opportunities.
+
+**Target user.** Rural landowners, agricultural producers, communities and local representatives, using phones they already have.
+
+**Why offline matters.** Fieldwork happens where coverage is weak or absent. Connex Field works after a single online visit, keeps answers on the device, and syncs only when connectivity returns and the user authorizes it.
+
+**Pre-existing (before the event).** The Connex platform: auth, profiles and subprofiles, subprofile connections, network filters, public profiles, chat, feed, carbon projects with timelines, notifications. See `docs/hackathon-baseline.md`.
+
+**Built during the event.** The `/field` module, bilingual EN/PT content, PWA offline support, local storage, an on-device small-AI layer (with deterministic fallback), user-authorized sync, the online Initial Passport, tests and docs.
+
+**Demonstration flow.** Open `/field` online once → airplane mode → reopen, app still works → complete and save a triage offline → ask the on-device assistant a natural question → see candidate pathways, missing info and safeguards → reconnect → authorize sync → Connex generates the Initial Passport and suggests compatible participants.
+
+**Run locally.**
+
+```sh
+npm install
+npm run dev          # http://localhost:8080/field (service worker disabled in dev)
+npm run build && npm run preview   # production build; service worker active
+```
+
+Offline test procedure: `docs/offline-test.md`.
