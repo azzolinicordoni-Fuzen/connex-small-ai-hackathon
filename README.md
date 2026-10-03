@@ -71,3 +71,29 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Hack-Nation 2026 — Connex Field
+
+**Challenge 4 — Small AI for Development · Sector: Agriculture · Sponsor: World Bank**
+
+**Problem.** Rural landowners and agricultural producers often lack reliable connectivity and accessible technical guidance, which keeps them out of carbon-market opportunities.
+
+**Target user.** Rural landowners, agricultural producers, communities and local representatives, using phones they already have.
+
+**Why offline matters.** Fieldwork happens where coverage is weak or absent. Connex Field works after a single online visit, keeps answers on the device, and syncs only when connectivity returns and the user authorizes it.
+
+**Pre-existing (before the event).** The Connex platform: auth, profiles and subprofiles, subprofile connections, network filters, public profiles, chat, feed, carbon projects with timelines, notifications. See `docs/hackathon-baseline.md`.
+
+**Built during the event.** The `/field` module, bilingual EN/PT content, PWA offline support, local storage, an on-device small-AI layer (with deterministic fallback), user-authorized sync, the online Initial Passport, tests and docs.
+
+**Demonstration flow.** Open `/field` online once → airplane mode → reopen, app still works → complete and save a triage offline → ask the on-device assistant a natural question → see candidate pathways, missing info and safeguards → reconnect → authorize sync → Connex generates the Initial Passport and suggests compatible participants.
+
+**Run locally.**
+
+```sh
+npm install
+npm run dev          # http://localhost:8080/field (service worker disabled in dev)
+npm run build && npm run preview   # production build; service worker active
+```
+
+Offline test procedure: `docs/offline-test.md`.
