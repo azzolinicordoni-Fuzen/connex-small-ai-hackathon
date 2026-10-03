@@ -12,7 +12,7 @@ const getNavItems = (isAuthenticated: boolean) => [
   { label: "Conexões", href: "/conexoes" },
   { label: "Feed", href: "/feed" },
   // Hack-Nation 2026 — public entry to the offline module
-  { label: "Connex Field", href: "/field" },
+  { label: "Connex Field", mobileLabel: "Connex Field — IA Offline", href: "/field" },
 ];
 
 export function Header() {
@@ -114,7 +114,7 @@ export function Header() {
                       : "text-foreground hover:bg-secondary"
                   )}
                 >
-                  {item.label}
+                  {"mobileLabel" in item && item.mobileLabel ? item.mobileLabel : item.label}
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border mt-2">
