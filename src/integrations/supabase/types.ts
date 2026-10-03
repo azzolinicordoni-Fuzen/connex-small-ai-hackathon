@@ -776,6 +776,84 @@ export type Database = {
           },
         ]
       }
+      field_sessions: {
+        Row: {
+          answers: Json
+          consent_version: string
+          content_version: string
+          created_at: string
+          device_created_at: string
+          id: string
+          language: string
+          local_model_version: string
+          local_session_id: string
+          offline_result: Json | null
+          payload_version: number
+          profile_id: string
+          source: string
+          status: string
+          subprofile_id: string | null
+          sync_consented_at: string
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          answers: Json
+          consent_version: string
+          content_version: string
+          created_at?: string
+          device_created_at: string
+          id?: string
+          language: string
+          local_model_version: string
+          local_session_id: string
+          offline_result?: Json | null
+          payload_version?: number
+          profile_id: string
+          source?: string
+          status?: string
+          subprofile_id?: string | null
+          sync_consented_at: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          consent_version?: string
+          content_version?: string
+          created_at?: string
+          device_created_at?: string
+          id?: string
+          language?: string
+          local_model_version?: string
+          local_session_id?: string
+          offline_result?: Json | null
+          payload_version?: number
+          profile_id?: string
+          source?: string
+          status?: string
+          subprofile_id?: string | null
+          sync_consented_at?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financeira_subperfis: {
         Row: {
           busca_plataforma: string[] | null

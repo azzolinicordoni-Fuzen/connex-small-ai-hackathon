@@ -16,6 +16,10 @@ export interface SessionRec {
   created_at: string;
   updated_at: string;
   remote_id: string | null;
+  // Phase 4 (optional for records created before sync existed)
+  payload_version?: number;
+  sync_consented_at?: string;
+  synced_at?: string;
 }
 export interface TriageRec { id: string; local_session_id: string; question_id: string; value_json: string; answered_at: string; updated_at: string }
 export interface ConversationRec { id: string; local_session_id: string; language: string; query: string; result_id: string | null; outcome: "answer" | "clarify" | "fallback"; created_at: string }
