@@ -108,3 +108,6 @@ Offline test procedure: `docs/offline-test.md`.
 | Initial Passport diagnosis | **Future online generative AI**, used only after the user authorizes sync. Not built yet. | — |
 
 Retrain and re-evaluate: `node scripts/train-field-intent-model.mjs`. Tests: `bun test ./tests/field.test.ts ./tests/field-ai.test.ts`.
+
+## Connex Field — Phase 4 synchronization (Hack-Nation 2026)
+Manual, consented, idempotent sync from `/field` to the isolated backend via the `field-sync` Edge Function into `field_sessions` (RLS: own profile only). Demo: complete triage offline → choose "Authorize now" (C19) → save → reconnect → "Sign in to synchronize" → back on `/field` press "Synchronize now" → receipt shown, raw answers removed from the device. Details: `docs/field-sync-security.md`.

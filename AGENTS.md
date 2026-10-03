@@ -6,3 +6,4 @@
 - Connex Field intent model is retrained only via scripts/train-field-intent-model.mjs; features.js and nb.js are shared by training and browser runtime — never hand-edit the model JSON or duplicate feature code (keeps training/inference identical and auditable).
 - Assistant answers flow ML → deterministic search → fixed fallback, and every displayed answer is the stored K01–K26 text — the AI only selects IDs (grounding).
 - Pathway engine (src/field/pathways.ts) lists paths to investigate and safeguards only; it must never output eligibility, scores, volumes, prices, costs or timelines.
+- Connex Field sync goes only through the `field-sync` Edge Function using the caller's JWT (no service role); ownership is derived server-side and `local_session_id` is the idempotency key — keeps RLS authoritative and retries safe.
