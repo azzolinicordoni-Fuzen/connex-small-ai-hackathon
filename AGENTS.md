@@ -7,3 +7,5 @@
 - Assistant answers flow ML → deterministic search → fixed fallback, and every displayed answer is the stored K01–K26 text — the AI only selects IDs (grounding).
 - Pathway engine (src/field/pathways.ts) lists paths to investigate and safeguards only; it must never output eligibility, scores, volumes, prices, costs or timelines.
 - Connex Field sync goes only through the `field-sync` Edge Function using the caller's JWT (no service role); ownership is derived server-side and `local_session_id` is the idempotency key — keeps RLS authoritative and retries safe.
+- Initial Passport generation goes only through the `field-diagnosis` Edge Function: browser sends just `field_session_id`, `field_diagnoses` is SELECT-only for users and written with the service role only after JWT + ownership checks — users can never write AI results.
+- `supabase/functions/field-diagnosis/faq.*.json` must stay byte-identical to `src/content/field/faq.*.json` (a test enforces it) — Edge Functions cannot import from src/.
