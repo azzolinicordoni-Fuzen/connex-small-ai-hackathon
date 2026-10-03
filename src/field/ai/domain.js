@@ -28,7 +28,7 @@ export function domainEvidence(text, lang) {
   let hits = 0;
   for (const w of normalize(text).split(" ")) {
     if (!w) continue;
-    if (stems.some((s) => (s.length === 1 ? w === s : w.startsWith(s)) || (w.length >= 5 && s.length >= 5 && ed1(w.slice(0, s.length + 1), s)))) hits++;
+    if (stems.some((s) => (s.length === 1 ? w === s : w.startsWith(s)) || (w.length >= 5 && s.length >= 5 && (ed1(w, s) || ed1(w.slice(0, s.length), s))))) hits++;
   }
   return hits;
 }
