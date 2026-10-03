@@ -238,7 +238,7 @@ export default function Field() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button size="lg" onClick={startOrResume} disabled={!loaded}>{session ? t.resume : t.begin}</Button>
               {session?.status === "synced" && session.remote_id && (
-                <Button size="lg" variant="outline" onClick={() => setView("review")} data-testid="field-open-passport">
+                <Button size="lg" variant="outline" onClick={() => { setStep(REVIEW); setView("triage"); }} data-testid="field-open-passport">
                   {lang === "pt" ? "Ver Passaporte Inicial" : "View Initial Passport"}
                 </Button>
               )}
