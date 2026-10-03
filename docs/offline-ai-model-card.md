@@ -95,3 +95,14 @@ The model returns IDs only. The interface shows the stored approved answer for t
 - About 169 KB, and pure JavaScript with no WebGPU, WASM or model download, so it runs on low-end Android phones.
 - Sub-millisecond to a few milliseconds per question, with negligible battery use.
 - Fully auditable: the training data, the script, the learned counts and the evaluation are all plain JSON in the repository.
+
+## Phase 3.1 — repair and hardening (measured)
+
+- **Dataset changes (per language, EN and PT identical counts):** +7 K09 (business as usual, counterfactual, depends on carbon finance, would happen anyway), +8 K20 (market/selling price, fixed price per tonne, price variation), +7 K01 (CO2e per credit, physical unit, quantity vs price), contrastive +2 K03, +2 K19, +1 each K10/K14/K16/K17/K18, +2 K13; +10 independently written out-of-domain examples (arithmetic, geography facts, farm-input prices). No evaluation sentence was copied or moved into training.
+- **Domain-relevance gate** (`src/field/ai/domain.js`): stem lexicon written from training data; with zero domain evidence the classifier may not answer or suggest and the user sees the fixed fallback. The classifier stays the primary component; with the model disabled the deterministic search is unchanged.
+- **Threshold selection:** still 5-fold CV on training only; utility now penalises a wrong auto-answer −4 (was −2). New: EN scale 3, accept 0.25, margin 0.2, oodReject 0.3, minCoverage 0.2; PT scale 4, accept 0.55, margin 0.05, oodReject 0.5, minCoverage 0.2.
+- **Evaluation files unchanged:** SHA-256 EN `d013b0bf…dd099`, PT `cc7c8134…8b5c4`, asserted in `tests/field-ai-regression.test.ts`.
+- **Artifact:** 172,914 → 203,794 bytes.
+- **Held-out:** EN top-1 90.4% → 96.2%, 35 auto-answers, 0 wrong, OOD rejection 100%; PT 88.5% → 92.3%, 28 auto-answers, 0 wrong (was 1), OOD rejection 100%.
+- **Known failures:** "What makes this different from business as usual?" uncertain → K09 direct (p 0.42); "Is there a fixed market price for every tonne?" clarify K03>K20 → K20 direct (0.60); "Um crédito equivale a quanto de CO2?" K20 wrong → K01 correct.
+- **Remaining limitations:** fewer PT auto-answers (more "Did you mean"); "what does leakage mean in a carbon project" / PT equivalent rank K09 first (clarify shown, contains K14); during repair the held-out report was inspected between iterations, so the results are slightly optimistic; data still team-written, not field-tested.
