@@ -9,3 +9,4 @@
 - Connex Field sync goes only through the `field-sync` Edge Function using the caller's JWT (no service role); ownership is derived server-side and `local_session_id` is the idempotency key — keeps RLS authoritative and retries safe.
 - Initial Passport generation goes only through the `field-diagnosis` Edge Function: browser sends just `field_session_id`, `field_diagnoses` is SELECT-only for users and written with the service role only after JWT + ownership checks — users can never write AI results.
 - `supabase/functions/field-diagnosis/faq.*.json` must stay byte-identical to `src/content/field/faq.*.json` (a test enforces it) — Edge Functions cannot import from src/.
+- Passport safety scan lives only in supabase/functions/field-diagnosis/logic.ts (sanitizeAi/revalidateResult) and the browser imports it from there; cached results are re-validated before display — one source of truth, no model call to fix unsafe text.

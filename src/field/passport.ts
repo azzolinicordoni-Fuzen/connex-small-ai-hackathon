@@ -2,6 +2,15 @@
 // Sends only field_session_id; the server reads the synchronized assessment itself.
 import { supabase } from "@/integrations/supabase/client";
 import { loadDiagnosis, saveDiagnosis } from "./db";
+// Same pure safety code as the Edge Function (single source of truth for the prohibited-claim scan).
+import { revalidateResult } from "../../supabase/functions/field-diagnosis/logic";
+
+/** Phase 5.1: every saved or received diagnosis is re-validated before display (no model call). */
+export function safeDiag(d: PassportDiag | null): PassportDiag | null {
+  if (!d || !d.result) return d;
+  const lang = d.result.language === "pt" ? "pt" : "en";
+  return { ...d, result: revalidateResult(d.result, lang).result as PassportResult };
+}
 
 export interface PassportDiag {
   id: string; field_session_id: string; payload_version: number; prompt_version: string; model_id: string;
@@ -28,12 +37,16 @@ export async function loadSavedPassport(localId: string, remoteId: string, onlin
       .select("id, field_session_id, payload_version, prompt_version, model_id, status, result, safe_error_code, completed_at")
       .eq("field_session_id", remoteId).eq("status", "ready").order("payload_version", { ascending: false }).limit(1).maybeSingle();
     if (data) {
-      await cache(localId, data as unknown as PassportDiag);
-      return data as unknown as PassportDiag;
+      const d = safeDiag(data as unknown as PassportDiag)!;
+      await cache(localId, d);
+      return d;
     }
   }
   const c = await loadDiagnosis(localId).catch(() => undefined);
-  return c ? (JSON.parse(c.result_json) as PassportDiag) : null;
+  if (!c) return null;
+  const d = safeDiag(JSON.parse(c.result_json) as PassportDiag);
+  if (d) await cache(localId, d); // overwrite any unsafe on-device copy
+  return d;
 }
 
 const cache = (localId: string, d: PassportDiag) =>
@@ -46,8 +59,9 @@ export async function generatePassport(localId: string, remoteId: string): Promi
   try {
     const { data, error } = await supabase.functions.invoke("field-diagnosis", { body: { field_session_id: remoteId } });
     if (!error && data?.diagnosis?.status === "ready") {
-      await cache(localId, data.diagnosis);
-      return { ok: true, diag: data.diagnosis };
+      const d = safeDiag(data.diagnosis)!;
+      await cache(localId, d);
+      return { ok: true, diag: d };
     }
     const ctx = (error as { context?: Response } | null)?.context;
     const body = ctx && typeof ctx.json === "function" ? await ctx.json().catch(() => ({})) : {};

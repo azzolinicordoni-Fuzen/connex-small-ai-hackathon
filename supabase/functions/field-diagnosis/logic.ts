@@ -111,6 +111,80 @@ export function findProhibited(obj: unknown): string | null {
   return null;
 }
 
+// ---------- Phase 5.1: stem-level safety scan + safe normalization ----------
+// Any AI-generated sentence containing one of these EN/PT stems is dropped, even when negated:
+// the only place allowed to mention eligibility/certification is the fixed server disclaimer.
+const STEM_RE = /(eligib|elegib|certif|approv|aprov|guarant|garant|qualif|assegur|\bapt[oa]s?\b)/i;
+// "qualified specialist/professional" is a neutral referral phrase, not a claim about the project.
+const STEM_ALLOW = /\b(qualified|qualificad[oa]s?)\s+(specialists?|professionals?|experts?|technicians?|especialistas?|profissionais|profissional|técnic[oa]s?)\b|\b(especialistas?|profissionais|profissional|técnic[oa]s?)\s+qualificad[oa]s?\b/gi;
+
+/** True when an AI-generated string contains or implies a prohibited claim. */
+export function isUnsafeText(s: string): boolean {
+  if (typeof s !== "string") return false;
+  if (STEM_RE.test(s.replace(STEM_ALLOW, " "))) return true;
+  return findProhibited({ s }) !== null;
+}
+
+/** Drops each unsafe sentence; returns "" when nothing safe remains. Never rewrites wording. */
+export function safeSentences(s: string): string {
+  if (typeof s !== "string") return "";
+  return s.split(/(?<=[.!?;])\s+/).filter((x) => x.trim() && !isUnsafeText(x)).join(" ").trim();
+}
+
+export const FIXED = {
+  title: { en: "Initial Passport", pt: "Passaporte Inicial" },
+  summary: {
+    en: "This summary organizes the information you declared. Review each point below with a specialist.",
+    pt: "Este resumo organiza as informações que você declarou. Revise cada ponto abaixo com um especialista.",
+  },
+  explanation: {
+    en: "A specialist should review this point using the information you declared.",
+    pt: "Um especialista deve revisar este ponto com base nas informações que você declarou.",
+  },
+  step: {
+    en: "Review this Passport with a specialist on Connex.",
+    pt: "Revise este Passaporte com um especialista na Connex.",
+  },
+};
+
+/** Applies the safety scan to every AI-generated string. Offline-restored items are approved content and kept. */
+export function sanitizeAi(o: any, lang: Lang, offline: any): any {
+  const offWhy = (list: any, id: string) => {
+    const w = (Array.isArray(list) ? list : []).find((x: any) => x?.id === id)?.why?.[lang];
+    return typeof w === "string" && w.trim() && !isUnsafeText(w) ? w.slice(0, 500) : "";
+  };
+  const expl = (e: string, fromOffline: string) => safeSentences(e) || fromOffline || FIXED.explanation[lang];
+  const steps = (o.next_steps ?? []).filter((n: any) => !isUnsafeText(n?.step));
+  return {
+    ...o,
+    passport_title: isUnsafeText(o.passport_title) ? FIXED.title[lang] : o.passport_title,
+    summary: safeSentences(o.summary) || FIXED.summary[lang],
+    declared_facts: (o.declared_facts ?? []).filter((f: any) => !isUnsafeText(f?.statement)),
+    candidate_pathways: (o.candidate_pathways ?? []).map((p: any) => p?.restored_from_offline ? p : ({
+      ...p, explanation: expl(p.explanation, offWhy(offline?.pathways, p.id)),
+      open_questions: (p.open_questions ?? []).filter((q: string) => !isUnsafeText(q)),
+    })),
+    safeguard_flags: (o.safeguard_flags ?? []).map((f: any) => f?.restored_from_offline ? f : ({
+      ...f, explanation: expl(f.explanation, offWhy(offline?.safeguards, f.id)),
+    })),
+    missing_information: (o.missing_information ?? []).filter((m: any) => !isUnsafeText(m?.why)),
+    next_steps: steps.length ? steps : [{ step: FIXED.step[lang] }],
+  };
+}
+
+/** Re-validates a stored result before display: rescans AI text and re-applies server text in the assessment language. */
+export function revalidateResult(result: any, fallbackLang: Lang, offline: any = null): { result: any; changed: boolean } {
+  if (!result || typeof result !== "object") return { result, changed: false };
+  const lang: Lang = result.language === "pt" ? "pt" : result.language === "en" ? "en" : fallbackLang;
+  const s = sanitizeAi(result, lang, offline);
+  const out = {
+    ...s, language: lang,
+    safeguard_flags: s.safeguard_flags.map((f: any) => ({ ...f, not_automatic_rejection: true, notice: FLAG_NOTICE[lang] })),
+    disclaimer: DISCLAIMER[lang],
+  };
+  return { result: out, changed: JSON.stringify(out) !== JSON.stringify(result) };
+}
+
 // ---------- prompt ----------
 const clean = (s: unknown, n: number) =>
   typeof s === "string" ? s.replace(/[<>{}`\\\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, n) : undefined;
@@ -181,7 +255,7 @@ export function normalize(o: any): any {
   };
 }
 
-export type Finalized = { ok: true; result: Record<string, unknown> } | { ok: false; code: string };
+export type Finalized = { ok: true; result: Record<string, unknown>; code?: undefined } | { ok: false; code: string; result?: undefined };
 
 export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record<string, any>; offline: any }): Finalized {
   let obj: unknown;
@@ -194,9 +268,8 @@ export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record
     console.error("field-diagnosis schema", p.error.issues.slice(0, 5).map((i: any) => `${i.path.join(".")}:${i.code}`).join(" "));
     return { ok: false, code: "MALFORMED_OUTPUT" };
   }
-  const o = p.data;
-  const bad = findProhibited(o);
-  if (bad) return { ok: false, code: "PROHIBITED_CLAIM" };
+  // Scan before any server-controlled text (disclaimer, notices) is added; unsafe AI sentences/items are dropped.
+  const o = sanitizeAi(p.data, ctx.lang, ctx.offline);
 
   const off = ctx.offline && typeof ctx.offline === "object" ? ctx.offline : null;
   const offPaths: any[] = Array.isArray(off?.pathways) ? off.pathways : [];
@@ -249,7 +322,7 @@ export function finalize(z: any, raw: string, ctx: { lang: Lang; answers: Record
 // ---------- handler ----------
 export interface SessionRow { id: string; profile_id: string; status: string; language: string; payload_version: number; answers: any; offline_result: any }
 export interface DiagRow { id: string; status: string; result: any; safe_error_code: string | null; started_at: string | null; updated_at: string; completed_at: string | null; payload_version: number; prompt_version: string; model_id: string; field_session_id: string }
-export type ModelCall = { ok: true; content: string } | { ok: false; code: string };
+export type ModelCall = { ok: true; content: string; code?: undefined } | { ok: false; code: string; content?: undefined };
 
 export interface Deps {
   z: any;
@@ -314,8 +387,16 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
   const pv = s.payload_version;
   const startedAt = new Date(d.now()).toISOString();
   const claim = { status: "processing", started_at: startedAt, safe_error_code: null, model_id: d.modelId, completed_at: null };
+  const sLang: Lang = s.language === "pt" ? "pt" : "en";
+  // Cached results are re-validated before display; a corrected copy is stored. Never calls the model.
+  const cachedReply = async (r: DiagRow) => {
+    const rv = revalidateResult(r.result, sLang, s.offline_result);
+    let out: DiagRow = { ...r, result: rv.result };
+    if (rv.changed) out = (await d.save(r.id, { result: rv.result })) ?? out;
+    return json(200, { status: "ready", cached: true, corrected: rv.changed, diagnosis: publicDiag(out) });
+  };
   let row = await d.find(s.id, pv, d.promptVersion);
-  if (row?.status === "ready") return json(200, { status: "ready", cached: true, diagnosis: publicDiag(row) });
+  if (row?.status === "ready") return cachedReply(row);
   const fresh = (r: DiagRow) => r.status === "processing" && r.started_at && d.now() - Date.parse(r.started_at) < STALE_PROCESSING_MS;
   if (row && fresh(row)) return json(409, { error: "IN_PROGRESS", retryable: true });
 
@@ -323,7 +404,7 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
     const ins = await d.insertProcessing({ field_session_id: s.id, profile_id: profileId, payload_version: pv, prompt_version: d.promptVersion, ...claim });
     if ("conflict" in ins) {
       const again = await d.find(s.id, pv, d.promptVersion);
-      if (again?.status === "ready") return json(200, { status: "ready", cached: true, diagnosis: publicDiag(again) });
+      if (again?.status === "ready") return cachedReply(again);
       return json(409, { error: "IN_PROGRESS", retryable: true });
     }
     if ("error" in ins) return json(500, { error: "INTERNAL", retryable: true });
@@ -344,8 +425,8 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
     if (!first.ok) code = first.code;
     else {
       let f = finalize(d.z, first.content, ctx);
-      if (!f.ok) {
-        // One controlled repair attempt.
+      if (!f.ok && f.code === "MALFORMED_OUTPUT") {
+        // One controlled repair attempt, only for malformed structure (unsafe content is dropped, never re-asked).
         const repair = await d.callModel(d.modelId, [...messages,
           { role: "assistant", content: first.content.slice(0, 12000) },
           { role: "user", content: `Your previous output was rejected (${f.code}). Return a corrected JSON object only, following every rule.` }]);
