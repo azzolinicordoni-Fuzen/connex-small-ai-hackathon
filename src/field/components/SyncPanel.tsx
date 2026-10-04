@@ -127,7 +127,7 @@ export function SyncPanel({ lang, online, session, answers, result, onSession }:
           <Button type="submit" disabled={pBusy || pName.trim().length < 2}>{pBusy && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}{pBusy ? s.pBusy : s.pBtn}</Button>
         </form>
       )}
-      {pDone && !needProfile && session?.status !== "synced" && <p role="status" className="text-primary">{s.pDone}</p>}
+      {pDone && !needProfile && <p role="status" className="text-primary">{s.pDone}</p>}
       {!needProfile && (session?.status === "error" || err) && <p role="alert" className="text-destructive">{errText}</p>}
       {block === null && !needProfile && (
         <Button onClick={run} disabled={busy} data-testid="field-sync-btn">
