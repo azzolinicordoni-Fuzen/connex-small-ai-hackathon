@@ -2200,6 +2200,13 @@ export type Database = {
         Args: { user1_profile_id: string; user2_profile_id: string }
         Returns: boolean
       }
+      ensure_my_profile: {
+        Args: {
+          _agent_type?: Database["public"]["Enums"]["agent_type"]
+          _name: string
+        }
+        Returns: string
+      }
       get_current_user_profile_id: { Args: never; Returns: string }
       get_profile_contact_info: {
         Args: { target_profile_id: string }
